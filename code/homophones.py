@@ -35,7 +35,7 @@ def update_homophones(name, flags):
     with open(homophones_file, "r") as f:
         for line in f:
             words = line.rstrip().split(",")
-            canonical_list.append(max(words, key=len))
+            canonical_list.append(words[0])
             for word in words:
                 word = word.lower()
                 old_words = phones.get(word, [])
@@ -106,7 +106,7 @@ def raise_homophones(word, forced=False, selection=False):
     gui.show()
 
 
-@imgui.open(y=0, x=main_screen.width / 2.6, software=False)
+@imgui.open(x=main_screen.x + main_screen.width / 2.6, y=main_screen.y)
 def gui(gui: imgui.GUI):
     global active_word_list
     if show_help:
@@ -116,7 +116,7 @@ def gui(gui: imgui.GUI):
         gui.line()
         index = 1
         for word in active_word_list:
-            gui.text("Pick {}: {} ".format(index, word))
+            gui.text("Choose {}: {} ".format(index, word))
             index = index + 1
 
 
@@ -139,20 +139,20 @@ class Actions:
         close_homophones()
 
     def homophones_show(m: str):
-        """Sentence formatter"""
+        """Show the homophones display"""
         print(m)
         raise_homophones(m, False, False)
 
     def homophones_show_selection():
-        """Sentence formatter"""
+        """Show the homophones display for the selected text"""
         raise_homophones(actions.edit.selected_text(), False, True)
 
     def homophones_force_show(m: str):
-        """Sentence formatter"""
+        """Show the homophones display forcibly"""
         raise_homophones(m, True, False)
 
     def homophones_force_show_selection():
-        """Sentence formatter"""
+        """Show the homophones display for the selected text forcibly"""
         raise_homophones(actions.edit.selected_text(), True, True)
 
     def homophones_select(number: int) -> str:
@@ -166,3 +166,9 @@ class Actions:
         app.notify(error)
         raise error
 
+    def homophones_get(word: str) -> [str] or None:
+        """Get homophones for the given word"""
+        word = word.lower()
+        if word in all_homophones:
+            return all_homophones[word]
+        return None

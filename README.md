@@ -1,11 +1,6 @@
-# Talon documentation
-For up-to-date documentation on Talon's API and features, please visit https://talon.wiki/. 
-
-https://talon.wiki/unofficial_talon_docs/ is a great place to learn about Talon files, actions, and voice command definitions.
-
 # knausj_talon
 
-Talon configs for Mac, Windows, and Linux. Very much in progress. This is also intended to work with both Dragon Naturally Speaking and wav2letter.\
+Talon configs for Mac, Windows, and Linux. Very much in progress. This is also intended to work with both Dragon Naturally Speaking and wav2letter.
 
 Notes: 
 - commands are subject to change. We do our best to minimize changes, but we are moving to an [object][verb] standard slowly but surely.
@@ -18,46 +13,51 @@ Clone repo into `~/.talon/user`
 
 ```insert code:
 cd ~/.talon/user
-git clone git@github.com:knausj85/knausj_talon.git knausj_talon
+git clone https://github.com/knausj85/knausj_talon knausj_talon
 ```
     
 Alternatively, access the directory by right clicking the Talon icon in taskbar, clicking Scripting>Open ~/talon, and navigating to user.
 
-The folder structure should look like:
+The folder structure should look something like the below:
 
 ```insert code:
 ~/.talon/user/knausj_talon
+~/.talon/user/knausj_talon/apps
 ~/.talon/user/knausj_talon/code
 ~/.talon/user/knausj_talon/lang
+~/.talon/user/knausj_talon/misc
+~/.talon/user/knausj_talon/modes
+~/.talon/user/knausj_talon/mouse_grid
+~/.talon/user/knausj_talon/talon_draft_window
+~/.talon/user/knausj_talon/text
+...
 ```
 
 ## Windows setup
-
-Note: Talon for Windows should be placed in the Program Files directory (or another 'secure' directory): `C:\Program Files\talon` Talon has been signed and utilizes uiAccess for several goodies: this will allow Talon to work with applications that are run as admin.
 
 Clone repo into `%AppData%\Talon\user` 
 
 ```insert code:
 cd %AppData%\Talon\user
-git clone git@github.com:knausj85/knausj_talon.git knausj_talon
+git clone https://github.com/knausj85/knausj_talon knausj_talon
 ```
     
 Alternatively, access the directory by right clicking the Talon icon in taskbar, clicking Scripting>Open ~/talon, and navigating to user.
     
-The folder structure should look like:
+The folder structure should look something like the below:
 
 ```insert code:
 %AppData%\Talon\user\knausj_talon
+%AppData%\Talon\user\knausj_talon\apps
 %AppData%\Talon\user\knausj_talon\code
 %AppData%\Talon\user\knausj_talon\lang
+%AppData%\Talon\user\knausj_talon\misc
+%AppData%\Talon\user\knausj_talon\modes
+%AppData%\Talon\user\knausj_talon\mouse_grid
+%AppData%\Talon\user\knausj_talon\talon_draft_window
+%AppData%\Talon\user\knausj_talon\text
+...
 ```
-
-## wav2letter setup
-
-If you're using wav2letter (aka NOT Dragon), uncomment this line in sleep_mode.talon.
-https://github.com/knausj85/knausj_talon/blob/master/modes/sleep_mode.talon#L9
-
-This helps avoid unexpected "Talon wake" commands. Depending on the specific model you're using, you may need to adjust the talon wake/talon sleep commands in modes.talon 
 
 ## Getting started with Talon
 
@@ -126,7 +126,7 @@ https://github.com/knausj85/knausj_talon/blob/master/text/symbols.talon
 
 Try using formatters by saying e.g. `snake hello world`, which will insert hello_world
 
-Mutliple formatters can be used togther, e.g. `dubstring snake hello world`. This will insert "hello_world"
+Multiple formatters can be used together, e.g. `dubstring snake hello world`. This will insert "hello_world"
 
 Formatters (snake, dubstring) are defined here
 https://github.com/knausj85/knausj_talon/blob/master/code/formatters.py#L146
@@ -175,7 +175,7 @@ By default, title tracking activates coding languages in supported applications 
 
 To enable title tracking for your application: 
 1. The active filename (including extension) must be included in the editor's title
-2. Implement the required Talon-defined actions (filename, file_ext) to correctly extract the filename and extension from the programs's title. See https://github.com/knausj85/knausj_talon/blob/master/apps/vscode/vscode.py#L18 for an example.
+2. Implement the required Talon-defined `filename` action to correctly extract the filename from the programs's title. See https://github.com/knausj85/knausj_talon/blob/8fc3ca75874398806b42d972c28dad91f1399653/apps/vscode/vscode.py#L109 for an example.
 
 Python, C#, Talon and javascript language support is currently broken up into ~four contexts in an attempt to define a common grammar where possible between languages
 
@@ -185,7 +185,9 @@ Python, C#, Talon and javascript language support is currently broken up into ~f
 
 • programming.talon - function, loop commands, etc
 
-• {your-language-here}.talon - for implementation of the actioIans for the above, and any language-specific stuff
+• {your-language-here}.py - for the language-specific implementations of actions to support the above commands, and to define any language-specific actions/captures/etc
+
+To start support for a new language, ensure the appropriate extension is added to code.py's extension_lang_map (https://github.com/knausj85/knausj_talon/blob/12229e932d9d3de85fa2f9d9a7c4f31ed6b6445b/code/code.py#L32) and then follow an existing language as appropriate. You may want to add a force command to `language_modes.talon` as well.
 
 
 ## File Manager commands
@@ -208,6 +210,10 @@ Notes:
 • Both Windows Explorer and Finder hide certain files and folder by default, so it's often best to use the imgui to list the options before issuing commands. 
 
 • If there no hidden files or folders, and the items are displayed in alphabetical order, you can typically issue the `follow <number>`, `file <number>` and `open <number>` commands based on the displayed order.
+
+To implement support for a new program, you need to implement the relevant file manager actions for your application and assert the user.file_manager tag.
+- There are a number of example implementations in the repository. Finder is a good example to copy and customize to your application as needed. 
+https://github.com/knausj85/knausj_talon/blob/5eae0b6a8f2269f24265e77feddbcc4bcf437c36/apps/mac/finder/finder.py#L16
 
 ## Terminal commands
 
@@ -278,6 +284,8 @@ This repository is now officially a team effort. The following contributors have
 - @fidgetingbits
 - @knausj85 
 - @rntz
+- @splondike
+- @pokey
 
 Collaborators will reply to issues and pull requests as time and health permits. Please be patient.
 
@@ -314,6 +322,7 @@ multiple_cursors.talon
 snippets.talon
 splits.talon
 tabs.talon
+generic_terminal.talon
 ```
 
 - New programming languages should support the appropriate 'generic' grammars where possible as well
@@ -333,3 +342,11 @@ user.code_libraries
 
 where appropriate. See e.g. csharp.py/csharp.talon. At least, until we come up with something better 👍 
 
+## Automated tests
+
+There are a number of automated tests in the repository which are run outside of the Talon environment. To run them make sure you have the `pytest` python package installed. You can then just run the `pytest` command from the repository root to execute all the tests.
+
+# Talon documentation
+For official documentation on Talon's API and features, please visit https://talonvoice.com/docs/. 
+
+For community-generated documentation on Talon, please visit https://talon.wiki/

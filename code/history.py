@@ -1,8 +1,13 @@
-from talon import imgui, Module, speech_system, actions
+from talon import imgui, Module, speech_system, actions, app
 
-# We keep hist_len lines of history, but by default display only hist_short_len of them.
-hist_len = 50
-hist_short_len = 10
+# We keep command_history_size lines of history, but by default display only
+# command_history_display of them.
+mod = Module()
+setting_command_history_size = mod.setting("command_history_size", int, default=50)
+setting_command_history_display = mod.setting(
+    "command_history_display", int, default=10
+)
+
 hist_more = False
 history = []
 
@@ -12,7 +17,6 @@ def parse_phrase(word_list):
 
 
 def on_phrase(j):
-    global hist_len
     global history
 
     try:
@@ -22,22 +26,23 @@ def on_phrase(j):
 
     if val != "":
         history.append(val)
-        history = history[-hist_len:]
+        history = history[-setting_command_history_size.get() :]
+
 
 # todo: dynamic rect?
-@imgui.open(y=0, software=False)
+@imgui.open(y=0)
 def gui(gui: imgui.GUI):
     global history
     gui.text("Command History")
     gui.line()
-    text = history[:] if hist_more else history[-hist_short_len:]
+    text = (
+        history[:] if hist_more else history[-setting_command_history_display.get() :]
+    )
     for line in text:
         gui.text(line)
 
 
 speech_system.register("phrase", on_phrase)
-
-mod = Module()
 
 
 @mod.action_class
@@ -71,3 +76,8 @@ class Actions:
         """Show less history"""
         global hist_more
         hist_more = False
+
+    def history_get(number: int):
+        """returns the history entry at the specified index"""
+        num = (0 - number) - 1
+        return history[num]
