@@ -184,6 +184,9 @@ mod.list(
     "prose_formatter",
     desc="words to start dictating prose, and the formatter they apply",
 )
+mod.list("post_dictation_keys",
+         desc="keys that can be pressed after dictation commands",
+)
 
 
 @mod.capture(rule="{self.formatters}+")
@@ -303,6 +306,12 @@ ctx.lists["self.prose_formatter"] = {
     "say": "NOOP",
     "speak": "NOOP",
     "sentence": "CAPITALIZE_FIRST_WORD",
+}
+ctx.lists["self.post_dictation_keys"] = {
+    "space": " ",
+    "spacebar": " ",
+    "enter": "enter",
+    "tab key": "tab",
 }
 
 
