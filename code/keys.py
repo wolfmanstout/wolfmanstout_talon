@@ -141,6 +141,7 @@ punctuation_words = {
     "period": ".",
     "full stop": ".",
     "semicolon": ";",
+    "semi": ";",
     "colon": ":",
     "forward slash": "/",
     "question mark": "?",
@@ -161,13 +162,17 @@ punctuation_words = {
 symbol_key_words = {
     "dot": ".",
     "point": ".",
-    "quote": "'",
+    "single quote": "'",
     "apostrophe": "'",
     "L square": "[",
     "left square": "[",
     "square": "[",
+    "open bracket": "[",
+    "lobe": "[",
     "R square": "]",
     "right square": "]",
+    "close bracket": "]",
+    "robe": "]",
     "slash": "/",
     "backslash": "\\",
     "minus": "-",
@@ -181,19 +186,31 @@ symbol_key_words = {
     "paren": "(",
     "L paren": "(",
     "left paren": "(",
+    "open paren": "(",
+    "leap": "(",
     "R paren": ")",
     "right paren": ")",
+    "close paren": ")",
+    "reap": ")",
     "brace": "{",
     "left brace": "{",
+    "open brace": "{",
+    "lake": "{",
     "R brace": "}",
     "right brace": "}",
+    "close brace": "}",
+    "rake": "}",
     "angle": "<",
     "left angle": "<",
+    "open angle": "<",
     "less than": "<",
+    "luke": "<",
     "rangle": ">",
     "R angle": ">",
     "right angle": ">",
+    "close angle": ">",
     "greater than": ">",
+    "ruke": ">",
     "star": "*",
     "hash": "#",
     "percent": "%",
@@ -202,6 +219,7 @@ symbol_key_words = {
     "pipe": "|",
     "dubquote": '"',
     "double quote": '"',
+    "quote": '"',
 
     # Currencies
     "dollar": "$",
@@ -221,6 +239,8 @@ ctx.lists["self.arrow_key"] = {
 }
 
 simple_keys = [
+    "backspace",
+    "delete",
     "end",
     "enter",
     "escape",
@@ -233,11 +253,12 @@ simple_keys = [
 ]
 
 alternate_keys = {
-    "delete": "backspace",
-    "forward delete": "delete",
+    "delete key": "delete",
     #'junk': 'backspace',
     "page up": "pageup",
     "page down": "pagedown",
+    "spacebar": "space",
+    "tab key": "tab",
 }
 # mac apparently doesn't have the menu key.
 if app.platform in ("windows", "linux"):

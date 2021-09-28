@@ -1,44 +1,44 @@
-find it:
+find [it]:
     edit.find()
 
 next one:
     edit.find_next()
 
-go word left:
+go word left | before:
     edit.word_left()
 
-go word right:
+go word right | after:
     edit.word_right()
 
-go left:
+[go] left:
     edit.left()
 
-go right:
+[go] right:
     edit.right()
 
-go up:
+[go] up:
     edit.up()
 
-go down:
+[go] down:
     edit.down()
 
-go line start:
+[go line] start:
     edit.line_start()
 
 go line end:
     edit.line_end()
 
-go way left:
+go way left | west:
     edit.line_start()
     edit.line_start()
 
-go way right:
+go way right | east:
     edit.line_end()
 
-go way down:
+go way down | south:
     edit.file_end()
 
-go way up:
+go way up | north:
     edit.file_start()
     
 go bottom:
@@ -54,16 +54,16 @@ go page up:
     edit.page_up()
 
 # selecting
-select line:
+select line | line select:
     edit.select_line()
 
-select all:
+select all | all select:
     edit.select_all()
 
-select left:
+select left | lefts:
     edit.extend_left()
 
-select right:
+select right | rights:
     edit.extend_right()
 
 select up:
@@ -75,10 +75,10 @@ select down:
 select word:
     edit.select_word()
 
-select word left:
+select word left | befores:
     edit.extend_word_left()
 
-select word right:
+select word right | afters:
     edit.extend_word_right()
 
 select way left:
@@ -101,13 +101,13 @@ indent [more]:
     edit.indent_less()
 
 # deleting
-clear line:
+clear line | line clear:
     edit.delete_line()
 
-clear left:
+clear left | lefts delete:
     key(backspace)
 
-clear right:
+clear right | rights delete:
     key(delete)
 
 clear up:
@@ -121,11 +121,11 @@ clear down:
 clear word:
     edit.delete_word()
 
-clear word left:
+clear word left | befores delete:
     edit.extend_word_left()
     edit.delete()
 
-clear word right:
+clear word right | afters delete:
     edit.extend_word_right()
     edit.delete()
 

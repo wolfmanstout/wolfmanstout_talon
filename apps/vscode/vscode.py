@@ -210,7 +210,7 @@ class UserActions:
     def multi_cursor_select_more_occurrences():
         actions.user.vscode("editor.action.addSelectionToNextFindMatch")
 
-    # snippet.py support beginHelp close
+    # snippet.py support begin
     def snippet_search(text: str):
         actions.user.vscode("editor.action.insertSnippet")
         actions.insert(text)
