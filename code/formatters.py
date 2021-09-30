@@ -116,6 +116,8 @@ formatters_dict = {
         NOSEP,
         first_vs_rest(lambda w: w.lower(), lambda w: "_" + w.lower()),
     ),
+    "PRE_SNAKE_CASE": (NOSEP, every_word(lambda w: "_" + w.lower())),
+    "POST_SNAKE_CASE": (NOSEP, every_word(lambda w: w.lower() + "_")),
     "NO_SPACES": (NOSEP, every_word(lambda w: w)),
     "DASH_SEPARATED": words_with_joiner("-"),
     "TERMINAL_DASH_SEPARATED": (
@@ -146,6 +148,7 @@ formatters_dict = {
 # This is the mapping from spoken phrases to formatters
 formatters_words = {
     "allcaps": formatters_dict["ALL_CAPS"],
+    "upper": formatters_dict["ALL_CAPS"],
     "alldown": formatters_dict["ALL_LOWERCASE"],
     "spaces": formatters_dict["ALL_LOWERCASE"],
     "camel": formatters_dict["PRIVATE_CAMEL_CASE"],
@@ -165,6 +168,8 @@ formatters_words = {
     "compound": formatters_dict["NO_SPACES"],
     "snake": formatters_dict["SNAKE_CASE"],
     "score": formatters_dict["SNAKE_CASE"],
+    "pre score": formatters_dict["PRE_SNAKE_CASE"],
+    "post score": formatters_dict["POST_SNAKE_CASE"],
     # "speak": formatters_dict["NOOP"],
     "string": formatters_dict["SINGLE_QUOTED_STRING"],
     "title": formatters_dict["CAPITALIZE_ALL_WORDS"],
