@@ -47,5 +47,7 @@ settings():
     # per-application basis.
     # user.context_sensitive_dictation = 1
 
+    speech.timeout = 0.2
+
 # uncomment tag to enable mouse grid
 # tag(): user.mouse_grid_enabled
