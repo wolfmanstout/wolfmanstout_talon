@@ -1,14 +1,14 @@
-eye move: user.move_cursor_to_gaze_point()
-eye (touch | click) [left]:
+(eye | I) move: user.move_cursor_to_gaze_point()
+(eye | I) (touch | click) [left]:
     user.move_cursor_to_gaze_point()
     mouse_click(0)
-eye (touch | click) right:
+(eye | I) (touch | click) right:
     user.move_cursor_to_gaze_point()
     mouse_click(1)
-eye (touch | click) middle:
+(eye | I) (touch | click) middle:
     user.move_cursor_to_gaze_point()
     mouse_click(2)
-eye control (touch | click):
+(eye | I) control (touch | click):
     user.move_cursor_to_gaze_point()
     key(ctrl:down)
     mouse_click(0)
