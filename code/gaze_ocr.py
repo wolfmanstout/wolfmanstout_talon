@@ -17,6 +17,14 @@ gaze_ocr_controller = gaze_ocr.Controller(
  
 mod = Module()
 
+@mod.capture(rule="<user.text> | <number>")
+def onscreen_text(m) -> str:
+    """Either words or a number."""
+    try:
+        return m.text
+    except AttributeError:
+        return str(m.number)
+
 @mod.action_class
 class GazeOcrActions:
     def move_cursor_to_word(text: str):

@@ -50,46 +50,46 @@ scroll down half:
 # [scroll] stop: '"[scroll] stop": Function(lambda: scroller.stop()),'()
 # scroll reset: '"scroll reset": Function(lambda: reset_scroller()),'()
 
-<user.text> move: user.move_cursor_to_word(text)
-<user.text> (touch | click) [left]:
-    user.move_cursor_to_word(text)
+<user.onscreen_text> move: user.move_cursor_to_word(onscreen_text)
+<user.onscreen_text> (touch | click) [left]:
+    user.move_cursor_to_word(onscreen_text)
     mouse_click(0)
-<user.text> (touch | click) right:
-    user.move_cursor_to_word(text)
+<user.onscreen_text> (touch | click) right:
+    user.move_cursor_to_word(onscreen_text)
     mouse_click(1)
-<user.text> (touch | click) middle:
-    user.move_cursor_to_word(text)
+<user.onscreen_text> (touch | click) middle:
+    user.move_cursor_to_word(onscreen_text)
     mouse_click(2)
-<user.text> control (touch | click):
-    user.move_cursor_to_word(text)
+<user.onscreen_text> control (touch | click):
+    user.move_cursor_to_word(onscreen_text)
     key(ctrl:down)
     mouse_click(0)
     key(ctrl:up)
-go before <user.text>: user.move_text_cursor_to_word(text, "before")
-go after <user.text>: user.move_text_cursor_to_word(text, "after")
-words before <user.text> delete:
+go before <user.onscreen_text>: user.move_text_cursor_to_word(onscreen_text, "before")
+go after <user.onscreen_text>: user.move_text_cursor_to_word(onscreen_text, "after")
+words before <user.onscreen_text> delete:
     key(shift:down)
-    user.move_text_cursor_to_word(text, "before")
+    user.move_text_cursor_to_word(onscreen_text, "before")
     key(shift:up)
     key(backspace)
-words after <user.text> delete:
+words after <user.onscreen_text> delete:
     key(shift:down)
-    user.move_text_cursor_to_word(text, "after")
+    user.move_text_cursor_to_word(onscreen_text, "after")
     key(shift:up)
     key(backspace)
-words <user.text> [through <user.text>] delete:
-    user.select_text(text_1, text_2 or "", 1)
+words <user.onscreen_text> [through <user.onscreen_text>] delete:
+    user.select_text(onscreen_text_1, onscreen_text_2 or "", 1)
     key(backspace)
-words before <user.text>:
+words before <user.onscreen_text>:
     key(shift:down)
-    user.move_text_cursor_to_word(text, "before")
+    user.move_text_cursor_to_word(onscreen_text, "before")
     key(shift:up)
-words after <user.text>:
+words after <user.onscreen_text>:
     key(shift:down)
-    user.move_text_cursor_to_word(text, "after")
+    user.move_text_cursor_to_word(onscreen_text, "after")
     key(shift:up)
-words <user.text> [through <user.text>]:
-    user.select_text(text_1, text_2 or "")
-replace <user.text> with <user.text>:
-    user.select_text(text_1)
-    insert(text_2)
+words <user.onscreen_text> [through <user.onscreen_text>]:
+    user.select_text(onscreen_text_1, onscreen_text_2 or "")
+replace <user.onscreen_text> with <user.onscreen_text>:
+    user.select_text(onscreen_text_1)
+    insert(onscreen_text_2)
