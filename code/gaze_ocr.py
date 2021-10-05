@@ -6,7 +6,7 @@ from gaze_ocr import _talon_wrappers as talon_wrappers
 
 # Initialize eye tracking and OCR. See installation instructions:
 # https://github.com/wolfmanstout/gaze-ocr
-tracker = gaze_ocr.eye_tracking.EyeTracker.get_connected_instance(None)
+tracker = gaze_ocr.eye_tracking.TalonEyeTracker()
 ocr_reader = screen_ocr.Reader.create_fast_reader()
 gaze_ocr_controller = gaze_ocr.Controller(
     ocr_reader,
@@ -25,23 +25,31 @@ def onscreen_text(m) -> str:
     except AttributeError:
         return str(m.number)
 
+@mod.capture(rule="<user.word> | <number>")
+def onscreen_word(m) -> str:
+    """Either a word or a number."""
+    try:
+        return m.word
+    except AttributeError:
+        return str(m.number)
+
 @mod.action_class
 class GazeOcrActions:
     def move_cursor_to_word(text: str):
         """Moves cursor to onscreen word."""
-        gaze_ocr_controller.start_reading_nearby()
+        gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.move_cursor_to_word(text):
             raise RuntimeError("Unable to find: " + text)
 
     def move_text_cursor_to_word(text: str, position: str):
         """Moves text cursor near onscreen word."""
-        gaze_ocr_controller.start_reading_nearby()
+        gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.move_text_cursor_to_word(text, position):
             raise RuntimeError("Unable to find: " + text)
 
     def select_text(start: str, end: str="", for_deletion: int=0):
         """Selects text near onscreen word."""
-        gaze_ocr_controller.start_reading_nearby()
+        gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.select_text(start, end, for_deletion):
             raise RuntimeError("Unable to select {} to {}".format(start, end))
 

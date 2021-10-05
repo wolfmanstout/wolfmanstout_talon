@@ -1,5 +1,7 @@
 mode: dictation
 -
+settings(): speech.timeout = 0.5
+
 ^press <user.keys>$: key("{keys}")
 
 # Everything here should call auto_insert to preserve the state to correctly auto-capitalize/auto-space.
