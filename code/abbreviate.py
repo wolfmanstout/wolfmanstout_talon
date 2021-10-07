@@ -213,6 +213,8 @@ abbreviations = {
     "what the fuck": "wtf",
     "window": "win",
 }
+# Slows down DFA compilation excessively
+abbreviations = {}
 
 ctx = Context()
 ctx.lists["user.abbreviation"] = abbreviations

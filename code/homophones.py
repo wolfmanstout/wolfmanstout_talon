@@ -31,14 +31,15 @@ def update_homophones(name, flags):
 
     phones = {}
     canonical_list = []
-    with open(homophones_file, "r") as f:
-        for line in f:
-            words = line.rstrip().split(",")
-            canonical_list.append(words[0])
-            for word in words:
-                word = word.lower()
-                old_words = phones.get(word, [])
-                phones[word] = sorted(set(old_words + words))
+    # Slows down DFA compilation excessively
+    # with open(homophones_file, "r") as f:
+    #     for line in f:
+    #         words = line.rstrip().split(",")
+    #         canonical_list.append(words[0])
+    #         for word in words:
+    #             word = word.lower()
+    #             old_words = phones.get(word, [])
+    #             phones[word] = sorted(set(old_words + words))
 
     global all_homophones
     all_homophones = phones
