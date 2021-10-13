@@ -40,7 +40,8 @@ def update_lists(decls):
         "scopes",
         "modes",
     ]:
-        l = getattr(decls, thing)
+        # Slows down DFA compilation excessively
+        l = {}  # getattr(decls, thing)
         ctx_global.lists[
             f"user.talon_{thing}"
         ] = actions.user.create_spoken_forms_from_list(
