@@ -31,16 +31,22 @@ def prose(m) -> str:
     text, _state = auto_capitalize(format_phrase(m))
     return text
 
+@mod.capture(rule="({user.vocabulary} | {user.punctuation} | <phrase>)+")
+def raw_prose(m) -> str:
+    """Mixed words and punctuation, auto-spaced & capitalized, without quote straightening."""
+    text, _state = auto_capitalize(format_phrase(m, straighten_quotes=False))
+    return text
+
 
 # ---------- FORMATTING ---------- #
-def format_phrase(m):
+def format_phrase(m, straighten_quotes=True):
     words = capture_to_words(m)
     result = ""
     for i, word in enumerate(words):
         if i > 0 and needs_space_between(words[i-1], word):
             result += " "
         result += word
-    return result
+    return result.replace("“", "\"").replace("”", "\"") if straighten_quotes else result
 
 def capture_to_words(m):
     words = []
@@ -160,7 +166,7 @@ class DictationFormat:
             text = " " + text
         text, self.state = auto_capitalize(text, self.state)
         self.before = text or self.before
-        return text
+        return text.replace("“", "\"").replace("”", "\"")
 
 dictation_formatter = DictationFormat()
 ui.register("app_deactivate", lambda app: dictation_formatter.reset())
