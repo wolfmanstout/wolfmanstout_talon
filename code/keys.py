@@ -159,6 +159,7 @@ punctuation_words = {
     "close paren": ")",
     "open quote": "“",
     "close quote": "”",
+    "hyphen": "-",
 
     # Currencies
     "dollar sign": "$",
