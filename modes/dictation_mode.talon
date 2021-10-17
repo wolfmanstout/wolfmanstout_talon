@@ -2,8 +2,6 @@ mode: dictation
 -
 settings(): speech.timeout = 0.5
 
-^press <user.keys>$: key("{keys}")
-
 # Everything here should call auto_insert to preserve the state to correctly auto-capitalize/auto-space.
 <user.raw_prose>: auto_insert(raw_prose)
 new line: "\n"
@@ -29,12 +27,6 @@ spell that <user.formatters> <user.letters>:
     user.dictation_insert_raw(result)
 ^undo [that]$: edit.undo()
 ^redo [that]$: edit.redo()
-^backspace$: key(backspace)
-^delete key$: key(delete)
-
-# Escape, type things that would otherwise be commands
-^escape <user.text>$:
-    auto_insert(user.text)
 
 numb <user.number_string>: "{number_string}"
 numb <user.number_string> (dot | point) <digit_string>: "{number_string}.{digit_string}"
