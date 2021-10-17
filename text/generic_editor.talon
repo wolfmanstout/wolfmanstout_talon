@@ -1,6 +1,3 @@
-mode: command
-mode: dictation
--
 find [it]:
     edit.find()
 

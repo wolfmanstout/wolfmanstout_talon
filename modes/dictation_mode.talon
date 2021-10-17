@@ -29,8 +29,8 @@ spell that <user.formatters> <user.letters>:
     user.dictation_insert_raw(result)
 ^undo [that]$: edit.undo()
 ^redo [that]$: edit.redo()
-backspace: key(backspace)
-delete key: key(delete)
+^backspace$: key(backspace)
+^delete key$: key(delete)
 
 # Escape, type things that would otherwise be commands
 ^escape <user.text>$:
