@@ -6,6 +6,7 @@ not mode: sleep
     mode.enable("dictation")
     user.code_clear_language_mode()
     mode.disable("user.gdb")
+    user.dictation_format_reset()
 ^command mode$:
     mode.disable("sleep")
     mode.disable("dictation")

@@ -14,17 +14,7 @@ zoom in: edit.zoom_in()
 zoom out: edit.zoom_out()
 screen up: edit.page_up()
 screen down: edit.page_down()
-copy [that]: edit.copy()
-cut [that]: edit.cut()
-paste [that]: edit.paste()
-^undo [that]$: edit.undo()
-^redo [that]$: edit.redo()
-paste (match | raw): edit.paste_match_style()
 [file] save: edit.save()
-wipe: key(backspace)    
-(pad | padding): 
-	insert("  ") 
-	key(left)
 slap: edit.line_insert_down()
 
 prose [<phrase>]$:
@@ -34,4 +24,5 @@ prose [<phrase>]$:
     mode.enable("dictation")
     user.code_clear_language_mode()
     mode.disable("user.gdb")
+    user.dictation_format_reset()
     user.parse_phrase(phrase or "")
