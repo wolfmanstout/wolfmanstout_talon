@@ -1,21 +1,32 @@
-from talon import Module, actions
+from talon import Module, actions, app
 
 import gaze_ocr
 import screen_ocr  # dependency of gaze-ocr
 from gaze_ocr import _talon_wrappers as talon_wrappers
 
-# Initialize eye tracking and OCR. See installation instructions:
-# https://github.com/wolfmanstout/gaze-ocr
-tracker = gaze_ocr.eye_tracking.TalonEyeTracker()
-ocr_reader = screen_ocr.Reader.create_fast_reader()
-gaze_ocr_controller = gaze_ocr.Controller(
-    ocr_reader,
-    tracker,
-    save_data_directory=r"C:\Users\james\Documents\OCR\logs",
-    mouse=talon_wrappers.Mouse(),
-    keyboard=talon_wrappers.Keyboard())
- 
 mod = Module()
+
+setting_ocr_logging_dir = mod.setting(
+    "ocr_logging_dir",
+    type=str,
+    default=None,
+    desc="If specified, log OCR'ed images to this directory.",
+)
+
+def on_ready():
+    # Initialize eye tracking and OCR. See installation instructions:
+    # https://github.com/wolfmanstout/gaze-ocr
+    global tracker, ocr_reader, gaze_ocr_controller
+    tracker = gaze_ocr.eye_tracking.TalonEyeTracker()
+    ocr_reader = screen_ocr.Reader.create_fast_reader()
+    gaze_ocr_controller = gaze_ocr.Controller(
+        ocr_reader,
+        tracker,
+        save_data_directory=setting_ocr_logging_dir.get(),
+        mouse=talon_wrappers.Mouse(),
+        keyboard=talon_wrappers.Keyboard())
+
+app.register("ready", on_ready)
 
 @mod.capture(rule="<user.text> | <number>")
 def onscreen_text(m) -> str:
