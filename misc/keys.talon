@@ -1,3 +1,6 @@
+mode: command
+mode: dictation
+-
 go <user.arrow_keys>: key(arrow_keys)
 <user.letter>: key(letter)
 (ship | uppercase | upper) <user.letters> [(lowercase | sunk)]:

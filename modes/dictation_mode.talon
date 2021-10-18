@@ -7,6 +7,7 @@ settings(): speech.timeout = 0.5
 <user.raw_prose>: auto_insert(raw_prose)
 new line: "\n"
 new paragraph: "\n\n"
+spacebar: " "
 cap <user.word>:
     result = user.formatted_text(word, "CAPITALIZE_FIRST_WORD")
     auto_insert(result)
@@ -27,5 +28,6 @@ numb <user.number_string> (dot | point) <digit_string>: "{number_string}.{digit_
 
 halt [<phrase>]$:
     mode.disable("sleep")
+    mode.enable("command")
     mode.disable("dictation")
     user.parse_phrase(phrase or "")

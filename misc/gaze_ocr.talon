@@ -1,3 +1,6 @@
+mode: command
+mode: dictation
+-
 (eye | I) move: user.move_cursor_to_gaze_point()
 (eye | I) (touch | click) [left]:
     user.move_cursor_to_gaze_point()

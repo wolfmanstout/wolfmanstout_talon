@@ -161,10 +161,11 @@ class DictationFormat:
         _, self.state = auto_capitalize(text, self.state)
         self.before = text or self.before
 
-    def format(self, text):
+    def format(self, text, auto_cap=True):
         if needs_space_between(self.before, text):
             text = " " + text
-        text, self.state = auto_capitalize(text, self.state)
+        if auto_cap:
+            text, self.state = auto_capitalize(text, self.state)
         self.before = text or self.before
         return text.replace("“", "\"").replace("”", "\"")
 
@@ -180,10 +181,9 @@ class Actions:
 
     def dictation_insert_raw(text: str):
         """Inserts text as-is, without invoking the dictation formatter."""
-        dictation_formatter.pass_through(text)
-        actions.insert(text)
+        actions.user.dictation_insert(text, False)
 
-    def dictation_insert(text: str) -> str:
+    def dictation_insert(text: str, auto_cap: bool=True) -> str:
         """Inserts dictated text, formatted appropriately."""
         context_sensitive = setting_context_sensitive_dictation.get()
         # Omit peeking left if we don't need left space or capitalization.
@@ -192,7 +192,7 @@ class Actions:
                      and auto_capitalize(text, "sentence start")[0] == text)):
             dictation_formatter.update_context(
                 actions.user.dictation_peek_left(clobber=True))
-        text = dictation_formatter.format(text)
+        text = dictation_formatter.format(text, auto_cap)
         actions.user.add_phrase_to_history(text)
         actions.insert(text)
         # Add a space after cursor if necessary.
