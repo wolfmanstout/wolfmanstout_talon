@@ -105,7 +105,7 @@ class CodeActions:
 class WinActions:
     def filename():
         title = actions.win.title()
-        result = title.split(" — ")[0]
+        result = title.split(" - ")[0]
         if "." in result:
             return result
         return ""
