@@ -50,19 +50,19 @@ class GazeOcrActions:
         """Moves cursor to onscreen word."""
         gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.move_cursor_to_word(text):
-            raise RuntimeError("Unable to find: " + text)
+            raise RuntimeError("Unable to find: \"{}\"".format(text))
 
     def move_text_cursor_to_word(text: str, position: str):
         """Moves text cursor near onscreen word."""
         gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.move_text_cursor_to_word(text, position):
-            raise RuntimeError("Unable to find: " + text)
+            raise RuntimeError("Unable to find: \"{}\"".format(text))
 
     def select_text(start: str, end: str="", for_deletion: int=0):
         """Selects text near onscreen word."""
         gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.select_text(start, end, for_deletion):
-            raise RuntimeError("Unable to select {} to {}".format(start, end))
+            raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
 
     def move_cursor_to_gaze_point(offset_right: int=0, offset_down: int=0):
         """Moves mouse cursor to gaze location."""
