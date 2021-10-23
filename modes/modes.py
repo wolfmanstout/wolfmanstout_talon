@@ -46,3 +46,18 @@ class Actions:
                 actions.user.engine_wake()
                 # note: this may not do anything for all versions of Dragon. Requires Pro.
                 actions.user.engine_mimic("start normal mode")
+
+    def dictation_mode():
+        """Enables dictation mode."""
+        actions.mode.disable("sleep")
+        actions.mode.disable("command")
+        actions.mode.enable("dictation")
+        actions.user.code_clear_language_mode()
+        actions.mode.disable("user.gdb")
+        actions.user.dictation_format_reset()
+
+    def command_mode():
+        """Enables command mode."""
+        actions.mode.disable("sleep")
+        actions.mode.disable("dictation")
+        actions.mode.enable("command")

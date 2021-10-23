@@ -18,11 +18,10 @@ screen down: edit.page_down()
 slap: edit.line_insert_down()
 
 prose [<phrase>]$:
-    # Copied from modes.talon.
-    mode.disable("sleep")
-    mode.disable("command")
-    mode.enable("dictation")
-    user.code_clear_language_mode()
-    mode.disable("user.gdb")
-    user.dictation_format_reset()
+    user.dictation_mode()
     user.parse_phrase(phrase or "")
+
+prose [<phrase>] halt:
+    user.dictation_mode()
+    user.parse_phrase(phrase or "")
+    user.command_mode()

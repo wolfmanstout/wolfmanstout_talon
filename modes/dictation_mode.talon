@@ -27,7 +27,5 @@ numb <user.number_string>: "{number_string}"
 numb <user.number_string> (dot | point) <digit_string>: "{number_string}.{digit_string}"
 
 halt [<phrase>]$:
-    mode.disable("sleep")
-    mode.enable("command")
-    mode.disable("dictation")
+    user.command_mode()
     user.parse_phrase(phrase or "")
