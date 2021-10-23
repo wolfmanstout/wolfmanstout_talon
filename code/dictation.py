@@ -12,6 +12,18 @@ setting_context_sensitive_dictation = mod.setting(
     desc="Look at surrounding text to improve auto-capitalization/spacing in dictation mode. By default, this works by selecting that text & copying it to the clipboard, so it may be slow or fail in some applications.",
 )
 
+mod.list("prose_modifiers", desc="Modifiers that can be used within prose")
+mod.list("prose_snippets", desc="Snippets that can be used within prose")
+ctx = Context()
+ctx.lists["user.prose_modifiers"] = ["cap", "no caps", "no space"]
+ctx.lists["user.prose_snippets"] = {
+    "spacebar": " ",
+    "new line": "\n",
+    "new paragraph": "\n\n",
+    "open quote": "“",
+    "close quote": "”",
+}
+
 @mod.capture(rule="({user.vocabulary} | <word>)")
 def word(m) -> str:
     """A single word, including user-defined vocabulary."""
@@ -23,39 +35,41 @@ def word(m) -> str:
 @mod.capture(rule="({user.vocabulary} | <phrase>)+")
 def text(m) -> str:
     """A sequence of words, including user-defined vocabulary."""
-    return format_phrase(m)
+    return apply_formatting(m)
 
-@mod.capture(rule="({user.vocabulary} | {user.punctuation} | <phrase>)+")
+@mod.capture(rule="({user.vocabulary} | {user.punctuation} | {user.prose_snippets} | <phrase> | {user.prose_modifiers})+")
 def prose(m) -> str:
     """Mixed words and punctuation, auto-spaced & capitalized."""
-    text, _state = auto_capitalize(format_phrase(m))
-    return text
+    return apply_formatting(m).replace("“", "\"").replace("”", "\"")
 
-@mod.capture(rule="({user.vocabulary} | {user.punctuation} | <phrase>)+")
+@mod.capture(rule="({user.vocabulary} | {user.punctuation} | {user.prose_snippets} | <phrase>)+")
 def raw_prose(m) -> str:
-    """Mixed words and punctuation, auto-spaced & capitalized, without quote straightening."""
-    text, _state = auto_capitalize(format_phrase(m, straighten_quotes=False))
-    return text
+    """Mixed words and punctuation, auto-spaced & capitalized, without quote straightening and commands (for use in dictation mode)."""
+    return apply_formatting(m)
 
 
 # ---------- FORMATTING ---------- #
-def format_phrase(m, straighten_quotes=True):
-    words = capture_to_words(m)
+def apply_formatting(m):
+    formatter = DictationFormat()
+    formatter.state = None
     result = ""
-    for i, word in enumerate(words):
-        if i > 0 and needs_space_between(words[i-1], word):
-            result += " "
-        result += word
-    return result.replace("“", "\"").replace("”", "\"") if straighten_quotes else result
-
-def capture_to_words(m):
-    words = []
     for item in m:
-        words.extend(
-            actions.dictate.replace_words(actions.dictate.parse_words(item))
-            if isinstance(item, grammar.vm.Phrase) else
-            item.split(" "))
-    return words
+        words = None
+        if item == "cap":
+            formatter.state = "sentence start"
+        elif item == "no caps":
+            formatter.state = None
+        elif item == "no space":
+            formatter.no_space = True
+        elif isinstance(item, grammar.vm.Phrase):
+            words = actions.dictate.replace_words(actions.dictate.parse_words(item))
+        else:
+            words = item.split(" ") if item != " " else [" "]
+        if words:
+            for word in words:
+                word = formatter.format(word)
+                result += word
+    return result
 
 # There must be a simpler way to do this, but I don't see it right now.
 no_space_after = re.compile(r"""
@@ -151,6 +165,7 @@ class DictationFormat:
     def reset(self):
         self.before = ""
         self.state = "sentence start"
+        self.no_space = False
 
     def update_context(self, before):
         if before is None: return
@@ -162,12 +177,13 @@ class DictationFormat:
         self.before = text or self.before
 
     def format(self, text, auto_cap=True):
-        if needs_space_between(self.before, text):
+        if not self.no_space and needs_space_between(self.before, text):
             text = " " + text
         if auto_cap:
             text, self.state = auto_capitalize(text, self.state)
         self.before = text or self.before
-        return text.replace("“", "\"").replace("”", "\"")
+        self.no_space = False
+        return text
 
 dictation_formatter = DictationFormat()
 ui.register("app_deactivate", lambda app: dictation_formatter.reset())
@@ -178,6 +194,18 @@ class Actions:
     def dictation_format_reset():
         """Resets the dictation formatter"""
         return dictation_formatter.reset()
+
+    def dictation_format_cap():
+        """Sets the dictation formatter to capitalize"""
+        dictation_formatter.state = "sentence start"
+
+    def dictation_format_no_caps():
+        """Sets the dictation formatter to not capitalize"""
+        dictation_formatter.state = None
+
+    def dictation_format_no_space():
+        """Sets the dictation formatter to not capitalize"""
+        dictation_formatter.no_space = True
 
     def dictation_insert_raw(text: str):
         """Inserts text as-is, without invoking the dictation formatter."""
@@ -193,6 +221,7 @@ class Actions:
             dictation_formatter.update_context(
                 actions.user.dictation_peek_left(clobber=True))
         text = dictation_formatter.format(text, auto_cap)
+        text = text.replace("“", "\"").replace("”", "\"")
         actions.user.add_phrase_to_history(text)
         actions.insert(text)
         # Add a space after cursor if necessary.

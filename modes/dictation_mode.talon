@@ -5,17 +5,13 @@ settings(): speech.timeout = 0.5
 
 # Everything here should call auto_insert to preserve the state to correctly auto-capitalize/auto-space.
 <user.raw_prose>: auto_insert(raw_prose)
-new line: "\n"
-new paragraph: "\n\n"
-spacebar: " "
-cap <user.word>:
-    result = user.formatted_text(word, "CAPITALIZE_FIRST_WORD")
-    auto_insert(result)
-no caps <user.word>: user.dictation_insert_raw(word)
+cap: user.dictation_format_cap()
+no caps: user.dictation_format_no_caps()
+no space: user.dictation_format_no_space()
 
 # Formatting
 formatted <user.format_text>:
-    auto_insert(format_text)
+    user.dictation_insert_raw(format_text)
 
 # Corrections
 spell that <user.letters>: auto_insert(letters)

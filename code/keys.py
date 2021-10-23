@@ -157,8 +157,6 @@ punctuation_words = {
     "ampersand": "&",
     "open paren": "(",
     "close paren": ")",
-    "open quote": "“",
-    "close quote": "”",
     "hyphen": "-",
 
     # Currencies
