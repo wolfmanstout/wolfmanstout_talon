@@ -1,4 +1,7 @@
+from typing import Union
+
 from talon import Module, actions, app
+from talon.grammar import Phrase
 
 import gaze_ocr
 import screen_ocr  # dependency of gaze-ocr
@@ -62,6 +65,15 @@ class GazeOcrActions:
         """Selects text near onscreen word."""
         gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.select_text(start, end, for_deletion):
+            raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
+
+    def select_text_with_timestamps(start: Phrase, end: Union[Phrase, str]=None,
+                                    for_deletion: int=0):
+        """Selects text near onscreen word at phrase timestamps."""
+        if not gaze_ocr_controller.select_text(
+                start, end, for_deletion,
+                start.words[0].start,
+                end.words[0].start if end else start.words[-1].end):
             raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
 
     def move_cursor_to_gaze_point(offset_right: int=0, offset_down: int=0):
