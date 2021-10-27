@@ -47,6 +47,24 @@ scroll down half:
     user.mouse_scroll_down()
     user.mouse_scroll_down()
     user.mouse_scroll_down()
+# parrot(shush):
+#     user.move_cursor_to_gaze_point(0, -40)
+#     user.power_momentum_scroll_down()
+#     user.power_momentum_start(ts, 2.0)
+# parrot(shush:repeat):
+#     user.power_momentum_add(ts, power)
+# parrot(shush:stop):
+#     user.power_momentum_decaying()
+
+# parrot(fff):
+#     user.move_cursor_to_gaze_point(0, 40)
+#     user.power_momentum_scroll_up()
+#     user.power_momentum_start(ts, 2.0)
+# parrot(fff:repeat):
+#     user.power_momentum_add(ts, power)
+# parrot(fff:stop):
+#     user.power_momentum_decaying()
+
 # scroll left: '"scroll left": Function(lambda: tracker.move_to_gaze_point((40, 0))) + Mouse("wheelleft:7"),'()+<wheelleft:7>
 # scroll right: '"scroll right": Function(lambda: tracker.move_to_gaze_point((-40, 0))) + Mouse("wheelright:7"),'()+<wheelright:7>
 # scroll start: '"scroll start": Function(lambda: scroller.start()),'()

@@ -65,6 +65,10 @@ class EditActions:
         actions.actions.insert(text)
     def find_next():
         actions.key('ctrl-s')
+    def indent_more():
+        actions.key('ctrl-x tab shift-right')
+    def indent_less():
+        actions.key('ctrl-x tab shift-left')
     def line_swap_up():
         actions.key("alt-up")
     def line_swap_down():

@@ -100,7 +100,7 @@ select way down:
 indent [more]:
     edit.indent_more()
 
-(indent less | out dent):
+(indent less | out dent | dedent):
     edit.indent_less()
 
 # deleting

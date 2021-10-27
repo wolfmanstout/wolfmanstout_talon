@@ -1,4 +1,6 @@
 not speech.engine: dragon
 mode: all
 -
-key(f1): speech.toggle()
+key(f1):
+   speech.toggle()
+   mode.toggle("noise")
