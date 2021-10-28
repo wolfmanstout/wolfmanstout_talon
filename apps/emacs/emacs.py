@@ -1,4 +1,5 @@
-from talon import Context, actions
+from talon import Context, Module, actions
+
 ctx = Context()
 ctx.matches = r"""
 title: /Emacs editor/
@@ -169,3 +170,53 @@ class UserActions:
         actions.key("ctrl-c & ctrl-n")
 
     # snippet.py support end
+
+mod = Module()
+
+@mod.action_class
+class Actions:
+    def jump_modulo_line(n: int):
+        """Jumps to the nearest line number modulo 100."""
+        actions.key("ctrl-u")
+        actions.insert(str(n))
+        actions.key("ctrl-c c g")
+
+    def mark_lines(n1: int, n2: int=-1, tight: int=0, tree: int=0):
+        """Marks the lines from n1 to n2."""
+        actions.user.jump_modulo_line(n1)
+        if tree:
+            actions.key("alt-h")
+            return
+        if tight:
+            actions.key("alt-m")
+        actions.key("ctrl-space")
+        if n2 != -1:
+            actions.user.jump_modulo_line(n2)
+        if tight:
+            actions.key("ctrl-e")
+        else:
+            actions.key("down")
+
+    def use_lines(n1: int, n2: int=-1,
+                  pre_key: str="", post_key: str="",
+                  tight: int=0, other_buffer: int=0, tree: int=0):
+        """Uses the lines from n1 to n2."""
+        if other_buffer:
+            actions.key("ctrl-x o")
+        else:
+            # Set mark without activating.
+            actions.key("ctrl-\\")
+        actions.user.mark_lines(n1, n2, tight, tree)
+        if pre_key:
+            actions.key(pre_key)
+        # Jump back to the beginning of the selection.
+        actions.key("ctrl-<")
+        if other_buffer:
+            actions.key("ctrl-x o")
+        else:
+            # Jump back to the original position.
+            actions.key("ctrl-<")
+        if not tight:
+            actions.key("ctrl-a")
+        if post_key:
+            actions.key(post_key)
