@@ -1,6 +1,6 @@
 from typing import Union
 
-from talon import Module, actions, app
+from talon import Context, Module, actions, app
 from talon.grammar import Phrase
 
 import gaze_ocr
@@ -79,3 +79,17 @@ class GazeOcrActions:
     def move_cursor_to_gaze_point(offset_right: int=0, offset_down: int=0):
         """Moves mouse cursor to gaze location."""
         tracker.move_to_gaze_point((offset_right, offset_down))
+
+# Dragon doesn't support timestamps.
+ctx = Context()
+ctx.matches = r"""
+speech.engine: dragon
+"""
+
+@ctx.action_class
+class DragonActions:
+    def select_text_with_timestamps(start: Phrase, end: Union[Phrase, str]=None,
+                                    for_deletion: int=0):
+        gaze_ocr_controller.read_nearby()
+        if not gaze_ocr_controller.select_text(start, end, for_deletion):
+            raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
