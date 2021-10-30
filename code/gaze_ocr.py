@@ -61,6 +61,12 @@ class GazeOcrActions:
         if not gaze_ocr_controller.move_text_cursor_to_word(text, position):
             raise RuntimeError("Unable to find: \"{}\"".format(text))
 
+    def move_text_cursor_to_word_ignore_errors(text: str, position: str):
+        """Moves text cursor near onscreen word, ignoring errors (log only)."""
+        gaze_ocr_controller.read_nearby()
+        if not gaze_ocr_controller.move_text_cursor_to_word(text, position):
+            print("Unable to find: \"{}\"".format(text))
+
     def select_text(start: str, end: str="", for_deletion: int=0):
         """Selects text near onscreen word."""
         gaze_ocr_controller.read_nearby()

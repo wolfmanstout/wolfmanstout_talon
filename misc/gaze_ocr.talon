@@ -96,11 +96,11 @@ words <phrase> delete:
     key(backspace)
 words before <user.onscreen_word>:
     key(shift:down)
-    user.move_text_cursor_to_word(onscreen_word, "before")
+    user.move_text_cursor_to_word_ignore_errors(onscreen_word, "before")
     key(shift:up)
 words after <user.onscreen_word>:
     key(shift:down)
-    user.move_text_cursor_to_word(onscreen_word, "after")
+    user.move_text_cursor_to_word_ignore_errors(onscreen_word, "after")
     key(shift:up)
 words <phrase> through <phrase>:
     user.select_text_with_timestamps(phrase_1, phrase_2 or "")
