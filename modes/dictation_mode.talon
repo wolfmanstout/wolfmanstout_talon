@@ -25,3 +25,6 @@ spell that <user.formatters> <user.letters>:
 halt [<phrase>]$:
     user.command_mode()
     user.parse_phrase(phrase or "")
+
+# Ignore accidental usage of "prose" in dictation mode.
+^prose: skip()

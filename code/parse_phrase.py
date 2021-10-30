@@ -1,6 +1,6 @@
 # From https://github.com/AndreasArvidsson/andreas-talon/blob/3631f25d426a9fb7526c240cb0c9961ea90072c2/andreas/misc/rephrase.py
 from typing import Optional, Union
-from talon import Module, actions, speech_system
+from talon import Context, Module, actions, speech_system
 from talon.grammar import Phrase
 
 mod = Module()
@@ -36,3 +36,17 @@ class Actions:
         samples = samples[pstart:pend]
 
         speech_system._on_audio_frame(samples)
+
+# Dragon doesn't support timestamps, so we fall back to mimic()
+ctx = Context()
+ctx.matches = r"""
+speech.engine: dragon
+"""
+
+@ctx.action_class
+class DragonActions:
+    def parse_phrase(phrase: Union[Phrase, str]):
+        if phrase == "":
+            return
+        command = " ".join(actions.dictate.replace_words(actions.dictate.parse_words(phrase)))
+        actions.mimic(command)
