@@ -43,7 +43,7 @@ ctx.matches = r"""
 speech.engine: dragon
 """
 
-@ctx.action_class
+@ctx.action_class("self")
 class DragonActions:
     def parse_phrase(phrase: Union[Phrase, str]):
         if phrase == "":

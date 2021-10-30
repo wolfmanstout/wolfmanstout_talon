@@ -31,21 +31,15 @@ def on_ready():
 
 app.register("ready", on_ready)
 
-@mod.capture(rule="<user.text> | <number>")
+@mod.capture(rule="<user.prose> | <user.single_digit_string>")
 def onscreen_text(m) -> str:
     """Either words or a number."""
-    try:
-        return m.text
-    except AttributeError:
-        return str(m.number)
+    return str(m)
 
-@mod.capture(rule="<user.word> | <number>")
+@mod.capture(rule="<user.word> | {user.punctuation} | <user.single_digit_string>")
 def onscreen_word(m) -> str:
     """Either a word or a number."""
-    try:
-        return m.word
-    except AttributeError:
-        return str(m.number)
+    return str(m)
 
 @mod.action_class
 class GazeOcrActions:
@@ -92,7 +86,7 @@ ctx.matches = r"""
 speech.engine: dragon
 """
 
-@ctx.action_class
+@ctx.action_class("self")
 class DragonActions:
     def select_text_with_timestamps(start: Phrase, end: Union[Phrase, str]=None,
                                     for_deletion: int=0):
