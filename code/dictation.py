@@ -168,7 +168,7 @@ class DictationFormat:
 
     def reset(self):
         self.before = ""
-        self.state = "sentence start"
+        self.state = None
         self.no_space = False
 
     def update_context(self, before):
