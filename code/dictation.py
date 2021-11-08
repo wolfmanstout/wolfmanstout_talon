@@ -59,11 +59,11 @@ def apply_formatting(m):
     for item in m:
         words = None
         if item == "cap":
-            formatter.state = "sentence start"
+            formatter.force_cap = True
         elif item == "no caps":
-            formatter.state = None
+            formatter.force_no_cap = True
         elif item == "no space":
-            formatter.no_space = True
+            formatter.force_no_space = True
         elif isinstance(item, grammar.vm.Phrase):
             words = actions.dictate.replace_words(actions.dictate.parse_words(item))
         else:
@@ -167,13 +167,18 @@ class DictationFormat:
         self.reset()
 
     def reset(self):
+        self.reset_except_forced()
+        self.force_no_space = False
+        self.force_cap = False
+        self.force_no_cap = False
+
+    def reset_except_forced(self):
         self.before = ""
         self.state = None
-        self.no_space = False
 
     def update_context(self, before):
         if before is None: return
-        self.reset()
+        self.reset_except_forced()
         self.pass_through(before)
 
     def pass_through(self, text):
@@ -181,12 +186,28 @@ class DictationFormat:
         self.before = text or self.before
 
     def format(self, text, auto_cap=True):
-        if not self.no_space and needs_space_between(self.before, text):
+        if not self.force_no_space and needs_space_between(self.before, text):
             text = " " + text
+        self.force_no_space = False
         if auto_cap:
             text, self.state = auto_capitalize(text, self.state)
+        if self.force_cap:
+            i = -1
+            for i, c in enumerate(text):
+                if c.isalnum():
+                    break
+            if i >= 0 and i < len(text):
+                text = text[:i] + text[i].capitalize() + text[i+1:]
+            self.force_cap = False
+        if self.force_no_cap:
+            i = -1
+            for i, c in enumerate(text):
+                if c.isalnum():
+                    break
+            if i >= 0 and i < len(text):
+                text = text[:i] + text[i].lower() + text[i+1:]
+            self.force_no_cap = False
         self.before = text or self.before
-        self.no_space = False
         return text
 
 dictation_formatter = DictationFormat()
@@ -201,15 +222,15 @@ class Actions:
 
     def dictation_format_cap():
         """Sets the dictation formatter to capitalize"""
-        dictation_formatter.state = "sentence start"
+        dictation_formatter.force_cap = True
 
     def dictation_format_no_caps():
         """Sets the dictation formatter to not capitalize"""
-        dictation_formatter.state = None
+        dictation_formatter.force_no_cap = True
 
     def dictation_format_no_space():
         """Sets the dictation formatter to not capitalize"""
-        dictation_formatter.no_space = True
+        dictation_formatter.force_no_space = True
 
     def dictation_insert_raw(text: str):
         """Inserts text as-is, without invoking the dictation formatter."""

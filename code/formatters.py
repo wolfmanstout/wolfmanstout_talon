@@ -72,7 +72,7 @@ def words_with_joiner(joiner):
     """Pass through words unchanged, but add a separator between them."""
 
     def formatter_function(i, word, _):
-        return word if i == 0 else joiner + word
+        return word if i == 0 else joiner + word.lower()
 
     return (NOSEP, formatter_function)
 
@@ -118,7 +118,7 @@ formatters_dict = {
     ),
     "PRE_SNAKE_CASE": (NOSEP, every_word(lambda w: "_" + w.lower())),
     "POST_SNAKE_CASE": (NOSEP, every_word(lambda w: w.lower() + "_")),
-    "NO_SPACES": (NOSEP, every_word(lambda w: w)),
+    "NO_SPACES": (NOSEP, every_word(lambda w: w.lower())),
     "DASH_SEPARATED": words_with_joiner("-"),
     "TERMINAL_DASH_SEPARATED": (
         NOSEP,
@@ -131,7 +131,7 @@ formatters_dict = {
     "SINGLE_QUOTED_STRING": (SEP, surround("'")),
     "SPACE_SURROUNDED_STRING": (SEP, surround(" ")),
     "DOT_SEPARATED": words_with_joiner("."),
-    "DOT_SNAKE": (NOSEP, lambda i, word, _: "." + word if i == 0 else "_" + word),
+    "DOT_SNAKE": (NOSEP, lambda i, word, _: "." + word.lower() if i == 0 else "_" + word.lower()),
     "SLASH_SEPARATED": (NOSEP, every_word(lambda w: "/" + w)),
     "CAPITALIZE_FIRST_WORD": (SEP, first_vs_rest(lambda w: w.capitalize())),
     "CAPITALIZE_ALL_WORDS": (
