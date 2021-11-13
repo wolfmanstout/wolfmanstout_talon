@@ -1,8 +1,5 @@
 title: /Emacs editor/
 -
-settings():
-    user.context_sensitive_dictation = 0
-
 # General
 cancel: key(ctrl-g)
 ^emacs close now$: key(ctrl-x ctrl-c)

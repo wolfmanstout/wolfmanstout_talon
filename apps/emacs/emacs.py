@@ -1,4 +1,5 @@
 from talon import Context, Module, actions
+from typing import Optional
 
 ctx = Context()
 ctx.matches = r"""
@@ -170,6 +171,41 @@ class UserActions:
         actions.key("ctrl-c & ctrl-n")
 
     # snippet.py support end
+
+    # dictation.py support start
+
+    def dictation_peek_left(clobber: bool = False) -> Optional[str]:
+        # Get rid of the selection if it exists.
+        if clobber: actions.user.clobber_selection_if_exists()
+        # Otherwise, if there's a selection, fail.
+        elif "" != actions.edit.selected_text(): return None
+
+        # In principle the previous word should suffice, but some applications
+        # have a funny concept of what the previous word is (for example, they
+        # may only take the "`" at the end of "`foo`"). To be double sure we
+        # take two words left. I also tried taking a line up + a word left, but
+        # edit.extend_up() = key(shift-up) doesn't work consistently in the
+        # Slack webapp (sometimes escapes the text box).
+        actions.edit.extend_word_left()
+        actions.edit.extend_word_left()
+        text = actions.edit.selected_text()
+        # if we're at the beginning of the document/text box, we may not have
+        # selected any text, in which case we shouldn't move the cursor.
+        if text: actions.key("ctrl-u ctrl-space")
+        return text
+
+    def dictation_peek_right() -> Optional[str]:
+        # We grab two characters because I think that's what no_space_before
+        # needs in the worst case. An example where the second character matters
+        # is inserting before (1) "' hello" vs (2) "'hello". In case (1) we
+        # don't want to add space, in case (2) we do.
+        actions.edit.extend_right()
+        actions.edit.extend_right()
+        after = actions.edit.selected_text()
+        if after: actions.key("ctrl-u ctrl-space")
+        return after
+
+    # dictation.py support end
 
 mod = Module()
 
