@@ -1,13 +1,16 @@
 tag: browser
 title: /<docs.google.com>/
 -
+settings():
+    insert_wait = 1
+
 select column: key(ctrl-space:2)
 select row: key(shift-space:2)
 row up: key(alt-e k)
 row down: key(alt-e j)
 column left: key(alt-e m)
 column right: key(alt-e m)
-add comment: key(ctrl-alt-m)
+add comment: key(ctrl:down alt:down m alt:up ctrl:up)
 preev comment: key(ctrl:down alt:down p c ctrl:up alt:up)
 next comment: key(ctrl:down alt:down n c ctrl:up alt:up)
 enter comment: key(ctrl:down alt:down e c ctrl:up alt:up)

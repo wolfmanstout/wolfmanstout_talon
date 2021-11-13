@@ -45,7 +45,7 @@ settings():
     # copying surrounding text before inserting. This can be slow and may not
     # work in some applications. You may wish to enable this on a
     # per-application basis.
-    # user.context_sensitive_dictation = 1
+    user.context_sensitive_dictation = 1
 
     speech.timeout = 0.3
 
