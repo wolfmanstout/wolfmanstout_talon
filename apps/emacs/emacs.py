@@ -1,4 +1,4 @@
-from talon import Context, Module, actions
+from talon import Context, Module, actions, clip
 from typing import Optional
 
 ctx = Context()
@@ -62,6 +62,15 @@ class EditActions:
         actions.key('alt-w')
     def cut():
         actions.key('ctrl-w')
+    def selected_text() -> str:
+        # Reimplemented to add sleep.
+        with clip.capture() as s:
+            actions.sleep("100ms")
+            actions.edit.copy()
+        try:
+            return s.get()
+        except clip.NoChange:
+            return ""
     def find(text: str=None):
         actions.key('ctrl-s')
         actions.actions.insert(text)
