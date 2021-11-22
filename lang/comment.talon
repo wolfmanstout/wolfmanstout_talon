@@ -1,4 +1,5 @@
 tag: user.code_comment
+and not app: vscode
 -
 comment: user.code_comment()
 comment line:
