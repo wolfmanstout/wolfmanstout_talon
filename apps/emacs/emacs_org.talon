@@ -1,3 +1,5 @@
+mode: command
+mode: dictation
 title: /Emacs editor/
 and title: /- Org -/
 -
