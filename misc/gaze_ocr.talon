@@ -106,6 +106,6 @@ words <phrase> through <phrase>:
     user.select_text_with_timestamps(phrase_1, phrase_2 or "")
 words <phrase>:
     user.select_text_with_timestamps(phrase, "")
-replace <user.onscreen_word> with <user.onscreen_word>:
-    user.select_text(onscreen_word_1)
-    insert(onscreen_word_2)
+replace <user.onscreen_word> with <user.text>:
+    user.select_text(onscreen_word)
+    insert(text)
