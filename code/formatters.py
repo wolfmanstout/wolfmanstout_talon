@@ -72,7 +72,7 @@ def words_with_joiner(joiner):
     """Pass through words unchanged, but add a separator between them."""
 
     def formatter_function(i, word, _):
-        return word if i == 0 else joiner + word.lower()
+        return word.lower() if i == 0 else joiner + word.lower()
 
     return (NOSEP, formatter_function)
 
