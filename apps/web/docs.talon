@@ -1,9 +1,6 @@
 tag: browser
 title: /<docs.google.com>/
 -
-settings():
-    insert_wait = 1
-
 select column: key(ctrl-space:2)
 select row: key(shift-space:2)
 row up: key(alt-e k)
