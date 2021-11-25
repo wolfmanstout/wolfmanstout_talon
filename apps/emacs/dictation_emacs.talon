@@ -13,10 +13,12 @@ go before [preev] <user.word>:
 go after preev <user.word>:
     key(left ctrl-r)
     insert(word)
+    key(ctrl-s)
     key(enter)
 go before next <user.word>:
     key(right ctrl-s)
     insert(word)
+    key(ctrl-r)
     key(enter)
 go after [next] <user.word>:
     key(ctrl-s)
