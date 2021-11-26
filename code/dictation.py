@@ -60,11 +60,13 @@ def apply_formatting(m):
         words = None
         if item == "cap":
             formatter.force_cap = True
+            formatter.force_no_cap = False
         elif item == "no caps":
             formatter.force_no_cap = True
+            formatter.force_cap = False
         elif item == "no space":
+            formatter.reset()
             formatter.force_no_space = True
-            formatter.force_no_cap = True
         elif isinstance(item, grammar.vm.Phrase):
             words = actions.dictate.replace_words(actions.dictate.parse_words(item))
         else:
@@ -223,13 +225,17 @@ class Actions:
     def dictation_format_cap():
         """Sets the dictation formatter to capitalize"""
         dictation_formatter.force_cap = True
+        dictation_formatter.force_no_cap = False
 
     def dictation_format_no_caps():
         """Sets the dictation formatter to not capitalize"""
         dictation_formatter.force_no_cap = True
+        dictation_formatter.force_cap = False
 
     def dictation_format_no_space():
-        """Sets the dictation formatter to not capitalize"""
+        """Sets the dictation formatter to not prepend a space"""
+        # Typically helpful to reset capitalization as well.
+        dictation_formatter.reset()
         dictation_formatter.force_no_space = True
 
     def dictation_insert_raw(text: str):
