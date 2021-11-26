@@ -64,6 +64,7 @@ def apply_formatting(m):
             formatter.force_no_cap = True
         elif item == "no space":
             formatter.force_no_space = True
+            formatter.force_no_cap = True
         elif isinstance(item, grammar.vm.Phrase):
             words = actions.dictate.replace_words(actions.dictate.parse_words(item))
         else:
@@ -192,23 +193,22 @@ class DictationFormat:
         if auto_cap:
             text, self.state = auto_capitalize(text, self.state)
         if self.force_cap:
-            i = -1
-            for i, c in enumerate(text):
-                if c.isalnum():
-                    break
-            if i >= 0 and i < len(text):
-                text = text[:i] + text[i].capitalize() + text[i+1:]
+            text = format_first_letter(text, lambda s: s.capitalize())
             self.force_cap = False
         if self.force_no_cap:
-            i = -1
-            for i, c in enumerate(text):
-                if c.isalnum():
-                    break
-            if i >= 0 and i < len(text):
-                text = text[:i] + text[i].lower() + text[i+1:]
+            text = format_first_letter(text, lambda s: s.lower())
             self.force_no_cap = False
         self.before = text or self.before
         return text
+
+def format_first_letter(text, formatter):
+    i = -1
+    for i, c in enumerate(text):
+        if c.isalnum():
+            break
+    if i >= 0 and i < len(text):
+        text = text[:i] + formatter(text[i]) + text[i+1:]
+    return text
 
 dictation_formatter = DictationFormat()
 ui.register("app_deactivate", lambda app: dictation_formatter.reset())
@@ -256,6 +256,32 @@ class Actions:
         if char is not None and needs_space_between(text, char):
             actions.insert(" ")
             actions.edit.left()
+
+    def dictation_reformat_cap():
+        """Capitalizes the last utterance"""
+        text = actions.user.get_last_phrase()
+        actions.user.clear_last_phrase()
+        text = format_first_letter(text, lambda s: s.capitalize())
+        actions.user.add_phrase_to_history(text)
+        actions.insert(text)
+
+    def dictation_reformat_no_caps():
+        """Capitalizes the last utterance"""
+        text = actions.user.get_last_phrase()
+        actions.user.clear_last_phrase()
+        text = format_first_letter(text, lambda s: s.lower())
+        actions.user.add_phrase_to_history(text)
+        actions.insert(text)
+
+    def dictation_reformat_no_space():
+        """Capitalizes the last utterance"""
+        text = actions.user.get_last_phrase()
+        if not text.startswith(" "):
+            return
+        actions.user.clear_last_phrase()
+        text = text[1:]
+        actions.user.add_phrase_to_history(text)
+        actions.insert(text)
 
     def dictation_peek_left(clobber: bool = False) -> Optional[str]:
         """
