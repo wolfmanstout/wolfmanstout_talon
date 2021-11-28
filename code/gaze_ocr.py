@@ -61,14 +61,14 @@ class GazeOcrActions:
         if not gaze_ocr_controller.move_text_cursor_to_word(text, position):
             print("Unable to find: \"{}\"".format(text))
 
-    def select_text(start: str, end: str="", for_deletion: int=0):
+    def select_text(start: str, end: str="", for_deletion: bool=False):
         """Selects text near onscreen word."""
         gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.select_text(start, end, for_deletion):
             raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
 
     def select_text_with_timestamps(start: Phrase, end: Union[Phrase, str]=None,
-                                    for_deletion: int=0):
+                                    for_deletion: bool=False):
         """Selects text near onscreen word at phrase timestamps."""
         if not gaze_ocr_controller.select_text(
                 start, end, for_deletion,
@@ -89,7 +89,7 @@ speech.engine: dragon
 @ctx.action_class("self")
 class DragonActions:
     def select_text_with_timestamps(start: Phrase, end: Union[Phrase, str]=None,
-                                    for_deletion: int=0):
+                                    for_deletion: bool=False):
         gaze_ocr_controller.read_nearby()
         if not gaze_ocr_controller.select_text(start, end, for_deletion):
             raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))

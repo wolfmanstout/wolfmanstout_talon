@@ -226,7 +226,7 @@ class Actions:
         actions.insert(str(n))
         actions.key("ctrl-c c g")
 
-    def mark_lines(n1: int, n2: int=-1, tight: int=0, tree: int=0):
+    def mark_lines(n1: int, n2: int=-1, tight: bool=False, tree: bool=False):
         """Marks the lines from n1 to n2."""
         actions.user.jump_modulo_line(n1)
         if tree:
@@ -244,7 +244,7 @@ class Actions:
 
     def use_lines(n1: int, n2: int=-1,
                   pre_key: str="", post_key: str="",
-                  tight: int=0, other_buffer: int=0, tree: int=0):
+                  tight: bool=False, other_buffer: bool=False, tree: bool=False):
         """Uses the lines from n1 to n2."""
         if other_buffer:
             actions.key("ctrl-x o")
