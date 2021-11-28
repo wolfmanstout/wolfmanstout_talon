@@ -26,9 +26,9 @@ class BrowserActions:
     def go_blank():
         actions.key('ctrl-n')
     def go_back():
-        actions.key('alt:down left alt:up')
+        actions.key('alt-left')
     def go_forward():
-        actions.key('alt:down right alt:up')
+        actions.key('alt-right')
     def go_home():
         actions.key('alt-home')
     def open_private_window():
