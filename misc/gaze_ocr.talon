@@ -88,11 +88,8 @@ scroll down half:
     key(ctrl:up)
 go before <user.onscreen_word>: user.move_text_cursor_to_word(onscreen_word, "before")
 go after <user.onscreen_word>: user.move_text_cursor_to_word(onscreen_word, "after")
-words <phrase> through <phrase> delete:
-    user.select_text_with_timestamps(phrase_1, phrase_2, 1)
-    key(backspace)
-words <phrase> delete:
-    user.select_text_with_timestamps(phrase, "", 1)
+words <phrase> [through <phrase>] delete:
+    user.select_text_with_timestamps(phrase_1, phrase_2 or "", 1)
     key(backspace)
 words before <user.onscreen_word>:
     key(shift:down)
@@ -102,10 +99,8 @@ words after <user.onscreen_word>:
     key(shift:down)
     user.move_text_cursor_to_word_ignore_errors(onscreen_word, "after")
     key(shift:up)
-words <phrase> through <phrase>:
+words <phrase> [through <phrase>]:
     user.select_text_with_timestamps(phrase_1, phrase_2 or "")
-words <phrase>:
-    user.select_text_with_timestamps(phrase, "")
 replace <user.onscreen_word> with <user.text>:
     user.select_text(onscreen_word)
     insert(text)
