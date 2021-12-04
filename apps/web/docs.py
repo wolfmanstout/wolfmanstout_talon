@@ -14,6 +14,7 @@ class EditActions:
         with clip.capture() as s:
             actions.sleep("10ms")
             actions.edit.copy()
+            actions.sleep("10ms")
         try:
             return s.get()
         except clip.NoChange:
