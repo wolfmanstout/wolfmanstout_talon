@@ -16,7 +16,6 @@ phrase <user.text> {user.post_dictation_keys}:
     key(post_dictation_keys)
 <user.formatters> that: user.formatters_reformat_selection(user.formatters)
 word <user.word>: user.insert_formatted(user.word, "NOOP")
-format help | help format: user.formatters_help_toggle()
 recent list: user.toggle_phrase_history()
 recent repeat <number_small>: insert(user.get_recent_phrase(number_small))
 recent copy <number_small>: clip.set_text(user.get_recent_phrase(number_small))

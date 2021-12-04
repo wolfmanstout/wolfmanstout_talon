@@ -253,12 +253,7 @@ class Actions:
         """Inserts a phrase formatted according to formatters. Formatters is a comma separated list of formatters (e.g. 'CAPITALIZE_ALL_WORDS,DOUBLE_QUOTED_STRING')"""
         actions.insert(format_phrase(phrase, formatters))
 
-    def formatters_help_toggle():
-        """Lists all formatters"""
-        if gui.showing:
-            gui.hide()
-        else:
-            gui.show()
+
 
     def formatters_reformat_last(formatters: str) -> str:
         """Clears and reformats last formatted phrase"""
@@ -287,6 +282,13 @@ class Actions:
         actions.insert(text)
         return text
 
+    def get_formatters_words():
+        """returns a list of words currently used as formatters, and a demonstration string using those formatters"""
+        formatters_help_demo = {}
+        for name in sorted(set(formatters_words.keys())):
+            formatters_help_demo[name] = format_phrase_no_history(['one', 'two', 'three'], name)
+        return  formatters_help_demo
+
     def reformat_text(text: str, formatters: str) -> str:
         """Reformat the text."""
         unformatted = unformat_text(text)
@@ -299,8 +301,9 @@ class Actions:
 
 def unformat_text(text: str) -> str:
     """Remove format from text"""
-    unformatted = re.sub(r"[^a-zA-Z0-9]+", " ", text)
-    # Split on camelCase, including numbes
+    unformatted = re.sub(r"[^\w]+", " ", text)
+    # Split on camelCase, including numbers
+    # FIXME: handle non-ASCII letters!
     unformatted = re.sub(r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-zA-Z])(?=[0-9])|(?<=[0-9])(?=[a-zA-Z])", " ", unformatted)
     # TODO: Separate out studleycase vars
     return unformatted.lower()
@@ -319,10 +322,3 @@ ctx.lists["self.post_dictation_keys"] = {
     "tab key": "tab",
 }
 
-
-@imgui.open()
-def gui(gui: imgui.GUI):
-    gui.text("List formatters")
-    gui.line()
-    for name in sorted(set(formatters_words.keys())):
-        gui.text(f"{name} | {format_phrase_no_history(['one', 'two', 'three'], name)}")

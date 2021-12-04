@@ -30,6 +30,9 @@ settings():
     # The amount to scroll up/down (equivalent to mouse wheel on Windows by default)
     user.mouse_wheel_down_amount = 120
 
+    # The amount to scroll left/right
+    user.mouse_wheel_horizontal_amount = 40
+
     # Mouse grid and friends put the number one on the bottom left (vs on the top left)
     user.grids_put_one_bottom_left = 1
 
@@ -48,6 +51,3 @@ settings():
     user.context_sensitive_dictation = 1
 
     speech.timeout = 0.3
-
-# uncomment tag to enable mouse grid
-# tag(): user.mouse_grid_enabled

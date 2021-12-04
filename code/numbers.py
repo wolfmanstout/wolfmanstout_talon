@@ -155,6 +155,10 @@ alt_teens = "(" + ("|".join(teens_map.keys())) + ")"
 alt_tens = "(" + ("|".join(tens_map.keys())) + ")"
 alt_scales = "(" + ("|".join(scales_map.keys())) + ")"
 number_word = "(" + "|".join(numbers_map.keys()) + ")"
+# don't allow numbers to start with scale words like "hundred", "thousand", etc
+leading_words = numbers_map.keys() - scales_map.keys()
+leading_words -= {'oh', 'o'} # comment out to enable bare/initial "oh"
+number_word_leading = f"({'|'.join(leading_words)})"
 
 # TODO: allow things like "double eight" for 88
 @ctx.capture("digit_string", rule=f"({alt_digits} | {alt_teens} | {alt_tens})+")
@@ -170,7 +174,7 @@ def single_digit_string(m) -> str:
     """Parses a sequence of single digits, returning it as a string."""
     return parse_number(list(m))
 
-@mod.capture(rule=f"{number_word}+ (and {number_word}+)*")
+@mod.capture(rule=f"{number_word_leading} ([and] {number_word})*")
 def number_string(m) -> str:
     """Parses a number phrase, returning that number as a string."""
     return parse_number(list(m))
