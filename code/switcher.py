@@ -195,9 +195,8 @@ def update_running_list():
             # print(cur_app.exe)
             running_application_dict[cur_app.exe.split(os.path.sep)[-1]] = True
 
-    # Slows down DFA compilation excessively
     running = actions.user.create_spoken_forms_from_list(
-        [],  # [curr_app.name for curr_app in ui.apps(background=False)],
+        [curr_app.name for curr_app in ui.apps(background=False)],
         words_to_exclude=words_to_exclude,
         generate_subsequences=True,
     )
@@ -357,6 +356,14 @@ def ui_event(event, arg):
 # errors on other platforms.
 ctx.lists["user.launch"] = {}
 ctx.lists["user.running"] = {}
+
+# Avoid long lists which slow down context switching.
+dragon_ctx = Context()
+dragon_ctx.matches = r"""
+speech.engine: dragon
+"""
+dragon_ctx.lists["user.launch"] = {}
+dragon_ctx.lists["user.running"] = {}
 
 # Talon starts faster if you don't use the `talon.ui` module during launch
 

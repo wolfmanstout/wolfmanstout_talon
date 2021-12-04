@@ -31,15 +31,14 @@ def update_homophones(name, flags):
 
     phones = {}
     canonical_list = []
-    # Slows down DFA compilation excessively
-    # with open(homophones_file, "r") as f:
-    #     for line in f:
-    #         words = line.rstrip().split(",")
-    #         canonical_list.append(words[0])
-    #         for word in words:
-    #             word = word.lower()
-    #             old_words = phones.get(word, [])
-    #             phones[word] = sorted(set(old_words + words))
+    with open(homophones_file, "r") as f:
+        for line in f:
+            words = line.rstrip().split(",")
+            canonical_list.append(words[0])
+            for word in words:
+                word = word.lower()
+                old_words = phones.get(word, [])
+                phones[word] = sorted(set(old_words + words))
 
     global all_homophones
     all_homophones = phones
@@ -51,6 +50,12 @@ fs.watch(cwd, update_homophones)
 active_word_list = None
 is_selection = False
 
+# Avoid long lists which slow down context switching.
+dragon_ctx = Context()
+dragon_ctx.matches = r"""
+speech.engine: dragon
+"""
+dragon_ctx.lists["self.homophones_canonicals"] = {}
 
 def close_homophones():
     gui.hide()

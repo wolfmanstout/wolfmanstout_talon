@@ -213,8 +213,13 @@ abbreviations = {
     "what the fuck": "wtf",
     "window": "win",
 }
-# Slows down DFA compilation excessively
-abbreviations = {}
 
 ctx = Context()
 ctx.lists["user.abbreviation"] = abbreviations
+
+# Avoid long lists which slow down context switching.
+dragon_ctx = Context()
+dragon_ctx.matches = r"""
+speech.engine: dragon
+"""
+dragon_ctx.lists["user.abbreviation"] = {}

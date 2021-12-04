@@ -39,6 +39,11 @@ ctx.lists["user.code_functions"] = {
     "repeat": "repeat",
 }
 
+# Avoid long lists which slow down context switching.
+dragon_ctx = Context()
+dragon_ctx.matches = r"""
+speech.engine: dragon
+"""
 
 def on_update_decls(decls):
     # todo modes?
@@ -58,6 +63,7 @@ def on_update_decls(decls):
         ] = actions.user.create_spoken_forms_from_list(
             l.keys(), generate_subsequences=False
         )
+        dragon_ctx.lists[f"user.talon_{thing}"] = {}
         # print(
         #     "List: {} \n {}".format(thing, str(ctx_talon_lists.lists[f"user.talon_{thing}"]))
         # )
