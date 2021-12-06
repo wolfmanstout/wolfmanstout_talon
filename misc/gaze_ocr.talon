@@ -101,6 +101,6 @@ words after <user.onscreen_word>:
     key(shift:up)
 words <phrase> [through <phrase>]:
     user.select_text_with_timestamps(phrase_1, phrase_2 or "")
-replace <user.onscreen_word> with <user.text>:
+replace <user.onscreen_word> with <user.prose>:
     user.select_text(onscreen_word)
-    insert(text)
+    insert(prose)
