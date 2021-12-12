@@ -59,13 +59,13 @@ def apply_formatting(m):
     for item in m:
         words = None
         if item == "cap":
-            formatter.force_cap = True
-            formatter.force_no_cap = False
+            formatter.force_capitalization = "caps"
         elif item == "no caps":
-            formatter.force_no_cap = True
-            formatter.force_cap = False
+            formatter.force_capitalization = "no caps"
         elif item == "no space":
-            formatter.reset()
+            # This is typically used when manually repositioned the cursor,
+            # so it is helpful to reset capitalization as well.
+            formatter.reset_context()
             formatter.force_no_space = True
         elif isinstance(item, grammar.vm.Phrase):
             words = actions.dictate.replace_words(actions.dictate.parse_words(item))
@@ -88,8 +88,8 @@ no_space_after = re.compile(r"""
 no_space_before = re.compile(r"""
   ^(?:
     [\s\-_.,!?/%)\]}'’”]   # characters that never need space before them
-  | [$£€¥₩₽₹](?!\w)       # currency symbols not followed by a word character
-  | [;:](?!-\)|-\()       # Skip smiley faces
+  | [$£€¥₩₽₹](?!\w)        # currency symbols not followed by a word character
+  | [;:](?!-\)|-\()        # colon or semicolon except for smiley faces
   # quotes followed by end of string, space, closing braces, dash, other quotes, or some punctuation.
   | ['"] (?: $ | [\s)\]}\-'".,!?;:/] )
   )""", re.VERBOSE)
@@ -170,18 +170,17 @@ class DictationFormat:
         self.reset()
 
     def reset(self):
-        self.reset_except_forced()
+        self.reset_context()
         self.force_no_space = False
-        self.force_cap = False
-        self.force_no_cap = False
+        self.force_capitalization = None  # Can also be "caps" or "no caps".
 
-    def reset_except_forced(self):
+    def reset_context(self):
         self.before = ""
         self.state = None
 
     def update_context(self, before):
         if before is None: return
-        self.reset_except_forced()
+        self.reset_context()
         self.pass_through(before)
 
     def pass_through(self, text):
@@ -194,19 +193,19 @@ class DictationFormat:
         self.force_no_space = False
         if auto_cap:
             text, self.state = auto_capitalize(text, self.state)
-        if self.force_cap:
+        if self.force_capitalization == "caps":
             text = format_first_letter(text, lambda s: s.capitalize())
-            self.force_cap = False
-        if self.force_no_cap:
+            self.force_capitalization = None
+        if self.force_capitalization == "no caps":
             text = format_first_letter(text, lambda s: s.lower())
-            self.force_no_cap = False
+            self.force_capitalization = None
         self.before = text or self.before
         return text
 
 def format_first_letter(text, formatter):
     i = -1
     for i, c in enumerate(text):
-        if c.isalnum():
+        if c.isalpha():
             break
     if i >= 0 and i < len(text):
         text = text[:i] + formatter(text[i]) + text[i+1:]
@@ -216,6 +215,13 @@ dictation_formatter = DictationFormat()
 ui.register("app_deactivate", lambda app: dictation_formatter.reset())
 ui.register("win_focus", lambda win: dictation_formatter.reset())
 
+def reformat_last_utterance(formatter):
+    text = actions.user.get_last_phrase()
+    actions.user.clear_last_phrase()
+    text = formatter(text)
+    actions.user.add_phrase_to_history(text)
+    actions.insert(text)
+
 @mod.action_class
 class Actions:
     def dictation_format_reset():
@@ -224,23 +230,34 @@ class Actions:
 
     def dictation_format_cap():
         """Sets the dictation formatter to capitalize"""
-        dictation_formatter.force_cap = True
-        dictation_formatter.force_no_cap = False
+        dictation_formatter.force_capitalization = "caps"
 
     def dictation_format_no_caps():
         """Sets the dictation formatter to not capitalize"""
-        dictation_formatter.force_no_cap = True
-        dictation_formatter.force_cap = False
+        dictation_formatter.force_capitalization = "no caps"
 
     def dictation_format_no_space():
         """Sets the dictation formatter to not prepend a space"""
-        # Typically helpful to reset capitalization as well.
-        dictation_formatter.reset()
+        # This is typically used when manually repositioned the cursor,
+        # so it is helpful to reset capitalization as well.
+        dictation_formatter.reset_context()
         dictation_formatter.force_no_space = True
+
+    def dictation_reformat_cap():
+        """Capitalizes the last utterance"""
+        reformat_last_utterance(lambda s: format_first_letter(s, lambda c: c.capitalize()))
+
+    def dictation_reformat_no_caps():
+        """Lowercases the last utterance"""
+        reformat_last_utterance(lambda s: format_first_letter(s, lambda c: c.lower()))
+
+    def dictation_reformat_no_space():
+        """Removes space before the last utterance"""
+        reformat_last_utterance(lambda s: s[1:] if s.startswith(" ") else s)
 
     def dictation_insert_raw(text: str):
         """Inserts text as-is, without invoking the dictation formatter."""
-        actions.user.dictation_insert(text, False)
+        actions.user.dictation_insert(text, auto_cap=False)
 
     def dictation_insert(text: str, auto_cap: bool=True) -> str:
         """Inserts dictated text, formatted appropriately."""

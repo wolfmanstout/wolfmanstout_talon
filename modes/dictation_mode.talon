@@ -6,6 +6,7 @@ settings(): speech.timeout = 0.5
 # Everything here should call auto_insert to preserve the state to correctly auto-capitalize/auto-space.
 <user.raw_prose>: auto_insert(raw_prose)
 cap: user.dictation_format_cap()
+# Hyphenated variants are for Dragon.
 (no-caps | no caps): user.dictation_format_no_caps()
 (no-space | no space): user.dictation_format_no_space()
 
