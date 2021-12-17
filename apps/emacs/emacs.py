@@ -262,7 +262,7 @@ class Actions:
         else:
             # Jump back to the original position.
             actions.key("ctrl-<")
-        if not tight:
+        if not tight and not tree:
             actions.key("ctrl-a")
         if post_key:
             actions.key(post_key)
