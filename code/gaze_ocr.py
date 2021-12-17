@@ -21,7 +21,7 @@ def on_ready():
     # https://github.com/wolfmanstout/gaze-ocr
     global tracker, ocr_reader, gaze_ocr_controller
     tracker = gaze_ocr.eye_tracking.TalonEyeTracker()
-    ocr_reader = screen_ocr.Reader.create_fast_reader()
+    ocr_reader = screen_ocr.Reader.create_fast_reader(radius=200)
     gaze_ocr_controller = gaze_ocr.Controller(
         ocr_reader,
         tracker,
