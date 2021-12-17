@@ -19,3 +19,8 @@ class EditActions:
             return s.get()
         except clip.NoChange:
             return ""
+    
+    def extend_word_right():
+        # Without this hack, docs may select a single whitespace character 
+        # instead of the next word.
+        actions.key('ctrl-left ctrl-right ctrl-shift-right')
