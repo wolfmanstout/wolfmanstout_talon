@@ -1,17 +1,17 @@
 mode: command
 mode: dictation
 -
-(eye | I) move: user.move_cursor_to_gaze_point()
-(eye | I) (touch | click) [left]:
+(eye | i) move: user.move_cursor_to_gaze_point()
+(eye | i) (touch | click) [left]:
     user.move_cursor_to_gaze_point()
     mouse_click(0)
-(eye | I) (touch | click) right:
+(eye | i) (touch | click) right:
     user.move_cursor_to_gaze_point()
     mouse_click(1)
-(eye | I) (touch | click) middle:
+(eye | i) (touch | click) middle:
     user.move_cursor_to_gaze_point()
     mouse_click(2)
-(eye | I) control (touch | click):
+(eye | i) control (touch | click):
     user.move_cursor_to_gaze_point()
     key(ctrl:down)
     mouse_click(0)
