@@ -100,6 +100,8 @@ go recent [<user.text>]:
     sleep(50ms)
     insert(text or "")
     sleep(250ms)
+change (preev | last): user.vscode("workbench.action.compareEditor.previousChange")
+change next: user.vscode("workbench.action.compareEditor.nextChange")
     
 # Bookmarks. Requires Bookmarks plugin
 go marks: user.vscode("workbench.view.extension.bookmarks")
