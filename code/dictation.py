@@ -330,7 +330,9 @@ class Actions:
         # take two words left. I also tried taking a line up + a word left, but
         # edit.extend_up() = key(shift-up) doesn't work consistently in the
         # Slack webapp (sometimes escapes the text box).
-        actions.edit.extend_word_left()
+        # Disable this by default and enable in applications that need it. 
+        # Causes trouble in Google Docs.
+        # actions.edit.extend_word_left()
         actions.edit.extend_word_left()
         text = actions.edit.selected_text()
         # if we're at the beginning of the document/text box, we may not have
