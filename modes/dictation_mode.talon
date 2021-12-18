@@ -24,7 +24,7 @@ spell that <user.formatters> <user.letters>:
 (numb | num) <user.number_string> (dot | point) <digit_string>: "{number_string}.{digit_string}"
 (numb | num) <user.number_string> colon <user.number_string>: "{number_string_1}:{number_string_2}"
 
-halt [<phrase>]$:
+(halt | now do) [<phrase>]$:
     user.command_mode()
     user.parse_phrase(phrase or "")
 
