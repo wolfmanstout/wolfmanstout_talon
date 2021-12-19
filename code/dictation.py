@@ -304,32 +304,6 @@ class Actions:
             actions.insert(" ")
             actions.edit.left()
 
-    def dictation_reformat_cap():
-        """Capitalizes the last utterance"""
-        text = actions.user.get_last_phrase()
-        actions.user.clear_last_phrase()
-        text = format_first_letter(text, lambda s: s.capitalize())
-        actions.user.add_phrase_to_history(text)
-        actions.insert(text)
-
-    def dictation_reformat_no_caps():
-        """Capitalizes the last utterance"""
-        text = actions.user.get_last_phrase()
-        actions.user.clear_last_phrase()
-        text = format_first_letter(text, lambda s: s.lower())
-        actions.user.add_phrase_to_history(text)
-        actions.insert(text)
-
-    def dictation_reformat_no_space():
-        """Capitalizes the last utterance"""
-        text = actions.user.get_last_phrase()
-        if not text.startswith(" "):
-            return
-        actions.user.clear_last_phrase()
-        text = text[1:]
-        actions.user.add_phrase_to_history(text)
-        actions.insert(text)
-
     def dictation_peek_left(clobber: bool = False) -> Optional[str]:
         """
         Tries to get some text before the cursor, ideally a word or two, for the
