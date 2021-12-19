@@ -197,7 +197,7 @@ class DictationFormat:
 
     def reset_context(self):
         self.before = ""
-        self.state = "sentence start"
+        self.state = None
 
     def update_context(self, before):
         if before is None: return
