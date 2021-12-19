@@ -4,7 +4,7 @@ format selection <user.formatters>:
     user.formatters_reformat_selection(formatters)
 
 cap that: user.dictation_reformat_cap()
-(no-caps | no caps) that: user.dictation_reformat_no_caps()
+(no-caps | no caps) that: user.dictation_reformat_no_cap()
 (no-space | no space) that: user.dictation_reformat_no_space()
 
 # Corrections

@@ -8,7 +8,7 @@ settings(): speech.timeout = 0.5
 <user.raw_prose>: auto_insert(raw_prose)
 cap: user.dictation_format_cap()
 # Hyphenated variants are for Dragon.
-(no-caps | no caps): user.dictation_format_no_caps()
+(no-caps | no caps): user.dictation_format_no_cap()
 (no-space | no space): user.dictation_format_no_space()
 
 # Formatting
