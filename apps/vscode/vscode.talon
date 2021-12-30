@@ -149,8 +149,6 @@ git stage all: user.vscode("git.stageAll")
 git unstage: user.vscode("git.unstage")
 git unstage all: user.vscode("git.unstageAll")
 pull request: user.vscode("pr.create")
-change next: key(alt-f5)
-change last: key(shift-alt-f5)
 
 #Debugging
 break point: user.vscode("editor.debug.action.toggleBreakpoint")
