@@ -24,21 +24,23 @@ go after [next] <user.word>:
     key(ctrl-s)
     insert(word)
     key(enter)
-words <user.text>:
+# Commands exactly matching gaze_ocr are used so that they are preferred.
+# TODO Use actions based on user.text and user.word once supported by gaze_ocr.
+words <phrase>:
     key(ctrl-c c ctrl-r)
-    insert(text)
+    insert(phrase)
     key(enter)
-words <user.word> through <user.word>:
+words <phrase> [through <phrase>]:
     key(ctrl-c c ctrl-t)
-    insert(word_1)
+    insert(phrase_1)
     key(enter)
-    insert(word_2)
+    insert(phrase_2)
     key(enter)
-replace <user.word> with <user.word>:
+replace <user.onscreen_word> with <user.prose>:
     key(ctrl-c c alt-shift-5)
-    insert(word_1)
+    insert(onscreen_word)
     key(enter)
-    insert(word_2)
+    insert(prose)
     key(enter)
 start: key(alt-m)
 line <number_small> [short]:
