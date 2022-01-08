@@ -14,3 +14,8 @@ select that: user.select_last_phrase()
 # Escape, type things that would otherwise be commands
 escape <user.text>:
     auto_insert(user.text)
+
+command <phrase>:
+    user.command_mode()
+    user.parse_phrase(phrase or "")
+    user.dictation_mode()

@@ -29,5 +29,10 @@ spell that <user.formatters> <user.letters>:
     user.command_mode()
     user.parse_phrase(phrase or "")
 
+(halt | now do) [<phrase>] prose:
+    user.command_mode()
+    user.parse_phrase(phrase or "")
+    user.dictation_mode()
+
 # Ignore accidental usage of "prose" in dictation mode.
 ^prose: skip()
