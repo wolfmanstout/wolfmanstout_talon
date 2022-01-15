@@ -3,6 +3,7 @@ mode: dictation
 -
 zoom in: edit.zoom_in()
 zoom out: edit.zoom_out()
+zoom reset: edit.zoom_reset()
 screen up: edit.page_up()
 screen down: edit.page_down()
 copy that: edit.copy()
