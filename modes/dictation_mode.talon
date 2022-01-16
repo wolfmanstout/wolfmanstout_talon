@@ -15,11 +15,6 @@ cap: user.dictation_format_cap()
 formatted <user.format_text>:
     user.dictation_insert_raw(format_text)
 
-# Numbers
-numb <user.number_string>: "{number_string}"
-numb <user.number_string> colon <user.number_string>: "{number_string_1}:{number_string_2}"
-numb <user.number_string> (dot | point) <digit_string>: "{number_string}.{digit_string}"
-
 # Corrections
 spell that <user.letters>: auto_insert(letters)
 spell that <user.formatters> <user.letters>:
