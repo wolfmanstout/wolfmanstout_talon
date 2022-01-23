@@ -51,6 +51,7 @@ work_ctx.lists["self.docked_apps"] = {
     "work browser": "6",
     "chrome": "6",
     "browser": "6",
+    "code": "7",
 }
 
 work_ctx.lists["self.known_window_names"] = {
