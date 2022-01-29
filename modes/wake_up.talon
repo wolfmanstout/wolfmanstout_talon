@@ -12,8 +12,9 @@ mode: all
     user.help_hide()
     user.mouse_sleep()
     speech.disable()
+    mode.disable("noise")
     user.engine_sleep()
-^talon sleep [<phrase>]$:
+(talon sleep | drowse) [<phrase>]$:
     speech.disable()
     mode.disable("noise")
 ^talon wake$:
