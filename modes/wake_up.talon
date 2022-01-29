@@ -14,7 +14,7 @@ mode: all
     speech.disable()
     mode.disable("noise")
     user.engine_sleep()
-(talon sleep | drowse) [<phrase>]$:
+drowse [<phrase>]$:
     speech.disable()
     mode.disable("noise")
 ^talon wake$:
