@@ -58,3 +58,12 @@ def get_list_from_csv(
             mapping[spoken_form] = output
 
     return mapping
+
+def append_to_csv(filename: str, rows: Dict[str, str]):
+    path = SETTINGS_DIR / filename
+    assert filename.endswith(".csv")
+
+    with open(path, "a", encoding="utf-8", newline="") as file:
+        writer = csv.writer(file)
+        for key, value in rows.items():
+            writer.writerow([key] if key == value else [value, key])

@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Sequence
 
 from talon import Context, Module, actions
-from .user_settings import get_list_from_csv
+from .user_settings import append_to_csv, get_list_from_csv
 
 mod = Module()
 ctx = Context()
@@ -180,3 +180,10 @@ class Actions:
             # fall back to dictate.replace_words for error-robustness
             logging.error("phrase replacer failed!")
             return actions.dictate.replace_words(words)
+
+    def add_selection_to_vocabulary():
+        """Permanently adds the currently selected text to the vocabulary."""
+        selection = actions.edit.selected_text().strip()
+        if selection in ctx.lists["user.vocabulary"]:
+            return
+        append_to_csv("additional_words.csv", {selection: selection})
