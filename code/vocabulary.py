@@ -9,7 +9,7 @@ mod = Module()
 ctx = Context()
 
 mod.list("vocabulary", desc="additional vocabulary words")
-mod.list("vocabulary_keys", desc="spoken forms of additional vocabulary words, used internally")
+mod.list("vocabulary_keys", desc="spoken forms of additional vocabulary words, used internally for testing")
 
 
 # Default words that will need to be capitalized (particularly under w2l).
@@ -205,7 +205,6 @@ class Actions:
         else:
             add_written_form = True
             vocabulary[written_form] = written_form
-            ctx.lists["user.vocabulary"] = vocabulary
             ctx.lists["user.vocabulary_keys"] = vocabulary.keys()
 
         if phrase == "":
