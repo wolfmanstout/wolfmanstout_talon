@@ -197,22 +197,22 @@ class Actions:
     def add_selection_to_vocabulary(phrase: Union[Phrase, str]):
         """Permanently adds the currently selected text to the vocabulary."""
         written_form = actions.edit.selected_text().strip()
-        # Don't modify the vocabulary file until the end or else we will invalidate the declarations in this file.
         vocabulary = dict(ctx.lists["user.vocabulary"])
         if written_form in vocabulary:
             logging.info("Written form is already in the vocabulary")
             add_written_form = False
         else:
             add_written_form = True
-            vocabulary[written_form] = written_form
-            ctx.lists["user.vocabulary_keys"] = vocabulary.keys()
 
         if phrase == "":
             if add_written_form:
                 append_to_csv("additional_words.csv", {written_form: written_form})
             return
 
-        # Test out the new vocabulary.
+        # Test out the new vocabulary. Don't modify the file until the end or
+        # else we will invalidate the declarations in this file.
+        vocabulary[written_form] = written_form
+        ctx.lists["user.vocabulary_keys"] = vocabulary.keys()
         actions.mode.save()
         try:
             actions.mode.disable("command")
