@@ -1,3 +1,3 @@
 mode: user.vocabulary_test
 -
-^<user.text>$: user.test_vocabulary_phrase(text)
+^<user.test_phrase>$: user.test_vocabulary_phrase(test_phrase)

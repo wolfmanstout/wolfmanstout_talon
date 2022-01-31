@@ -9,6 +9,7 @@ mod = Module()
 ctx = Context()
 
 mod.list("vocabulary", desc="additional vocabulary words")
+mod.list("vocabulary_keys", desc="spoken forms of additional vocabulary words, used internally")
 
 
 # Default words that will need to be capitalized (particularly under w2l).
@@ -174,6 +175,14 @@ phrase_replacer = PhraseReplacer(phrases_to_replace)
 mod.mode("vocabulary_test", "a mode used internally to test vocabulary words")
 test_result: str = ""
 
+@mod.capture(rule="({user.vocabulary_keys} | <phrase>)")
+def test_phrase(m) -> str:
+    """User defined spoken forms or phrase."""
+    try:
+        return m.vocabulary_keys
+    except AttributeError:
+        return " ".join(actions.dictate.parse_words(m.phrase))
+
 @mod.action_class
 class Actions:
     def replace_phrases(words: Sequence[str]) -> Sequence[str]:
@@ -197,6 +206,7 @@ class Actions:
             add_written_form = True
             vocabulary[written_form] = written_form
             ctx.lists["user.vocabulary"] = vocabulary
+            ctx.lists["user.vocabulary_keys"] = vocabulary.keys()
 
         if phrase == "":
             if add_written_form:
@@ -219,9 +229,10 @@ class Actions:
         if spoken_form == "":
             logging.error("vocabulary test failed")
             return
-        if add_written_form:
-            append_to_csv("additional_words.csv", {written_form: written_form})
-        if spoken_form != written_form:
+        if spoken_form == written_form:
+            if add_written_form:
+                append_to_csv("additional_words.csv", {written_form: written_form})
+        else:
             if spoken_form in vocabulary:
                 logging.info("Spoken form is already in the vocabulary")
             else:
