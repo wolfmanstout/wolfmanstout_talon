@@ -1,7 +1,8 @@
 import logging
-from typing import Dict, Sequence
+from typing import Dict, Sequence, Union
 
 from talon import Context, Module, actions
+from talon.grammar import Phrase
 from .user_settings import append_to_csv, get_list_from_csv
 
 mod = Module()
@@ -170,6 +171,9 @@ assert rep.replace_string('this is a tricky one') == 'stopping early a tricky on
 
 phrase_replacer = PhraseReplacer(phrases_to_replace)
 
+mod.mode("vocabulary_test", "a mode used internally to test vocabulary words")
+test_result: str = ""
+
 @mod.action_class
 class Actions:
     def replace_phrases(words: Sequence[str]) -> Sequence[str]:
@@ -181,9 +185,49 @@ class Actions:
             logging.error("phrase replacer failed!")
             return actions.dictate.replace_words(words)
 
-    def add_selection_to_vocabulary():
+    def add_selection_to_vocabulary(phrase: Union[Phrase, str]):
         """Permanently adds the currently selected text to the vocabulary."""
-        selection = actions.edit.selected_text().strip()
-        if selection in ctx.lists["user.vocabulary"]:
+        written_form = actions.edit.selected_text().strip()
+        # Don't modify the vocabulary file until the end or else we will invalidate the declarations in this file.
+        vocabulary = dict(ctx.lists["user.vocabulary"])
+        if written_form in vocabulary:
+            logging.info("Written form is already in the vocabulary")
+            add_written_form = False
+        else:
+            add_written_form = True
+            vocabulary[written_form] = written_form
+            ctx.lists["user.vocabulary"] = vocabulary
+
+        if phrase == "":
+            if add_written_form:
+                append_to_csv("additional_words.csv", {written_form: written_form})
             return
-        append_to_csv("additional_words.csv", {selection: selection})
+
+        # Test out the new vocabulary.
+        actions.mode.save()
+        try:
+            actions.mode.disable("command")
+            actions.mode.disable("dictation")
+            actions.mode.enable("user.vocabulary_test")
+            actions.user.parse_phrase(phrase)
+        finally:
+            actions.mode.restore()
+            global test_result
+            spoken_form = test_result
+            test_result = ""
+
+        if spoken_form == "":
+            logging.error("vocabulary test failed")
+            return
+        if add_written_form:
+            append_to_csv("additional_words.csv", {written_form: written_form})
+        if spoken_form != written_form:
+            if spoken_form in vocabulary:
+                logging.info("Spoken form is already in the vocabulary")
+            else:
+                append_to_csv("additional_words.csv", {spoken_form: written_form})
+
+    def test_vocabulary_phrase(result: str):
+        """Tests the recognition of the phrase."""
+        global test_result
+        test_result = result

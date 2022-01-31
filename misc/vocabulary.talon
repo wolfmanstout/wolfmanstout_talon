@@ -1,4 +1,4 @@
 mode: command
 mode: dictation
 -
-this add vocab: user.add_selection_to_vocabulary()
+this add vocab [as <phrase>]: user.add_selection_to_vocabulary(phrase or "")
