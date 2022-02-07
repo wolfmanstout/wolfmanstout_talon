@@ -47,6 +47,7 @@ work_ctx.lists["self.docked_apps"] = {
     "home browser": "3",
     "home terminal": "4",
     "home emacs": "5",
+    "emacs": "5",
     "work chrome": "6",
     "work browser": "6",
     "chrome": "6",
@@ -59,7 +60,6 @@ work_ctx.lists["self.known_window_names"] = {
     "dos": "system32\\cmd.exe",
     "terminal": " - Terminal::Xpra-Launcher.exe",
     "work terminal": " - Terminal::Xpra-Launcher.exe",
-    "emacs": " - Emacs editor::Xpra-Launcher.exe",
     "work emacs": " - Emacs editor::Xpra-Launcher.exe",
     "studio": " - Android Studio::Xpra-Launcher.exe",
 }
