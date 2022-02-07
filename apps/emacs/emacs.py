@@ -65,9 +65,9 @@ class EditActions:
     def selected_text() -> str:
         # Reimplemented to add sleep.
         with clip.capture() as s:
-            actions.sleep("200ms")
+            actions.sleep("100ms")
             actions.edit.copy()
-            actions.sleep("200ms")
+            actions.sleep("100ms")
         try:
             return s.get()
         except clip.NoChange:
