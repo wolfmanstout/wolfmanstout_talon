@@ -2,6 +2,7 @@
 from typing import Optional, Union
 from talon import Context, Module, actions, speech_system
 from talon.grammar import Phrase
+from talon.lib import flac
 
 mod = Module()
 
@@ -22,7 +23,7 @@ speech_system.register("post:phrase", on_post_phrase)
 
 @mod.action_class
 class Actions:
-    def parse_phrase(phrase: Union[Phrase, str]):
+    def parse_phrase(phrase: Union[Phrase, str], recording_path: str=""):
         """Rerun phrase"""
         if phrase == "":
             return
@@ -34,7 +35,8 @@ class Actions:
         pstart = int(start * 16_000)
         pend = int(end * 16_000)
         samples = samples[pstart:pend]
-
+        if recording_path:
+            flac.write_file(recording_path, samples)
         speech_system._on_audio_frame(samples)
 
 # Dragon doesn't support timestamps, so we fall back to mimic()
@@ -45,7 +47,7 @@ speech.engine: dragon
 
 @ctx.action_class("self")
 class DragonActions:
-    def parse_phrase(phrase: Union[Phrase, str]):
+    def parse_phrase(phrase: Union[Phrase, str], recording_path: str=""):
         if phrase == "":
             return
         command = " ".join(actions.dictate.replace_words(actions.dictate.parse_words(phrase)))

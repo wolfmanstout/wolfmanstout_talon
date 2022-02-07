@@ -63,8 +63,14 @@ def append_to_csv(filename: str, rows: Dict[str, str]):
     path = SETTINGS_DIR / filename
     assert filename.endswith(".csv")
 
-    # TODO Check if file already has trailing newline
+    with resource.open(str(path), "r") as file:
+        line = None
+        for line in file:
+            pass
+        needs_newline = line is not None and not line.endswith("\n")
     with open(path, "a", encoding="utf-8", newline="") as file:
+        if needs_newline:
+            file.write("\n")
         writer = csv.writer(file)
         for key, value in rows.items():
             writer.writerow([key] if key == value else [value, key])

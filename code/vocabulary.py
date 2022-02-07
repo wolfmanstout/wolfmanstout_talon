@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Dict, Sequence, Union
 
 from talon import Context, Module, actions
@@ -10,7 +11,12 @@ ctx = Context()
 
 mod.list("vocabulary", desc="additional vocabulary words")
 mod.list("vocabulary_keys", desc="spoken forms of additional vocabulary words, used internally for testing")
-
+vocabulary_recording_dir = mod.setting(
+    "vocabulary_recording_dir",
+    type=str,
+    default=None,
+    desc="If specified, log vocabulary recordings to this directory.",
+)
 
 # Default words that will need to be capitalized (particularly under w2l).
 # NB. These defaults and those later in this file are ONLY used when
@@ -218,7 +224,13 @@ class Actions:
             actions.mode.disable("command")
             actions.mode.disable("dictation")
             actions.mode.enable("user.vocabulary_test")
-            actions.user.parse_phrase(phrase)
+            if vocabulary_recording_dir.get():
+                recording_path = "{}/{}.flac".format(
+                    vocabulary_recording_dir.get(),
+                    re.sub(r"[^A-Za-z]", "_", written_form))
+            else:
+                recording_path = ""
+            actions.user.parse_phrase(phrase, recording_path)
         finally:
             actions.mode.restore()
             global test_result

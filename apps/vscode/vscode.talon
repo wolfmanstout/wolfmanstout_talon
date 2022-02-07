@@ -67,6 +67,8 @@ file move:
 file open folder: user.vscode("revealFileInOS")
 file reveal: user.vscode("workbench.files.action.showActiveFileInExplorer")
 save ugly: user.vscode("workbench.action.files.saveWithoutFormatting")
+buff (open | hunt):
+    user.vscode("workbench.action.showAllEditorsByMostRecentlyUsed")
 
 # Language Features
 suggest show: user.vscode("editor.action.triggerSuggest")
@@ -101,6 +103,7 @@ go recent [<user.text>]:
     sleep(50ms)
     insert(text or "")
     sleep(250ms)
+go change: user.vscode("workbench.action.navigateToLastEditLocation")
 change (preev | last): user.vscode("workbench.action.compareEditor.previousChange")
 change next: user.vscode("workbench.action.compareEditor.nextChange")
     
@@ -132,7 +135,7 @@ git commit [<user.text>]:
     user.insert_formatted(text or "", "CAPITALIZE_FIRST_WORD")
 git commit undo: user.vscode("git.undoCommit")
 git commit ammend: user.vscode("git.commitStagedAmend")
-git diff: user.vscode("git.openChange")
+git diff | diff open: user.vscode("git.openChange")
 git ignore: user.vscode("git.ignore")
 git merge: user.vscode("git.merge")
 git output: user.vscode("git.showOutput")

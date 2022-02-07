@@ -2,5 +2,5 @@
 __pycache__
 *.sw?
 # Locally generated
-/settings/additional_words*
+/settings
 .vscode/settings.json
