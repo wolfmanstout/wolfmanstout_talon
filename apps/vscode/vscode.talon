@@ -67,6 +67,8 @@ file move:
 file open folder: user.vscode("revealFileInOS")
 file reveal: user.vscode("workbench.files.action.showActiveFileInExplorer")
 save ugly: user.vscode("workbench.action.files.saveWithoutFormatting")
+buff (open | hunt):
+    user.vscode("workbench.action.showAllEditorsByMostRecentlyUsed")
 
 # Language Features
 suggest show: user.vscode("editor.action.triggerSuggest")
