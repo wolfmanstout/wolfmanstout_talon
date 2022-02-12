@@ -1,5 +1,6 @@
 # Descended from https://github.com/dwiel/talon_community/blob/master/misc/dictation.py
-from talon import Module, Context, ui, actions, clip, app, grammar
+import time
+from talon import Module, Context, ui, actions, clip, app, grammar, speech_system
 from typing import Optional, Tuple, Literal, Callable
 import re
 
@@ -274,6 +275,21 @@ dictation_formatter = DictationFormat()
 ui.register("app_deactivate", lambda app: dictation_formatter.reset())
 ui.register("win_focus", lambda win: dictation_formatter.reset())
 
+# TODO: Use a stack
+phrase_timestamp = None
+context_check_phrase_timestamp = None
+
+def on_pre_phrase(d):
+    global phrase_timestamp
+    phrase_timestamp = time.time()
+
+def on_post_phrase(d):
+    global phrase_timestamp
+    phrase_timestamp = None
+
+speech_system.register("pre:phrase", on_pre_phrase)
+speech_system.register("post:phrase", on_post_phrase)
+
 def reformat_last_utterance(formatter):
     text = actions.user.get_last_phrase()
     actions.user.clear_last_phrase()
@@ -319,17 +335,20 @@ class Actions:
         """Inserts dictated text, formatted appropriately."""
         add_space_after = False
         if setting_context_sensitive_dictation.get():
-            # Peek left if we might need leading space or auto-capitalization.
-            if (not omit_space_before(text)
-                or text != auto_capitalize(text, "sentence start")[0]):
-                dictation_formatter.update_context(
-                    actions.user.dictation_peek_left(clobber=True))
-            # Peek right if we might need trailing space. NB. We peek right
-            # BEFORE insertion to avoid breaking the undo-chain between the
-            # inserted text and the trailing space.
-            if not omit_space_after(text):
-                char = actions.user.dictation_peek_right()
-                add_space_after = char is not None and needs_space_between(text, char)
+            global context_check_phrase_timestamp, phrase_timestamp
+            if context_check_phrase_timestamp != phrase_timestamp:
+                # Peek left if we might need leading space or auto-capitalization.
+                if (not omit_space_before(text)
+                    or text != auto_capitalize(text, "sentence start")[0]):
+                    dictation_formatter.update_context(
+                        actions.user.dictation_peek_left(clobber=True))
+                # Peek right if we might need trailing space. NB. We peek right
+                # BEFORE insertion to avoid breaking the undo-chain between the
+                # inserted text and the trailing space.
+                if not omit_space_after(text):
+                    char = actions.user.dictation_peek_right()
+                    add_space_after = char is not None and needs_space_between(text, char)
+                context_check_phrase_timestamp = phrase_timestamp
         text = dictation_formatter.format(text, auto_cap)
         # Straighten curly quotes that were introduced to obtain proper
         # spacing. The formatter context still has the original curly quotes
