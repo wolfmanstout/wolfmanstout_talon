@@ -66,19 +66,19 @@ _word_map_defaults = {
 _word_map_defaults.update({word.lower(): word for word in _capitalize_defaults})
 
 
-# phrases_to_replace is a spoken form -> written form map, used by
-# `user.replace_phrases` to rewrite words and phrases Talon recognized.
-# This does not change the priority with which Talon recognizes
-# particular phrases over others.
+# phrases_to_replace is a spoken form -> written form map, used by our
+# implementation of `dictate.replace_words` (at bottom of file) to rewrite words
+# and phrases Talon recognized. This does not change the priority with which
+# Talon recognizes particular phrases over others.
 phrases_to_replace = get_list_from_csv(
     "words_to_replace.csv",
     headers=("Replacement", "Original"),
     default=_word_map_defaults
 )
 
-# "dictate.word_map" is used by `actions.dictate.replace_words`;
-# a built-in Talon action similar to `replace_phrases`, but supporting
-# only single-word replacements. Multi-word phrases are ignored.
+# "dictate.word_map" is used by Talon's built-in default implementation of
+# `dictate.replace_words`, but supports only single-word replacements.
+# Multi-word phrases are ignored.
 ctx.settings["dictate.word_map"] = phrases_to_replace
 
 
@@ -102,10 +102,6 @@ ctx.lists["user.vocabulary"] = get_list_from_csv(
     headers=("Word(s)", "Spoken Form (If Different)"),
     default=_default_vocabulary,
 )
-
-# for quick verification of the reload
-# print(str(ctx.settings["dictate.word_map"]))
-# print(str(ctx.lists["user.vocabulary"]))
 
 class PhraseReplacer:
     """Utility for replacing phrases by other phrases inside text or word lists.
@@ -189,16 +185,15 @@ def test_phrase(m) -> str:
     except AttributeError:
         return " ".join(actions.dictate.parse_words(m.phrase))
 
-@mod.action_class
-class Actions:
-    def replace_phrases(words: Sequence[str]) -> Sequence[str]:
-        """Replace phrases according to words_to_replace.csv"""
+@ctx.action_class('dictate')
+class OverwrittenActions:
+    def replace_words(words: Sequence[str]) -> Sequence[str]:
         try:
             return phrase_replacer.replace(words)
         except:
-            # fall back to dictate.replace_words for error-robustness
+            # fall back to default implementation for error-robustness
             logging.error("phrase replacer failed!")
-            return actions.dictate.replace_words(words)
+            return actions.next(words)
 
     def add_selection_to_vocabulary(phrase: Union[Phrase, str]):
         """Permanently adds the currently selected text to the vocabulary."""
