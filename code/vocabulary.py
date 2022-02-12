@@ -248,6 +248,12 @@ class Actions:
             else:
                 append_to_csv("additional_words.csv", {spoken_form: written_form})
 
+    def add_selection_to_words_to_replace(phrase: Phrase):
+        """Permanently adds the currently selected text to words to replace."""
+        written_form = actions.edit.selected_text().strip()
+        spoken_form = " ".join(actions.dictate.parse_words(phrase))
+        append_to_csv("words_to_replace.csv", {spoken_form: written_form})
+
     def test_vocabulary_phrase(result: str):
         """Tests the recognition of the phrase."""
         global test_result
