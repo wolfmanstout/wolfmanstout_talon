@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 from typing import Dict, Sequence, Union
 
 from talon import Context, Module, actions
@@ -195,6 +196,8 @@ class OverwrittenActions:
             logging.error("phrase replacer failed!")
             return actions.next(words)
 
+@mod.action_class
+class Actions:
     def add_selection_to_vocabulary(phrase: Union[Phrase, str]):
         """Permanently adds the currently selected text to the vocabulary."""
         written_form = actions.edit.selected_text().strip()
@@ -220,9 +223,10 @@ class OverwrittenActions:
             actions.mode.disable("dictation")
             actions.mode.enable("user.vocabulary_test")
             if vocabulary_recording_dir.get():
-                recording_path = "{}/{}.flac".format(
+                recording_path = "{}/{}_{}.flac".format(
                     vocabulary_recording_dir.get(),
-                    re.sub(r"[^A-Za-z]", "_", written_form))
+                    re.sub(r"[^A-Za-z]", "_", written_form),
+                    round(time.time()))
             else:
                 recording_path = ""
             actions.user.parse_phrase(phrase, recording_path)
