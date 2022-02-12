@@ -9,4 +9,7 @@ padded <user.symbol_key>: key(space symbol_key space)
 <user.function_key>: key(function_key)
 <user.special_key>: key(special_key)
 <user.modifiers> <user.unmodified_key>: key("{modifiers}-{unmodified_key}")
+# for key combos consisting only of modifiers, eg. `press super`.
 press <user.modifiers>: key(modifiers)
+# for consistency with dictation mode and explicit arrow keys if you need them.
+press <user.keys>: key(keys)
