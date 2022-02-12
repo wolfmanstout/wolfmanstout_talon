@@ -1,5 +1,8 @@
 title: /Emacs editor/
 -
+settings():
+    user.mouse_wheel_down_amount = 90
+
 # General
 ^emacs close now$: key(ctrl-x ctrl-c)
 exec: key(alt-x)
