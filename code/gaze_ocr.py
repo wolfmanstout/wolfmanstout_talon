@@ -31,47 +31,28 @@ def on_ready():
 
 app.register("ready", on_ready)
 
-@mod.capture(rule="<user.prose> | <user.single_digit_string>")
-def onscreen_text(m) -> str:
-    """Either words or a number."""
-    return str(m)
-
-@mod.capture(rule="<user.word> | {user.punctuation} | <user.single_digit_string>")
-def onscreen_word(m) -> str:
-    """Either a word or a number."""
-    return str(m)
-
 @mod.action_class
 class GazeOcrActions:
-    def move_cursor_to_word(text: str):
+    def move_cursor_to_word(text: Phrase):
         """Moves cursor to onscreen word."""
-        gaze_ocr_controller.read_nearby()
-        if not gaze_ocr_controller.move_cursor_to_word(text):
+        if not gaze_ocr_controller.move_cursor_to_word(str(text), timestamp=text.words[0].start):
             raise RuntimeError("Unable to find: \"{}\"".format(text))
 
-    def move_text_cursor_to_word(text: str, position: str):
+    def move_text_cursor_to_word(text: Phrase, position: str):
         """Moves text cursor near onscreen word."""
-        gaze_ocr_controller.read_nearby()
-        if not gaze_ocr_controller.move_text_cursor_to_word(text, position):
+        if not gaze_ocr_controller.move_text_cursor_to_word(str(text), position, timestamp=text.words[0].start):
             raise RuntimeError("Unable to find: \"{}\"".format(text))
 
-    def move_text_cursor_to_word_ignore_errors(text: str, position: str):
+    def move_text_cursor_to_word_ignore_errors(text: Phrase, position: str):
         """Moves text cursor near onscreen word, ignoring errors (log only)."""
-        gaze_ocr_controller.read_nearby()
-        if not gaze_ocr_controller.move_text_cursor_to_word(text, position):
+        if not gaze_ocr_controller.move_text_cursor_to_word(str(text), position, timestamp=text.words[0].start):
             print("Unable to find: \"{}\"".format(text))
 
-    def select_text(start: str, end: str="", for_deletion: bool=False):
-        """Selects text near onscreen word."""
-        gaze_ocr_controller.read_nearby()
-        if not gaze_ocr_controller.select_text(start, end, for_deletion):
-            raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
-
-    def select_text_with_timestamps(start: Phrase, end: Union[Phrase, str]=None,
-                                    for_deletion: bool=False):
+    def select_text(start: Phrase, end: Union[Phrase, str]=None,
+                    for_deletion: bool=False):
         """Selects text near onscreen word at phrase timestamps."""
         if not gaze_ocr_controller.select_text(
-                start, end, for_deletion,
+                str(start), str(end), for_deletion,
                 start.words[0].start,
                 end.words[0].start if end else start.words[-1].end):
             raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))

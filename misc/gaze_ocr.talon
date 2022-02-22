@@ -71,36 +71,36 @@ scroll down half:
 # [scroll] stop: '"[scroll] stop": Function(lambda: scroller.stop()),'()
 # scroll reset: '"scroll reset": Function(lambda: reset_scroller()),'()
 
-<user.onscreen_word> move: user.move_cursor_to_word(onscreen_word)
-<user.onscreen_word> (touch | click) [left]:
-    user.move_cursor_to_word(onscreen_word)
+<phrase> move: user.move_cursor_to_word(phrase)
+<phrase> (touch | click) [left]:
+    user.move_cursor_to_word(phrase)
     mouse_click(0)
-<user.onscreen_word> (touch | click) right:
-    user.move_cursor_to_word(onscreen_word)
+<phrase> (touch | click) right:
+    user.move_cursor_to_word(phrase)
     mouse_click(1)
-<user.onscreen_word> (touch | click) middle:
-    user.move_cursor_to_word(onscreen_word)
+<phrase> (touch | click) middle:
+    user.move_cursor_to_word(phrase)
     mouse_click(2)
-<user.onscreen_word> control (touch | click):
-    user.move_cursor_to_word(onscreen_word)
+<phrase> control (touch | click):
+    user.move_cursor_to_word(phrase)
     key(ctrl:down)
     mouse_click(0)
     key(ctrl:up)
-go before <user.onscreen_word>: user.move_text_cursor_to_word(onscreen_word, "before")
-go after <user.onscreen_word>: user.move_text_cursor_to_word(onscreen_word, "after")
+go before <phrase>: user.move_text_cursor_to_word(phrase, "before")
+go after <phrase>: user.move_text_cursor_to_word(phrase, "after")
 words <phrase> [through <phrase>] delete:
-    user.select_text_with_timestamps(phrase_1, phrase_2 or "", 1)
+    user.select_text(phrase_1, phrase_2 or "", 1)
     key(backspace)
-words before <user.onscreen_word>:
+words before <phrase>:
     key(shift:down)
-    user.move_text_cursor_to_word_ignore_errors(onscreen_word, "before")
+    user.move_text_cursor_to_word_ignore_errors(phrase, "before")
     key(shift:up)
-words after <user.onscreen_word>:
+words after <phrase>:
     key(shift:down)
-    user.move_text_cursor_to_word_ignore_errors(onscreen_word, "after")
+    user.move_text_cursor_to_word_ignore_errors(phrase, "after")
     key(shift:up)
 words <phrase> [through <phrase>]:
-    user.select_text_with_timestamps(phrase_1, phrase_2 or "")
-replace <user.onscreen_word> with <user.prose>:
-    user.select_text(onscreen_word)
+    user.select_text(phrase_1, phrase_2 or "")
+replace <phrase> with <user.prose>:
+    user.select_text(phrase)
     insert(prose)
