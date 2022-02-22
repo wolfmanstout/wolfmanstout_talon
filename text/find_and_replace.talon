@@ -50,11 +50,11 @@ comment next clip:
 go last <user.text> [over]: 
     user.select_previous_occurrence(text)
     sleep(100ms)
-    edit.right()
+    edit.left()
 go last clip: 
     user.select_previous_occurrence(clip.text())
     sleep(100ms)
-    edit.right()
+    edit.left()
 go next <user.text> [over]: 
     user.select_next_occurrence(text)
     edit.right()
@@ -83,6 +83,3 @@ select last <user.text> [over]: user.select_previous_occurrence(text)
 select next <user.text> [over]: user.select_next_occurrence(text)
 select last clip: user.select_previous_occurrence(clip.text())
 select next clip: user.select_next_occurrence(clip.text())
-
-
-
