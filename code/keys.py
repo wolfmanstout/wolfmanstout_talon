@@ -142,9 +142,12 @@ punctuation_words = {
     ",": ",",  # <== these things
     "comma": ",",
     "coma": ",",
+    "come a": ",",
     "period": ".",
+    "buried": ".",
     "semicolon": ";",
     "colon": ":",
+    "corn": ":",
     "slash": "/",
     "apostrophe ess": "'s",
     "question mark": "?",
@@ -154,8 +157,11 @@ punctuation_words = {
     "at sign": "@",
     "ampersand": "&",
     "open paren": "(",
+    "open brand": "(",
     "close paren": ")",
+    "close brand": ")",
     "hyphen": "-",
+    "high and": "-",
 
     # Currencies
     "dollar sign": "$",
