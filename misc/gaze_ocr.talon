@@ -1,17 +1,18 @@
 mode: command
 mode: dictation
 -
-(eye | i) move: user.move_cursor_to_gaze_point()
-(eye | i) (touch | click) [left]:
+# Caret added so that these do not compete with the OCR commands below.
+^(eye | i) move: user.move_cursor_to_gaze_point()
+^(eye | i) (touch | click) [left]:
     user.move_cursor_to_gaze_point()
     mouse_click(0)
-(eye | i) (touch | click) right:
+^(eye | i) (touch | click) right:
     user.move_cursor_to_gaze_point()
     mouse_click(1)
-(eye | i) (touch | click) middle:
+^(eye | i) (touch | click) middle:
     user.move_cursor_to_gaze_point()
     mouse_click(2)
-(eye | i) control (touch | click):
+^(eye | i) control (touch | click):
     user.move_cursor_to_gaze_point()
     key(ctrl:down)
     mouse_click(0)
@@ -71,36 +72,36 @@ scroll down half:
 # [scroll] stop: '"[scroll] stop": Function(lambda: scroller.stop()),'()
 # scroll reset: '"scroll reset": Function(lambda: reset_scroller()),'()
 
-<phrase> move: user.move_cursor_to_word(phrase)
-<phrase> (touch | click) [left]:
-    user.move_cursor_to_word(phrase)
+^<user.timestamped_prose> move: user.move_cursor_to_word(timestamped_prose)
+^<user.timestamped_prose> (touch | click) [left]:
+    user.move_cursor_to_word(timestamped_prose)
     mouse_click(0)
-<phrase> (touch | click) right:
-    user.move_cursor_to_word(phrase)
+^<user.timestamped_prose> (touch | click) right:
+    user.move_cursor_to_word(timestamped_prose)
     mouse_click(1)
-<phrase> (touch | click) middle:
-    user.move_cursor_to_word(phrase)
+^<user.timestamped_prose> (touch | click) middle:
+    user.move_cursor_to_word(timestamped_prose)
     mouse_click(2)
-<phrase> control (touch | click):
-    user.move_cursor_to_word(phrase)
+^<user.timestamped_prose> control (touch | click):
+    user.move_cursor_to_word(timestamped_prose)
     key(ctrl:down)
     mouse_click(0)
     key(ctrl:up)
-go before <phrase>: user.move_text_cursor_to_word(phrase, "before")
-go after <phrase>: user.move_text_cursor_to_word(phrase, "after")
-words <phrase> [through <phrase>] delete:
-    user.select_text(phrase_1, phrase_2 or "", 1)
+go before <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "before")
+go after <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "after")
+words <user.timestamped_prose> [through <user.timestamped_prose>] delete:
+    user.select_text(timestamped_prose_1, timestamped_prose_2 or "", 1)
     key(backspace)
-words before <phrase>:
+words before <user.timestamped_prose>$:
     key(shift:down)
-    user.move_text_cursor_to_word_ignore_errors(phrase, "before")
+    user.move_text_cursor_to_word_ignore_errors(timestamped_prose, "before")
     key(shift:up)
-words after <phrase>:
+words after <user.timestamped_prose>$:
     key(shift:down)
-    user.move_text_cursor_to_word_ignore_errors(phrase, "after")
+    user.move_text_cursor_to_word_ignore_errors(timestamped_prose, "after")
     key(shift:up)
-words <phrase> [through <phrase>]:
-    user.select_text(phrase_1, phrase_2 or "")
-replace <phrase> with <user.prose>:
-    user.select_text(phrase)
+words <user.timestamped_prose> [through <user.timestamped_prose>]$:
+    user.select_text(timestamped_prose_1, timestamped_prose_2 or "")
+replace <user.timestamped_prose> with <user.prose>$:
+    user.select_text(timestamped_prose)
     insert(prose)

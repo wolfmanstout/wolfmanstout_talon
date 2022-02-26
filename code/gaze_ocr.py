@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Union
 
 from talon import Context, Module, actions, app
@@ -31,30 +32,53 @@ def on_ready():
 
 app.register("ready", on_ready)
 
+@dataclass
+class TimestampedText:
+    text: str
+    start: float
+    end: float
+
+@mod.capture(rule="<phrase> | period | questionmark | exclamationmark | comma | colon | openparen | closeparen | hyphen")
+def timestamped_prose(m) -> TimestampedText:
+    """Dictated text appearing onscreen."""
+    try:
+        phrase = m.phrase
+        return TimestampedText(
+            text=" ".join(actions.dictate.replace_words(actions.dictate.parse_words(phrase))),
+            start=phrase.words[0].start,
+            end=phrase.words[-1].end)
+    except AttributeError:
+        return TimestampedText(
+            text=" ".join(m),
+            start=m[0].start,
+            end=m[-1].end)
+
 @mod.action_class
 class GazeOcrActions:
-    def move_cursor_to_word(text: Phrase):
+    def move_cursor_to_word(text: TimestampedText):
         """Moves cursor to onscreen word."""
-        if not gaze_ocr_controller.move_cursor_to_word(str(text), timestamp=text.words[0].start):
+        if not gaze_ocr_controller.move_cursor_to_word(text.text, timestamp=text.start):
             raise RuntimeError("Unable to find: \"{}\"".format(text))
 
-    def move_text_cursor_to_word(text: Phrase, position: str):
+    def move_text_cursor_to_word(text: TimestampedText, position: str):
         """Moves text cursor near onscreen word."""
-        if not gaze_ocr_controller.move_text_cursor_to_word(str(text), position, timestamp=text.words[0].start):
+        if not gaze_ocr_controller.move_text_cursor_to_word(text.text, position, timestamp=text.start):
             raise RuntimeError("Unable to find: \"{}\"".format(text))
 
-    def move_text_cursor_to_word_ignore_errors(text: Phrase, position: str):
+    def move_text_cursor_to_word_ignore_errors(text: TimestampedText, position: str):
         """Moves text cursor near onscreen word, ignoring errors (log only)."""
-        if not gaze_ocr_controller.move_text_cursor_to_word(str(text), position, timestamp=text.words[0].start):
+        if not gaze_ocr_controller.move_text_cursor_to_word(text.text, position, timestamp=text.start):
             print("Unable to find: \"{}\"".format(text))
 
-    def select_text(start: Phrase, end: Union[Phrase, str]=None,
+    def select_text(start: TimestampedText, end: Union[TimestampedText, str]="",
                     for_deletion: bool=False):
         """Selects text near onscreen word at phrase timestamps."""
+        start_text = start.text
+        end_text = end.text if end else None
         if not gaze_ocr_controller.select_text(
-                str(start), str(end), for_deletion,
-                start.words[0].start,
-                end.words[0].start if end else start.words[-1].end):
+                start_text, end_text, for_deletion,
+                start.start,
+                end.start if end else start.end):
             raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
 
     def move_cursor_to_gaze_point(offset_right: int=0, offset_down: int=0):
