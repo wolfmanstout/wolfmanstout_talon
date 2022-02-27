@@ -149,7 +149,6 @@ punctuation_words = {
     "colon": ":",
     "corn": ":",
     "slash": "/",
-    "apostrophe ess": "'s",
     "question mark": "?",
     "exclamation mark": "!",
     "number sign": "#",
