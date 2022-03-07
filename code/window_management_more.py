@@ -42,17 +42,15 @@ hostname: /jwstout/
 
 work_ctx.lists["self.docked_apps"] = {
     "explorer": "1",
-    "dragon": "2",
-    "home chrome": "3",
-    "home browser": "3",
-    "home terminal": "4",
-    "home emacs": "5",
-    "emacs": "5",
-    "work chrome": "6",
-    "work browser": "6",
-    "chrome": "6",
-    "browser": "6",
-    "code": "7",
+    "home chrome": "2",
+    "home browser": "2",
+    "home emacs": "3",
+    "emacs": "3",
+    "work chrome": "4",
+    "work browser": "4",
+    "chrome": "4",
+    "browser": "4",
+    "code": "5",
 }
 
 work_ctx.lists["self.known_window_names"] = {
