@@ -3,7 +3,6 @@ tag: browser
 link: key(ctrl-,)
 link tab | tab [new] link: key(ctrl-.)
 (link | links) background [tab]: key(alt-f)
-go tab preev: key(ctrl-shift-1)
 tab move left: key(ctrl-shift-pageup)
 tab move right: key(ctrl-shift-pagedown)
 tab (dupe | duplicate): key(ctrl-l alt-enter)

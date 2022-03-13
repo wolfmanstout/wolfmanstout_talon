@@ -1,3 +1,6 @@
+mode: command
+mode: dictation
+-
 {user.docked_apps} win [<phrase>]:
     # Select the first window.
     key(win:down)
