@@ -4,6 +4,7 @@ title: /Google.com Mail/
 title: /<mail.google.com>/
 title: /<inbox.google.com>/
 -
+tag(): user.emoji
 open: key(+ o)
 archive: key(+ {)
 done: key(+ [)
