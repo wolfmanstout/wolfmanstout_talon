@@ -31,17 +31,17 @@ down:
 go line end:
     edit.line_end()
 
-go way left | west:
+go (way left | west):
     edit.line_start()
     edit.line_start()
 
-go way right | east:
+go (way right | east):
     edit.line_end()
 
-go way down | south:
+go (way down | south):
     edit.file_end()
 
-go way up | north:
+go (way up | north):
     edit.file_start()
 
 go page down:
@@ -213,4 +213,3 @@ cut word right:
 cut line:
     edit.select_line()
     edit.cut()
-
