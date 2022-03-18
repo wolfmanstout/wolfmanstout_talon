@@ -1,18 +1,17 @@
 mode: command
 mode: dictation
 -
-# Caret added so that these do not compete with the OCR commands below.
-^(eye | i) move: user.move_cursor_to_gaze_point()
-^(eye | i) (touch | click) [left]:
+(eye | i) [cursor] move: user.move_cursor_to_gaze_point()
+(eye | i) [left] (touch | click):
     user.move_cursor_to_gaze_point()
     mouse_click(0)
-^(eye | i) (touch | click) right:
+(eye | i) right (touch | click):
     user.move_cursor_to_gaze_point()
     mouse_click(1)
-^(eye | i) (touch | click) middle:
+(eye | i) middle (touch | click):
     user.move_cursor_to_gaze_point()
     mouse_click(2)
-^(eye | i) control (touch | click):
+(eye | i) control (touch | click):
     user.move_cursor_to_gaze_point()
     key(ctrl:down)
     mouse_click(0)
@@ -72,17 +71,17 @@ scroll down half:
 # [scroll] stop: '"[scroll] stop": Function(lambda: scroller.stop()),'()
 # scroll reset: '"scroll reset": Function(lambda: reset_scroller()),'()
 
-^<user.timestamped_prose> move: user.move_cursor_to_word(timestamped_prose)
-^<user.timestamped_prose> (touch | click) [left]:
+cursor move <user.timestamped_prose>$: user.move_cursor_to_word(timestamped_prose)
+[left] (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     mouse_click(0)
-^<user.timestamped_prose> (touch | click) right:
+right (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     mouse_click(1)
-^<user.timestamped_prose> (touch | click) middle:
+middle (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     mouse_click(2)
-^<user.timestamped_prose> control (touch | click):
+control (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     key(ctrl:down)
     mouse_click(0)
