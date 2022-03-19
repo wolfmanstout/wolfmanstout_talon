@@ -98,6 +98,14 @@ class ImgUI:
 
         return __funcwrapper
 
+class SpeechSystem:
+    """
+    Stub out SpeechSystem so we don't get crashes
+    """
+    
+    def register(*args, **kwargs):
+        pass
+
 class UI:
     """
     Stub out UI so we don't get crashes
@@ -110,6 +118,7 @@ actions = Actions()
 app = None
 clip = None
 imgui = ImgUI()
+speech_system = SpeechSystem()
 ui = UI()
 
 # Indicate to test files that they should load
