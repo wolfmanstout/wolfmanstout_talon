@@ -104,3 +104,6 @@ words <user.timestamped_prose> [through <user.timestamped_prose>]$:
 replace <user.timestamped_prose> with <user.prose>$:
     user.select_text(timestamped_prose)
     insert(prose)
+words <user.timestamped_prose> phones:
+    user.select_text(timestamped_prose)
+    user.homophones_show_selection()
