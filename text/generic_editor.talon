@@ -31,17 +31,17 @@ down:
 go line end:
     edit.line_end()
 
-go (way left | west):
+go way left | [go] west:
     edit.line_start()
     edit.line_start()
 
-go (way right | east):
+go way right | [go] east:
     edit.line_end()
 
-go (way down | south):
+go way down | [go] south:
     edit.file_end()
 
-go (way up | north):
+go way up | [go] north:
     edit.file_start()
 
 go page down:
