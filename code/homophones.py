@@ -1,3 +1,5 @@
+from copy import deepcopy
+from typing import Dict, Sequence
 from talon import Context, Module, app, clip, cron, imgui, actions, ui, fs
 import os
 
@@ -35,10 +37,13 @@ def update_homophones(name, flags):
         for line in f:
             words = line.rstrip().split(",")
             canonical_list.append(words[0])
+            merged_words = set(words)
             for word in words:
-                word = word.lower()
-                old_words = phones.get(word, [])
-                phones[word] = sorted(set(old_words + words))
+                old_words = phones.get(word.lower(), [])
+                merged_words.update(old_words)
+            merged_words = sorted(merged_words)
+            for word in merged_words:
+                phones[word.lower()] = merged_words
 
     global all_homophones
     all_homophones = phones
@@ -206,3 +211,7 @@ class Actions:
         if word in all_homophones:
             return all_homophones[word]
         return None
+
+    def homophones_get_all() -> Dict[str, Sequence[str]]:
+        """Get a copy of the homophones dict"""
+        return deepcopy(all_homophones)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Dict, Iterable, Sequence, Union
 
 from talon import Context, Module, actions, app
 from talon.grammar import Phrase
@@ -7,6 +7,9 @@ from talon.grammar import Phrase
 import gaze_ocr
 import screen_ocr  # dependency of gaze-ocr
 from gaze_ocr import _talon_wrappers as talon_wrappers
+
+from .keys import punctuation_words
+from .numbers import digits_map
 
 mod = Module()
 
@@ -17,12 +20,37 @@ setting_ocr_logging_dir = mod.setting(
     desc="If specified, log OCR'ed images to this directory.",
 )
 
+
+def add_homophones(homophones: Dict[str, Sequence[str]],
+                   to_add: Iterable[Iterable[str]]):
+    for words in to_add:
+        merged_words = set(words)
+        for word in words:
+            old_words = homophones.get(word.lower(), [])
+            merged_words.update(old_words)
+        merged_words = sorted(merged_words)
+        for word in merged_words:
+            homophones[word.lower()] = merged_words
+
+
 def on_ready():
     # Initialize eye tracking and OCR. See installation instructions:
     # https://github.com/wolfmanstout/gaze-ocr
     global tracker, ocr_reader, gaze_ocr_controller
     tracker = gaze_ocr.eye_tracking.TalonEyeTracker()
-    ocr_reader = screen_ocr.Reader.create_fast_reader(radius=200)
+    homophones = actions.user.homophones_get_all()
+    add_homophones(homophones,
+                   [(str(num), spoken) for spoken, num in digits_map.items()])
+    # TODO Fix this hacky approach to handling multi-word homophones.
+    add_homophones(homophones,
+                   [(punctuation, "".join(spoken.split())) 
+                    for spoken, punctuation in punctuation_words.items()])
+    add_homophones(homophones, [
+        # 0k is not actually a homophone but is frequently produced by OCR.
+        ("ok", "okay", "0k"),
+    ])
+    ocr_reader = screen_ocr.Reader.create_fast_reader(
+        radius=200, homophones=homophones)
     gaze_ocr_controller = gaze_ocr.Controller(
         ocr_reader,
         tracker,
