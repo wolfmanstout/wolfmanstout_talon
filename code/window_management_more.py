@@ -33,6 +33,7 @@ home_ctx.lists["self.docked_apps"] = {
 home_ctx.lists["self.known_window_names"] = {
     "rebel": "Talon - REPL",
     "emacs": "- Emacs editor (Ubuntu)",
+    "dos": "system32\\cmd.exe",
 }
 
 work_ctx = Context()
