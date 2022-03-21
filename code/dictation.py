@@ -335,6 +335,14 @@ class Actions:
 
     def dictation_insert(text: str, auto_cap: bool=True) -> str:
         """Inserts dictated text, formatted appropriately."""
+        return actions.user.dictation_insert_with_options(text, auto_cap)
+    
+    def dictation_insert_with_options(text: str,
+                                      auto_cap: bool = True,
+                                      peek_right_after: bool = False) -> str:
+        """Inserts dictated text, formatted appropriately. Provides configurability options."""
+        original_text = text
+        needs_check_after = False
         add_space_after = False
         if setting_context_sensitive_dictation.get():
             global context_check_phrase_timestamp, phrase_timestamp
@@ -348,8 +356,11 @@ class Actions:
                 # BEFORE insertion to avoid breaking the undo-chain between the
                 # inserted text and the trailing space.
                 if not omit_space_after(text):
-                    char = actions.user.dictation_peek_right()
-                    add_space_after = char is not None and needs_space_between(text, char)
+                    if peek_right_after:
+                        needs_check_after = True
+                    else:
+                        char = actions.user.dictation_peek_right()
+                        add_space_after = char is not None and needs_space_between(text, char)
                 context_check_phrase_timestamp = phrase_timestamp
         text = dictation_formatter.format(text, auto_cap)
         # Straighten curly quotes that were introduced to obtain proper
@@ -359,7 +370,11 @@ class Actions:
         actions.user.add_phrase_to_history(text)
         # we insert the text all at once in case we have an implementation of
         # insert that is more efficient for long strings, eg. paste-to-insert
-        actions.insert(text + (" " if add_space_after else ""))
+        actions.insert(text)
+        if needs_check_after:
+            char = actions.user.dictation_peek_right()
+            add_space_after = char is not None and needs_space_between(original_text, char)
+        actions.insert(" " if add_space_after else "")
         if add_space_after: actions.edit.left()
 
     def dictation_peek_left(clobber: bool = False) -> Optional[str]:

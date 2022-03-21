@@ -15,3 +15,9 @@ class EditActions:
         actions.key('ctrl-]')
     def indent_less():
         actions.key('ctrl-]')
+
+@ctx.action_class("user")
+class Actions:
+    def dictation_insert(text: str, auto_cap: bool=True) -> str:
+        # "Peek right" after insertion to avoid breaking autosuggest.
+        actions.user.dictation_insert_with_options(text, auto_cap, peek_right_after=True)
