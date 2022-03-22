@@ -6,42 +6,6 @@ title: /Emacs editor/
 cancel: key(ctrl-g)
 
 # Movement
-go before [preev] <user.word>:
-    key(ctrl-r)
-    insert(word)
-    key(enter)
-go after preev <user.word>:
-    key(left ctrl-r)
-    insert(word)
-    key(ctrl-s)
-    key(enter)
-go before next <user.word>:
-    key(right ctrl-s)
-    insert(word)
-    key(ctrl-r)
-    key(enter)
-go after [next] <user.word>:
-    key(ctrl-s)
-    insert(word)
-    key(enter)
-# Commands exactly matching gaze_ocr are used so that they are preferred.
-# TODO Use actions based on user.text and user.word once supported by gaze_ocr.
-words <phrase>:
-    key(ctrl-c c ctrl-r)
-    insert(phrase)
-    key(enter)
-words <phrase> [through <phrase>]:
-    key(ctrl-c c ctrl-t)
-    insert(phrase_1)
-    key(enter)
-    insert(phrase_2)
-    key(enter)
-replace <user.onscreen_word> with <user.prose>:
-    key(ctrl-c c alt-shift-5)
-    insert(onscreen_word)
-    key(enter)
-    insert(prose)
-    key(enter)
 start: key(alt-m)
 line <number_small> [short]:
     key(ctrl-u)
