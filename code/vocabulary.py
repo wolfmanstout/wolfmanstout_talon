@@ -185,21 +185,23 @@ class Actions:
     def add_selection_to_vocabulary(phrase: Union[Phrase, str]):
         """Permanently adds the currently selected text to the vocabulary."""
         written_form = actions.edit.selected_text().strip()
+        acronym = re.match(r"[A-Z]+", written_form)
+        default_spoken_form = " ".join(written_form) if acronym else written_form
         vocabulary = dict(ctx.lists["user.vocabulary"])
-        if written_form in vocabulary:
-            logging.info("Written form is already in the vocabulary")
-            add_written_form = False
+        if default_spoken_form in vocabulary:
+            logging.info("Default spoken form is already in the vocabulary")
+            add_default_spoken_form = False
         else:
-            add_written_form = True
+            add_default_spoken_form = True
 
         if phrase == "":
-            if add_written_form:
-                append_to_csv("additional_words.csv", {written_form: written_form})
+            if add_default_spoken_form:
+                append_to_csv("additional_words.csv", {default_spoken_form: written_form})
             return
 
         # Test out the new vocabulary. Don't modify the file until the end or
         # else we will invalidate the declarations in this file.
-        vocabulary[written_form] = written_form
+        vocabulary[default_spoken_form] = written_form
         ctx.lists["user.vocabulary_keys"] = vocabulary.keys()
         actions.mode.save()
         try:
@@ -223,9 +225,9 @@ class Actions:
         if spoken_form == "":
             logging.error("vocabulary test failed")
             return
-        if spoken_form == written_form:
-            if add_written_form:
-                append_to_csv("additional_words.csv", {written_form: written_form})
+        if spoken_form == default_spoken_form:
+            if add_default_spoken_form:
+                append_to_csv("additional_words.csv", {default_spoken_form: written_form})
         else:
             if spoken_form in vocabulary:
                 logging.info("Spoken form is already in the vocabulary")
