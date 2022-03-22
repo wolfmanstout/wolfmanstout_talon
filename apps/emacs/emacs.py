@@ -59,7 +59,8 @@ ctx.lists["user.snippets"] = {
 @ctx.action_class('edit')
 class EditActions:
     def copy():
-        actions.key('alt-w')
+        # Reactivate transient mark mode after copying.
+        actions.key('alt-w ctrl-x ctrl-x ctrl-x ctrl-x')
     def cut():
         actions.key('ctrl-w')
     def selected_text() -> str:
