@@ -12,6 +12,12 @@ setting_context_sensitive_dictation = mod.setting(
     default=False,
     desc="Look at surrounding text to improve auto-capitalization/spacing in dictation mode. By default, this works by selecting that text & copying it to the clipboard, so it may be slow or fail in some applications.",
 )
+setting_peek_right_after_insertion = mod.setting(
+    "peek_right_after_insertion",
+    type=bool,
+    default=False,
+    desc="If true, context sensitive dictation will only peek right after inserting text. Useful in applications for which the default behavior causes problems.",
+)
 
 mod.list("prose_modifiers", desc="Modifiers that can be used within prose")
 mod.list("prose_snippets", desc="Snippets that can be used within prose")
@@ -335,12 +341,6 @@ class Actions:
 
     def dictation_insert(text: str, auto_cap: bool=True) -> str:
         """Inserts dictated text, formatted appropriately."""
-        return actions.user.dictation_insert_with_options(text, auto_cap)
-    
-    def dictation_insert_with_options(text: str,
-                                      auto_cap: bool = True,
-                                      peek_right_after: bool = False) -> str:
-        """Inserts dictated text, formatted appropriately. Provides configurability options."""
         original_text = text
         needs_check_after = False
         add_space_after = False
@@ -356,7 +356,7 @@ class Actions:
                 # BEFORE insertion to avoid breaking the undo-chain between the
                 # inserted text and the trailing space.
                 if not omit_space_after(text):
-                    if peek_right_after:
+                    if setting_peek_right_after_insertion.get():
                         needs_check_after = True
                     else:
                         char = actions.user.dictation_peek_right()

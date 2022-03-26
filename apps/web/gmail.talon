@@ -4,6 +4,9 @@ title: /Google.com Mail/
 title: /<mail.google.com>/
 title: /<inbox.google.com>/
 -
+settings():
+    user.peek_right_after_insertion = 1
+
 tag(): user.emoji
 open: key(+ o)
 archive: key(+ {)
