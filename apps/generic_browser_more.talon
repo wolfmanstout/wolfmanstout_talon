@@ -58,19 +58,19 @@ sheets site:
     key(enter)
 new (docs|doc) site:
     key(ctrl-l)
-    insert("go/newdoc")
+    insert("doc.new")
     key(enter)
 new (slides|slide) site:
     key(ctrl-l)
-    insert("go/newslide")
+    insert("slides.new")
     key(enter)
 new (sheets|sheet) site:
     key(ctrl-l)
-    insert("go/newsheet")
+    insert("sheet.new")
     key(enter)
 new (scripts|script) site:
     key(ctrl-l)
-    insert("go/newscript")
+    insert("script.new")
     key(enter)
 amazon site:
     key(ctrl-l)
