@@ -3,13 +3,23 @@ from talon import Context, Module, actions, clip, ui
 
 ctx = Context()
 mod = Module()
+setting_clipboard_delay = mod.setting(
+    "clipboard_delay",
+    type=str,
+    default="",
+    desc="Delay before and after accessing clipboard contents.",
+)
 
 
 @ctx.action_class("edit")
 class EditActions:
     def selected_text() -> str:
         with clip.capture() as s:
+            if setting_clipboard_delay.get():
+                actions.sleep(setting_clipboard_delay.get())
             actions.edit.copy()
+            if setting_clipboard_delay.get():
+                actions.sleep(setting_clipboard_delay.get())
         try:
             return s.get()
         except clip.NoChange:

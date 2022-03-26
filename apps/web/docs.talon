@@ -1,6 +1,9 @@
 tag: browser
 title: /<docs.google.com>/
 -
+settings():
+    user.clipboard_delay = "10ms"
+
 select column: key(ctrl-space:2)
 select row: key(shift-space:2)
 row up: key(alt-e k)

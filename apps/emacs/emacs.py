@@ -63,16 +63,6 @@ class EditActions:
         actions.key('alt-w ctrl-x ctrl-x ctrl-x ctrl-x')
     def cut():
         actions.key('ctrl-w')
-    def selected_text() -> str:
-        # Reimplemented to add sleep.
-        with clip.capture() as s:
-            actions.sleep("100ms")
-            actions.edit.copy()
-            actions.sleep("100ms")
-        try:
-            return s.get()
-        except clip.NoChange:
-            return ""
     def find(text: str=None):
         actions.key('ctrl-s')
         actions.actions.insert(text)

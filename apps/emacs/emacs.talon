@@ -2,6 +2,7 @@ title: /Emacs editor/
 -
 settings():
     user.mouse_wheel_down_amount = 90
+    user.clipboard_delay = "100ms"
 
 # General
 ^emacs close now$: key(ctrl-x ctrl-c)
