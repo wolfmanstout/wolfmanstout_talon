@@ -185,7 +185,7 @@ class Actions:
     def add_selection_to_vocabulary(phrase: Union[Phrase, str]):
         """Permanently adds the currently selected text to the vocabulary."""
         written_form = actions.edit.selected_text().strip()
-        acronym = re.match(r"[A-Z]+", written_form)
+        acronym = re.fullmatch(r"[A-Z]+", written_form)
         default_spoken_form = " ".join(written_form) if acronym else written_form
         vocabulary = dict(ctx.lists["user.vocabulary"])
         if default_spoken_form in vocabulary:
