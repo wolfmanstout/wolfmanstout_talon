@@ -75,6 +75,10 @@ cursor move <user.timestamped_prose>$: user.move_cursor_to_word(timestamped_pros
 [left] (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     mouse_click(0)
+[left] (touch | click) twice <user.timestamped_prose>$:
+    user.move_cursor_to_word(timestamped_prose)
+    mouse_click(0)
+    mouse_click(0)
 right (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     mouse_click(1)
@@ -88,22 +92,22 @@ control (touch | click) <user.timestamped_prose>$:
     key(ctrl:up)
 go before <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "before")
 go after <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "after")
-words <user.timestamped_prose> [through <user.timestamped_prose>] delete:
+delete (word | words) <user.timestamped_prose> [through <user.timestamped_prose>]$:
     user.select_text(timestamped_prose_1, timestamped_prose_2 or "", 1)
     key(backspace)
-words before <user.timestamped_prose>$:
+select before <user.timestamped_prose>$:
     key(shift:down)
     user.move_text_cursor_to_word_ignore_errors(timestamped_prose, "before")
     key(shift:up)
-words after <user.timestamped_prose>$:
+select after <user.timestamped_prose>$:
     key(shift:down)
     user.move_text_cursor_to_word_ignore_errors(timestamped_prose, "after")
     key(shift:up)
-words <user.timestamped_prose> [through <user.timestamped_prose>]$:
+select <user.timestamped_prose> [through <user.timestamped_prose>]$:
     user.select_text(timestamped_prose_1, timestamped_prose_2 or "")
 replace <user.timestamped_prose> with <user.prose>$:
     user.select_text(timestamped_prose)
     insert(prose)
-words <user.timestamped_prose> phones:
+phones word <user.timestamped_prose>$:
     user.select_text(timestamped_prose)
     user.homophones_show_selection()
