@@ -19,6 +19,12 @@ setting_ocr_logging_dir = mod.setting(
     default=None,
     desc="If specified, log OCR'ed images to this directory.",
 )
+setting_ocr_click_offset_right = mod.setting(
+    "ocr_click_offset_right",
+    type=int,
+    default=1,  # Windows biases towards the left of whatever is clicked.
+    desc="Adjust the X-coordinate when clicking around OCR text.",
+)
 
 
 def add_homophones(homophones: Dict[str, Sequence[str]],
@@ -85,17 +91,23 @@ def timestamped_prose(m) -> TimestampedText:
 class GazeOcrActions:
     def move_cursor_to_word(text: TimestampedText):
         """Moves cursor to onscreen word."""
-        if not gaze_ocr_controller.move_cursor_to_word(text.text, timestamp=text.start):
+        if not gaze_ocr_controller.move_cursor_to_words(
+            text.text, timestamp=text.start, 
+            click_offset_right=setting_ocr_click_offset_right.get()):
             raise RuntimeError("Unable to find: \"{}\"".format(text))
 
     def move_text_cursor_to_word(text: TimestampedText, position: str):
         """Moves text cursor near onscreen word."""
-        if not gaze_ocr_controller.move_text_cursor_to_word(text.text, position, timestamp=text.start):
+        if not gaze_ocr_controller.move_text_cursor_to_words(
+            text.text, position, timestamp=text.start, 
+            click_offset_right=setting_ocr_click_offset_right.get()):
             raise RuntimeError("Unable to find: \"{}\"".format(text))
 
     def move_text_cursor_to_word_ignore_errors(text: TimestampedText, position: str):
         """Moves text cursor near onscreen word, ignoring errors (log only)."""
-        if not gaze_ocr_controller.move_text_cursor_to_word(text.text, position, timestamp=text.start):
+        if not gaze_ocr_controller.move_text_cursor_to_words(
+                text.text, position, timestamp=text.start, 
+                click_offset_right=setting_ocr_click_offset_right.get()):
             print("Unable to find: \"{}\"".format(text))
 
     def select_text(start: TimestampedText, end: Union[TimestampedText, str]="",
@@ -106,7 +118,8 @@ class GazeOcrActions:
         if not gaze_ocr_controller.select_text(
                 start_text, end_text, for_deletion,
                 start.start,
-                end.start if end else start.end):
+                end.start if end else start.end,
+                click_offset_right=setting_ocr_click_offset_right.get()):
             raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
 
     def move_cursor_to_gaze_point(offset_right: int=0, offset_down: int=0):
