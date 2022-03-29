@@ -5,6 +5,10 @@ mode: dictation
 (eye | i) [left] (touch | click):
     user.move_cursor_to_gaze_point()
     mouse_click(0)
+(eye | i) [left] double (touch | click):
+    user.move_cursor_to_gaze_point()
+    mouse_click(0)
+    mouse_click(0)
 (eye | i) right (touch | click):
     user.move_cursor_to_gaze_point()
     mouse_click(1)
@@ -75,7 +79,7 @@ cursor move <user.timestamped_prose>$: user.move_cursor_to_word(timestamped_pros
 [left] (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     mouse_click(0)
-[left] (touch | click) twice <user.timestamped_prose>$:
+[left] double (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     mouse_click(0)
     mouse_click(0)
