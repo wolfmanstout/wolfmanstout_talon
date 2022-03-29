@@ -112,6 +112,6 @@ select <user.timestamped_prose> [through <user.timestamped_prose>]$:
 replace <user.timestamped_prose> [through <user.timestamped_prose>] with <user.prose>$:
     user.select_text(timestamped_prose_1, timestamped_prose_2 or "")
     insert(prose)
-phones word <user.timestamped_prose>$:
-    user.select_text(timestamped_prose)
+phones word <user.timestamped_homophone>$:
+    user.select_text(timestamped_homophone)
     user.homophones_show_selection()

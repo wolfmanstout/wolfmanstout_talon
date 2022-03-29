@@ -47,10 +47,10 @@ def on_ready():
     homophones = actions.user.homophones_get_all()
     add_homophones(homophones,
                    [(str(num), spoken) for spoken, num in digits_map.items()])
-    # TODO Fix this hacky approach to handling multi-word homophones.
     add_homophones(homophones,
-                   [(punctuation, "".join(spoken.split())) 
-                    for spoken, punctuation in punctuation_words.items()])
+                   [(punctuation, spoken) 
+                    for spoken, punctuation in punctuation_words.items()
+                    if " " not in spoken])
     add_homophones(homophones, [
         # 0k is not actually a homophone but is frequently produced by OCR.
         ("ok", "okay", "0k"),
@@ -72,20 +72,31 @@ class TimestampedText:
     start: float
     end: float
 
-@mod.capture(rule="<phrase> | period | questionmark | exclamationmark | comma | colon | openparen | closeparen | hyphen")
+@mod.capture(rule="(<phrase> | {user.vocabulary} | {user.punctuation})+")
 def timestamped_prose(m) -> TimestampedText:
     """Dictated text appearing onscreen."""
-    try:
-        phrase = m.phrase
-        return TimestampedText(
-            text=" ".join(actions.dictate.replace_words(actions.dictate.parse_words(phrase))),
-            start=phrase.words[0].start,
-            end=phrase.words[-1].end)
-    except AttributeError:
-        return TimestampedText(
-            text=" ".join(m),
-            start=m[0].start,
-            end=m[-1].end)
+    words = []
+    start = None
+    end = None
+    for item in m:
+        if isinstance(item, Phrase):
+            words.extend(actions.dictate.replace_words(actions.dictate.parse_words(item)))
+            if not start:
+                start = item.words[0].start
+            end = item.words[-1].end
+        else:
+            words.append(str(item))
+            if not start:
+                start = item.start
+            end = item.end
+    assert start
+    assert end
+    return TimestampedText(text=" ".join(words), start=start, end=end)
+
+@mod.capture(rule="{self.homophones_canonicals}")
+def timestamped_homophone(m) -> TimestampedText:
+    """Timestamped homophone."""
+    return TimestampedText(text=" ".join(m), start=m[0].start, end=m[-1].end)
 
 @mod.action_class
 class GazeOcrActions:
