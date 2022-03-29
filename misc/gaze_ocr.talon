@@ -109,8 +109,8 @@ select after <user.timestamped_prose>$:
     key(shift:up)
 select <user.timestamped_prose> [through <user.timestamped_prose>]$:
     user.select_text(timestamped_prose_1, timestamped_prose_2 or "")
-replace <user.timestamped_prose> with <user.prose>$:
-    user.select_text(timestamped_prose)
+replace <user.timestamped_prose> [through <user.timestamped_prose>] with <user.prose>$:
+    user.select_text(timestamped_prose_1, timestamped_prose_2 or "")
     insert(prose)
 phones word <user.timestamped_prose>$:
     user.select_text(timestamped_prose)
