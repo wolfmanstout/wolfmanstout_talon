@@ -1,3 +1,5 @@
+mode: command
+mode: dictation
 tag: browser
 title: /<docs.google.com>/
 -
