@@ -22,3 +22,8 @@ dupe row: key(shift-space:2 ctrl-c alt-i b ctrl-v up down)
 delete row: key(alt-e d)
 # (click|touch) present: ClickElementAction("//*[@aria-label='Start presentation (Ctrl+F5)']")
 file rename: key(alt-shift-f r)
+please [<user.text>]$:
+    key(alt-/)
+    insert(user.text or "")
+    sleep(100ms)
+    key(enter)
