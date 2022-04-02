@@ -72,7 +72,8 @@ class TimestampedText:
     start: float
     end: float
 
-@mod.capture(rule="(<phrase> | {user.vocabulary} | {user.punctuation})+")
+# "edit" is frequently misrecognized as "at it", and is common in UIs.
+@mod.capture(rule="(<phrase> | {user.vocabulary} | {user.punctuation} | {user.prose_snippets})+ | edit")
 def timestamped_prose(m) -> TimestampedText:
     """Dictated text appearing onscreen."""
     words = []
