@@ -41,6 +41,10 @@ if hasattr(talon, "test_mode"):
         assert result == " with.\nSpace"
         result = format.format("new.\nline")
         assert result == " new.\nLine"
+        result = format.format("bullet\n* test")
+        assert result == " bullet\n* Test"
+        result = format.format("bullet\n* TODO test")
+        assert result == " bullet\n* TODO Test"
 
     def test_force_spacing_and_capitalization():
         format = dictation.DictationFormat()
