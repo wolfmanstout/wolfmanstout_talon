@@ -181,6 +181,7 @@ def needs_space_between(before: str, after: str) -> bool:
 no_cap_after = re.compile(r"""(
     e\.g\.
     | i\.e\.
+    | vs\.
     )$""", re.VERBOSE)
 
 def auto_capitalize(text, state = None):
@@ -203,7 +204,8 @@ def auto_capitalize(text, state = None):
     sentence_end = False
     for c in text:
         # Sentence endings followed by space & double newlines create a charge.
-        if (sentence_end and c in " \n\t") or (newline and c == "\n"):
+        # Star also creates a charge to support Emacs Org-mode.
+        if (sentence_end and c in " \n\t") or (newline and c in "\n*"):
             charge = True
         # Alphanumeric characters and commas/colons absorb charge & try to
         # capitalize (for numbers & punctuation this does nothing, which is what
@@ -214,7 +216,7 @@ def auto_capitalize(text, state = None):
         # Otherwise the charge just passes through.
         output += c
         newline = c == "\n"
-        sentence_end = c in ".!?" and not no_cap_after.search(output)
+        sentence_end = (c in ".!?" or output.endswith("TODO")) and not no_cap_after.search(output)
     return output, ("sentence start" if charge or sentence_end else
                     "after newline" if newline else None)
 
