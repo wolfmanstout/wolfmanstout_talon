@@ -14,4 +14,4 @@ class EditActions:
     def indent_more():
         actions.key('ctrl-]')
     def indent_less():
-        actions.key('ctrl-]')
+        actions.key('ctrl-[')
