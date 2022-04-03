@@ -170,6 +170,14 @@ def test_phrase(m) -> str:
     except AttributeError:
         return " ".join(actions.dictate.parse_words(m.phrase))
 
+def _create_vocabulary_entries(spoken_form, written_form, type):
+    entries = {spoken_form: written_form}
+    if type == "name":
+        entries[f"{spoken_form}'s"] = f"{written_form}'s"
+    elif type == "noun":
+        entries[f"{spoken_form}s"] = f"{written_form}s"
+    return entries
+
 @ctx.action_class('dictate')
 class OverwrittenActions:
     def replace_words(words: Sequence[str]) -> Sequence[str]:
@@ -182,7 +190,7 @@ class OverwrittenActions:
 
 @mod.action_class
 class Actions:
-    def add_selection_to_vocabulary(phrase: Union[Phrase, str]):
+    def add_selection_to_vocabulary(phrase: Union[Phrase, str], type: str=""):
         """Permanently adds the currently selected text to the vocabulary."""
         written_form = actions.edit.selected_text().strip()
         acronym = re.fullmatch(r"[A-Z]+", written_form)
@@ -196,7 +204,8 @@ class Actions:
 
         if phrase == "":
             if add_default_spoken_form:
-                append_to_csv("additional_words.csv", {default_spoken_form: written_form})
+                append_to_csv("additional_words.csv",
+                              _create_vocabulary_entries(default_spoken_form, written_form, type))
             return
 
         # Test out the new vocabulary. Don't modify the file until the end or
@@ -227,12 +236,14 @@ class Actions:
             return
         if spoken_form == default_spoken_form:
             if add_default_spoken_form:
-                append_to_csv("additional_words.csv", {default_spoken_form: written_form})
+                append_to_csv("additional_words.csv",
+                              _create_vocabulary_entries(default_spoken_form, written_form, type))
         else:
             if spoken_form in vocabulary:
                 logging.info("Spoken form is already in the vocabulary")
             else:
-                append_to_csv("additional_words.csv", {spoken_form: written_form})
+                append_to_csv("additional_words.csv",
+                              _create_vocabulary_entries(spoken_form, written_form, type))
 
     def add_selection_to_words_to_replace(phrase: Phrase):
         """Permanently adds the currently selected text to words to replace."""
