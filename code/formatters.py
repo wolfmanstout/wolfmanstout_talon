@@ -115,7 +115,7 @@ formatters_dict = {
     "DOT_SEPARATED": words_with_joiner("."),
     "DOT_SNAKE": (NOSEP, lambda i, word, _: "." + word.lower() if i == 0 else "_" + word.lower()),
     "SLASH_SEPARATED": (NOSEP, every_word(lambda w: "/" + w)),
-    "CAPITALIZE_FIRST_WORD": (SEP, first_vs_rest(lambda w: w.capitalize())),
+    "CAPITALIZE_FIRST_WORD": (SEP, first_vs_rest(lambda w: w[0].capitalize() + w[1:] if w else "")),
     "CAPITALIZE_ALL_WORDS": (
         SEP,
         lambda i, word, _: word.capitalize()
@@ -283,7 +283,6 @@ def unformat_text(text: str) -> str:
 
 ctx.lists["self.formatters"] = formatters_words.keys()
 ctx.lists["self.prose_formatter"] = {
-    "say": "NOOP",
     "speak": "NOOP",
     "sentence": "CAPITALIZE_FIRST_WORD",
 }

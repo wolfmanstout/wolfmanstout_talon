@@ -4,6 +4,11 @@ phrase <user.text> over: user.insert_formatted(text, "NOOP")
 phrase <user.text> {user.post_dictation_keys}:
     user.insert_formatted(text, "NOOP")
     key(post_dictation_keys)
+say <user.raw_prose>$: user.dictation_insert(raw_prose)
+say <user.raw_prose> over: user.dictation_insert(raw_prose)
+say <user.raw_prose> {user.post_dictation_keys}:
+    user.dictation_insert(raw_prose)
+    key(post_dictation_keys)
 {user.prose_formatter} <user.prose>$: user.insert_formatted(prose, prose_formatter)
 {user.prose_formatter} <user.prose> over: user.insert_formatted(prose, prose_formatter)
 {user.prose_formatter} <user.prose> {user.post_dictation_keys}:
