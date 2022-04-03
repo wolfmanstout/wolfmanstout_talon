@@ -1,9 +1,11 @@
+mode: command
+mode: dictation
+-
 control mouse: user.mouse_toggle_control_mouse()
 zoom mouse: user.mouse_toggle_zoom_mouse()
 camera overlay: user.mouse_toggle_camera_overlay()
 run calibration: user.mouse_calibrate()
-# Anchor to take precedent over gaze_ocr.
-^here touch [left]:
+here [left] touch:
 	mouse_click(0)
 	# close the mouse grid if open
 	user.grid_close()
@@ -11,12 +13,12 @@ run calibration: user.mouse_calibrate()
 	# Touch automatically ends left drags so this is for right drags specifically
 	user.mouse_drag_end()
 
-righty | here touch right:
+here right touch:
 	mouse_click(1)
 	# close the mouse grid if open
 	user.grid_close()
 
-midclick | here touch middle:
+here middle touch:
 	mouse_click(2)
 	# close the mouse grid
 	user.grid_close()
@@ -28,38 +30,38 @@ midclick | here touch middle:
 #option = alt
 #shift
 #super = windows key
-<user.modifiers> touch:
+here <user.modifiers> touch:
 	key("{modifiers}:down")
 	mouse_click(0)
 	key("{modifiers}:up")
 	# close the mouse grid
 	user.grid_close()
-<user.modifiers> righty:
+here <user.modifiers> right touch:
 	key("{modifiers}:down")
 	mouse_click(1)
 	key("{modifiers}:up")
 	# close the mouse grid
 	user.grid_close()
-(dubclick | duke):
+here double touch:
 	mouse_click()
 	mouse_click()
 	# close the mouse grid
 	user.grid_close()
-(tripclick | triplick):
+here triple touch:
 	mouse_click()
 	mouse_click()
 	mouse_click()
 	# close the mouse grid
 	user.grid_close()
-left drag | drag:
+here [left] drag:
 	user.mouse_drag(0)
 	# close the mouse grid
 	user.grid_close()
-right drag | righty drag:
+here right drag:
 	user.mouse_drag(1)
 	# close the mouse grid
 	user.grid_close()
-end drag | drag end:
+end drag:
     user.mouse_drag_end()
 wheel down: user.mouse_scroll_down()
 wheel down here:
