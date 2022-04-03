@@ -12,6 +12,7 @@ from .keys import punctuation_words
 from .numbers import digits_map
 
 mod = Module()
+ctx = Context()
 
 setting_ocr_logging_dir = mod.setting(
     "ocr_logging_dir",
@@ -99,6 +100,20 @@ def timestamped_homophone(m) -> TimestampedText:
     """Timestamped homophone."""
     return TimestampedText(text=" ".join(m), start=m[0].start, end=m[-1].end)
 
+mod.list("ocr_actions", desc="Actions to perform on selected text.")
+mod.list("ocr_modifiers", desc="Modifiers to perform on selected text.")
+ctx.lists["self.ocr_actions"] = {
+    "take": "select",
+    "copy": "copy",
+    "carve": "cut",
+    "paste to": "paste",
+    "clear": "delete",
+    "cap": "capitalize",
+}
+ctx.lists["self.ocr_modifiers"] = {
+    "all": "selectAll",
+}
+
 @mod.action_class
 class GazeOcrActions:
     def move_cursor_to_word(text: TimestampedText):
@@ -137,3 +152,33 @@ class GazeOcrActions:
     def move_cursor_to_gaze_point(offset_right: int=0, offset_down: int=0):
         """Moves mouse cursor to gaze location."""
         tracker.move_to_gaze_point((offset_right, offset_down))
+
+    def perform_ocr_action(ocr_action: str,
+                           ocr_modifier: str,
+                           start: TimestampedText,
+                           end: Union[TimestampedText, str] = ""):
+        """Selects text and performs an action."""
+        for_deletion = ocr_action in ("cut", "delete")
+        actions.user.select_text(start, end, for_deletion)
+        if ocr_modifier == "":
+            pass
+        elif ocr_modifier == "selectAll":
+            actions.edit.select_all()
+        else:
+            raise RuntimeError(f"Modifier not supported: {ocr_modifier}")
+        
+        if ocr_action == "select":
+            pass
+        elif ocr_action == "copy":
+            actions.edit.copy()
+        elif ocr_action == "cut":
+            actions.edit.cut()
+        elif ocr_action == "paste":
+            actions.edit.paste()
+        elif ocr_action == "delete":
+            actions.key("backspace")
+        elif ocr_action == "capitalize":
+            text = actions.edit.selected_text()
+            actions.insert(text[0].capitalize() + text[1:] if text else "")
+        else:
+            raise RuntimeError(f"Action not supported: {ocr_action}")
