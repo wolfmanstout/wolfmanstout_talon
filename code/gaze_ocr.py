@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Iterable, Sequence, Union
+from typing import Dict, Iterable, Optional, Sequence, Union
 
 from talon import Context, Module, actions, app
 from talon.grammar import Phrase
@@ -73,6 +73,18 @@ class TimestampedText:
     start: float
     end: float
 
+@dataclass
+class TextRange:
+    start: Optional[TimestampedText]
+    after_start: bool
+    end: Optional[TimestampedText]
+    before_end: bool
+
+@dataclass
+class TextPosition:
+    text: TimestampedText
+    position: str
+
 # "edit" is frequently misrecognized as "at it", and is common in UIs.
 @mod.capture(rule="(<phrase> | {user.vocabulary} | {user.punctuation} | {user.prose_snippets})+ | edit")
 def timestamped_prose(m) -> TimestampedText:
@@ -99,6 +111,32 @@ def timestamped_prose(m) -> TimestampedText:
 def timestamped_homophone(m) -> TimestampedText:
     """Timestamped homophone."""
     return TimestampedText(text=" ".join(m), start=m[0].start, end=m[-1].end)
+
+@mod.capture(rule="[before | after] <self.timestamped_prose>")
+def prose_position(m) -> TextPosition:
+    """Position relative to prose."""
+    return TextPosition(
+        text=m.timestamped_prose, 
+        position = m[0] if m[0] in ("before", "after") else "",
+    )
+
+@mod.capture(rule="<self.prose_position> [through <self.prose_position>]")
+def prose_range(m) -> TextRange:
+    """A range of onscreen text."""
+    if m.prose_position_1.position and len(m.prose_position_list) == 1:
+        return TextRange(
+            start=None,
+            after_start=False,
+            end=m.prose_position_1.text,
+            before_end=m.prose_position_1.position == "before",
+        )
+    else:
+        return TextRange(
+            start=m.prose_position_1.text,
+            after_start=m.prose_position_1.position == "after",
+            end=m.prose_position_2.text if len(m.prose_position_list) == 2 else None,
+            before_end=(m.prose_position_2.position == "before") if len(m.prose_position_list) == 2 else None,
+        )
 
 mod.list("ocr_actions", desc="Actions to perform on selected text.")
 mod.list("ocr_modifiers", desc="Modifiers to perform on selected text.")
@@ -155,11 +193,18 @@ class GazeOcrActions:
 
     def perform_ocr_action(ocr_action: str,
                            ocr_modifier: str,
-                           start: TimestampedText,
-                           end: Union[TimestampedText, str] = ""):
+                           text_range: TextRange):
         """Selects text and performs an action."""
-        for_deletion = ocr_action in ("cut", "delete")
-        actions.user.select_text(start, end, for_deletion)
+        if text_range.end and not text_range.start:
+            actions.key("shift:down")
+            actions.user.move_text_cursor_to_word_ignore_errors(
+                text_range.end,
+                "before" if text_range.before_end else "after")
+            actions.key("shift:up")
+        else:
+            # TODO Add support for more combinations.
+            for_deletion = ocr_action in ("cut", "delete")
+            actions.user.select_text(text_range.start, text_range.end, for_deletion)
         if ocr_modifier == "":
             pass
         elif ocr_modifier == "selectAll":

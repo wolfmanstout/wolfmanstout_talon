@@ -96,20 +96,20 @@ control (touch | click) <user.timestamped_prose>$:
     key(ctrl:up)
 (go before | pre seen) <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "before")
 (go after | post seen) <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "after")
-(select | take seen) before <user.timestamped_prose>$:
+select before <user.timestamped_prose>$:
     key(shift:down)
     user.move_text_cursor_to_word_ignore_errors(timestamped_prose, "before")
     key(shift:up)
-(select | take seen) after <user.timestamped_prose>$:
+select after <user.timestamped_prose>$:
     key(shift:down)
     user.move_text_cursor_to_word_ignore_errors(timestamped_prose, "after")
     key(shift:up)
 select <user.timestamped_prose> [through <user.timestamped_prose>]$:
     user.select_text(timestamped_prose_1, timestamped_prose_2 or "")
-{user.ocr_actions} [{user.ocr_modifiers}] seen <user.timestamped_prose> [through <user.timestamped_prose>]$:
-    user.perform_ocr_action(ocr_actions, ocr_modifiers or "", timestamped_prose_1, timestamped_prose_2 or "")
-replace [{user.ocr_modifiers}] [seen] <user.timestamped_prose> [through <user.timestamped_prose>] with <user.prose>$:
-    user.perform_ocr_action("select", ocr_modifiers or "", timestamped_prose_1, timestamped_prose_2 or "")
+{user.ocr_actions} [{user.ocr_modifiers}] seen <user.prose_range>$:
+    user.perform_ocr_action(ocr_actions, ocr_modifiers or "", prose_range)
+replace [{user.ocr_modifiers}] [seen] <user.prose_range> with <user.prose>$:
+    user.perform_ocr_action("select", ocr_modifiers or "", prose_range)
     insert(prose)
 phones seen <user.timestamped_homophone>$:
     user.select_text(timestamped_homophone)
