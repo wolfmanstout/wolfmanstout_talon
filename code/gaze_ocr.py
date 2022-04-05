@@ -197,10 +197,12 @@ class GazeOcrActions:
         """Selects text and performs an action."""
         if text_range.end and not text_range.start:
             actions.key("shift:down")
-            actions.user.move_text_cursor_to_word_ignore_errors(
-                text_range.end,
-                "before" if text_range.before_end else "after")
-            actions.key("shift:up")
+            try:
+                actions.user.move_text_cursor_to_word(
+                    text_range.end,
+                    "before" if text_range.before_end else "after")
+            finally:
+                actions.key("shift:up")
         else:
             # TODO Add support for more combinations.
             for_deletion = ocr_action in ("cut", "delete")
