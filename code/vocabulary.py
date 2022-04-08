@@ -173,7 +173,7 @@ def test_phrase(m) -> str:
 def _create_vocabulary_entries(spoken_form, written_form, type):
     entries = {spoken_form: written_form}
     if type == "name":
-        entries[f"{spoken_form}'s"] = f"{written_form}'s"
+        entries[f"{spoken_form}s"] = f"{written_form}'s"
     elif type == "noun":
         entries[f"{spoken_form}s"] = f"{written_form}s"
     return entries
