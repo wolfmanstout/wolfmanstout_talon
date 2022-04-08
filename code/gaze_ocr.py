@@ -146,7 +146,9 @@ ctx.lists["self.ocr_actions"] = {
     "carve": "cut",
     "paste to": "paste",
     "clear": "delete",
+    "chuck": "delete",
     "cap": "capitalize",
+    "lower": "lowercase",
 }
 ctx.lists["self.ocr_modifiers"] = {
     "all": "selectAll",
@@ -227,5 +229,8 @@ class GazeOcrActions:
         elif ocr_action == "capitalize":
             text = actions.edit.selected_text()
             actions.insert(text[0].capitalize() + text[1:] if text else "")
+        elif ocr_action == "lowercase":
+            text = actions.edit.selected_text()
+            actions.insert(text.lower())
         else:
             raise RuntimeError(f"Action not supported: {ocr_action}")

@@ -75,7 +75,7 @@ scroll down half:
 # [scroll] stop: '"[scroll] stop": Function(lambda: scroller.stop()),'()
 # scroll reset: '"scroll reset": Function(lambda: reset_scroller()),'()
 
-(hover seen | cursor move) <user.timestamped_prose>$: user.move_cursor_to_word(timestamped_prose)
+(hover (seen | scene) | cursor move) <user.timestamped_prose>$: user.move_cursor_to_word(timestamped_prose)
 [left] (touch | click) <user.timestamped_prose>$:
     user.move_cursor_to_word(timestamped_prose)
     mouse_click(0)
@@ -94,23 +94,15 @@ control (touch | click) <user.timestamped_prose>$:
     key(ctrl:down)
     mouse_click(0)
     key(ctrl:up)
-(go before | pre seen) <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "before")
-(go after | post seen) <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "after")
-select before <user.timestamped_prose>$:
-    key(shift:down)
-    user.move_text_cursor_to_word_ignore_errors(timestamped_prose, "before")
-    key(shift:up)
-select after <user.timestamped_prose>$:
-    key(shift:down)
-    user.move_text_cursor_to_word_ignore_errors(timestamped_prose, "after")
-    key(shift:up)
-select <user.timestamped_prose> [through <user.timestamped_prose>]$:
-    user.select_text(timestamped_prose_1, timestamped_prose_2 or "")
-{user.ocr_actions} [{user.ocr_modifiers}] seen <user.prose_range>$:
+(go before | pre (seen | scene)) <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "before")
+(go after | post (seen | scene)) <user.timestamped_prose>$: user.move_text_cursor_to_word(timestamped_prose, "after")
+select <user.prose_range>$:
+    user.perform_ocr_action("select", "", prose_range)
+{user.ocr_actions} [{user.ocr_modifiers}] (seen | scene) <user.prose_range>$:
     user.perform_ocr_action(ocr_actions, ocr_modifiers or "", prose_range)
-replace [{user.ocr_modifiers}] [seen] <user.prose_range> with <user.prose>$:
+replace [{user.ocr_modifiers}] [seen | scene] <user.prose_range> with <user.prose>$:
     user.perform_ocr_action("select", ocr_modifiers or "", prose_range)
     insert(prose)
-phones seen <user.timestamped_homophone>$:
+phones (seen | scene) <user.timestamped_homophone>$:
     user.select_text(timestamped_homophone)
     user.homophones_show_selection()
