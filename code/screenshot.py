@@ -8,7 +8,7 @@ mod = Module()
 
 default_folder = ""
 if app.platform == "windows":
-    default_folder = os.path.expanduser(os.path.join("~", r"OneDrive\Pictures"))
+    default_folder = os.path.expanduser(os.path.join("~", r"Pictures"))
 if not os.path.isdir(default_folder):
     default_folder = os.path.join("~", "Pictures")
 
