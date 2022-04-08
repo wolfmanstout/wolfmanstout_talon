@@ -76,6 +76,10 @@ amazon site:
     key(ctrl-l)
     insert("smile.amazon.com")
     key(enter)
+meet site:
+    key(ctrl-l)
+    insert("meet.google.com")
+    key(enter)
 insert text box: key(alt-i t)
 match next: key(ctrl-g)
 match preev: key(ctrl-shift-g)
