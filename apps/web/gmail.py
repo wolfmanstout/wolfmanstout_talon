@@ -7,6 +7,7 @@ title: /Gmail/
 title: /Google.com Mail/
 title: /<mail.google.com>/
 title: /<inbox.google.com>/
+title: /messaged you - Chat/
 """
 
 @ctx.action_class('edit')
