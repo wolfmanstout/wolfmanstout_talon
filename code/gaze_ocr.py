@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Iterable, Optional, Sequence, Union
 
-from talon import Context, Module, actions, app
+from talon import Context, Module, actions, app, settings
 from talon.grammar import Phrase
 
 import gaze_ocr
@@ -178,7 +178,7 @@ class GazeOcrActions:
             print("Unable to find: \"{}\"".format(text))
 
     def select_text(start: TimestampedText, end: Union[TimestampedText, str]="",
-                    for_deletion: bool=False):
+                    for_deletion: bool=False, after_start: bool=False, before_end: bool=False):
         """Selects text near onscreen word at phrase timestamps."""
         start_text = start.text
         end_text = end.text if end else None
@@ -186,7 +186,8 @@ class GazeOcrActions:
                 start_text, end_text, for_deletion,
                 start.start,
                 end.start if end else start.end,
-                click_offset_right=setting_ocr_click_offset_right.get()):
+                click_offset_right=setting_ocr_click_offset_right.get(),
+                after_start=after_start, before_end=before_end):
             raise RuntimeError("Unable to select \"{}\" to \"{}\"".format(start, end))
 
     def move_cursor_to_gaze_point(offset_right: int=0, offset_down: int=0):
@@ -195,7 +196,8 @@ class GazeOcrActions:
 
     def perform_ocr_action(ocr_action: str,
                            ocr_modifier: str,
-                           text_range: TextRange):
+                           text_range: TextRange,
+                           for_deletion: Optional[bool]=None):
         """Selects text and performs an action."""
         if text_range.end and not text_range.start:
             actions.key("shift:down")
@@ -206,9 +208,10 @@ class GazeOcrActions:
             finally:
                 actions.key("shift:up")
         else:
-            # TODO Add support for more combinations.
-            for_deletion = ocr_action in ("cut", "delete")
-            actions.user.select_text(text_range.start, text_range.end, for_deletion)
+            for_deletion = for_deletion if for_deletion is not None else ocr_action in ("cut", "delete")
+            actions.user.select_text(text_range.start, text_range.end, for_deletion, 
+                                     after_start=text_range.after_start, 
+                                     before_end=text_range.before_end)
         if ocr_modifier == "":
             pass
         elif ocr_modifier == "selectAll":
@@ -234,3 +237,12 @@ class GazeOcrActions:
             actions.insert(text.lower())
         else:
             raise RuntimeError(f"Action not supported: {ocr_action}")
+
+    def replace_text(ocr_modifier: str, text_range: TextRange, replacement: str):
+        """Replaces onscreen text."""
+        for_deletion = settings.get("user.context_sensitive_dictation")
+        actions.user.perform_ocr_action("select", ocr_modifier, text_range, for_deletion)
+        if settings.get("user.context_sensitive_dictation"):
+            actions.user.dictation_insert(replacement)
+        else:
+            actions.insert(replacement)
