@@ -1,4 +1,5 @@
-from typing import Set
+from copy import deepcopy
+from typing import Dict, Set
 
 from talon import Module, Context, actions, app
 import sys
@@ -277,3 +278,7 @@ class Actions:
                 getattr(actions.edit, d)()
             else:
                 raise RuntimeError(f'invalid arrow key: {d}')
+    
+    def get_punctuation_words() -> Dict[str, str]:
+        """Get a copy of the punctuation words dict."""
+        return deepcopy(punctuation_words)
