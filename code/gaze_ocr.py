@@ -5,8 +5,8 @@ from talon import Context, Module, actions, app, settings
 from talon.grammar import Phrase
 
 import gaze_ocr
+import gaze_ocr.talon
 import screen_ocr  # dependency of gaze-ocr
-from gaze_ocr import _talon_wrappers as talon_wrappers
 
 from .keys import punctuation_words
 from .numbers import digits_map
@@ -44,7 +44,7 @@ def on_ready():
     # Initialize eye tracking and OCR. See installation instructions:
     # https://github.com/wolfmanstout/gaze-ocr
     global tracker, ocr_reader, gaze_ocr_controller
-    tracker = gaze_ocr.eye_tracking.TalonEyeTracker()
+    tracker = gaze_ocr.talon.TalonEyeTracker()
     homophones = actions.user.homophones_get_all()
     add_homophones(homophones,
                    [(str(num), spoken) for spoken, num in digits_map.items()])
@@ -62,8 +62,8 @@ def on_ready():
         ocr_reader,
         tracker,
         save_data_directory=setting_ocr_logging_dir.get(),
-        mouse=talon_wrappers.Mouse(),
-        keyboard=talon_wrappers.Keyboard())
+        mouse=gaze_ocr.talon.Mouse(),
+        keyboard=gaze_ocr.talon.Keyboard())
 
 app.register("ready", on_ready)
 
