@@ -20,4 +20,3 @@ drowse [<phrase>]$:
 ^talon wake$:
     speech.enable()
     mode.enable("noise")
-

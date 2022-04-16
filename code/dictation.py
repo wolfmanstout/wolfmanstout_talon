@@ -90,7 +90,7 @@ def raw_prose(m) -> str:
     """Mixed words and punctuation, auto-spaced & capitalized, without quote straightening and commands (for use in dictation mode)."""
     return apply_formatting(m)
 
-
+
 # ---------- FORMATTING ---------- #
 def format_phrase(m):
     words = capture_to_words(m)
@@ -224,7 +224,7 @@ def auto_capitalize(text, state = None):
     return output, ("sentence start" if charge or sentence_end else
                     "after newline" if newline else None)
 
-
+
 # ---------- DICTATION AUTO FORMATTING ---------- #
 class DictationFormat:
     def __init__(self):
@@ -376,14 +376,12 @@ class Actions:
         # so that future dictation is properly formatted.
         text = text.replace("“", "\"").replace("”", "\"")
         actions.user.add_phrase_to_history(text)
-        # we insert the text all at once in case we have an implementation of
-        # insert that is more efficient for long strings, eg. paste-to-insert
         actions.insert(text)
         if needs_check_after:
             char = actions.user.dictation_peek_right()
             add_space_after = char is not None and needs_space_between(original_text, char)
-        actions.insert(" " if add_space_after else "")
-        if add_space_after: actions.edit.left()
+        if add_space_after:
+            actions.insert_between("", " ")
 
     def dictation_peek_left(clobber: bool = False) -> Optional[str]:
         """
