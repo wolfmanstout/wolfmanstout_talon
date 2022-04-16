@@ -353,11 +353,13 @@ class Actions:
         if setting_context_sensitive_dictation.get():
             global context_check_phrase_timestamp, phrase_timestamp
             if context_check_phrase_timestamp != phrase_timestamp:
+                # Clobber selection in case we need to peek either left or right.
+                actions.user.clobber_selection_if_exists()
                 # Peek left if we might need leading space or auto-capitalization.
                 if (not omit_space_before(text)
                     or text != auto_capitalize(text, "sentence start")[0]):
                     dictation_formatter.update_context(
-                        actions.user.dictation_peek_left(clobber=True))
+                        actions.user.dictation_peek_left(clobber=False))
                 # Peek right if we might need trailing space. NB. We peek right
                 # BEFORE insertion to avoid breaking the undo-chain between the
                 # inserted text and the trailing space.
