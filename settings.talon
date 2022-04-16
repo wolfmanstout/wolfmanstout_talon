@@ -50,7 +50,7 @@ settings():
     # per-application basis.
     user.context_sensitive_dictation = 1
 
-    speech.timeout = 0.3
+    speech.timeout = 0.35
 
 # Uncomment this to enable the curse yes/curse no commands (show hide mouse cursor). See issue #688.
 # tag(): user.mouse_cursor_commands_enable
