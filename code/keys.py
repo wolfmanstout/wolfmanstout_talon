@@ -163,6 +163,7 @@ punctuation_words = {
     "dollar sign": "$",
 }
 symbol_key_words = {
+    "dot": ".",
     "point": ".",
     "single quote": "'",
     "L square": "[",
