@@ -156,10 +156,6 @@ punctuation_words = {
     "percent sign": "%",
     "at sign": "@",
     "ampersand": "&",
-    "open paren": "(",
-    "open brand": "(",
-    "close paren": ")",
-    "close brand": ")",
     "hyphen": "-",
     "high and": "-",
 
@@ -224,6 +220,15 @@ symbol_key_words = {
 
 # make punctuation words also included in {user.symbol_keys}
 symbol_key_words.update(punctuation_words)
+# Only allow the following words in dictation so that auto-spacing is always applied.
+punctuation_words.update(
+    {
+        "open paren": "(",
+        "open brand": "(",
+        "close paren": ")",
+        "close brand": ")",
+    }
+)
 ctx.lists["self.punctuation"] = punctuation_words
 ctx.lists["self.symbol_key"] = symbol_key_words
 ctx.lists["self.number_key"] = dict(zip(default_digits, numbers))
