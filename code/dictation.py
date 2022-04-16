@@ -381,7 +381,7 @@ class Actions:
             char = actions.user.dictation_peek_right()
             add_space_after = char is not None and needs_space_between(original_text, char)
         if add_space_after:
-            actions.insert_between("", " ")
+            actions.user.insert_between("", " ")
 
     def dictation_peek_left(clobber: bool = False) -> Optional[str]:
         """
