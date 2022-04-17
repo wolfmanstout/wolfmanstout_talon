@@ -33,7 +33,6 @@ buff switch: key(ctrl-x b enter)
 buff close: key(ctrl-x 0)
 buff done: key(ctrl-x #)
 buff kill: key(ctrl-x k enter)
-buff even: key(ctrl-x +)
 buff up:
     key(ctrl-c alt-x)
     insert("windmove-up")

@@ -135,6 +135,9 @@ class UserActions:
     def split_next():
         actions.key("ctrl-x o")
 
+    def split_reset():
+        actions.key("ctrl-x +")
+
     def split_window_down():
         actions.key("ctrl-x 2 ctrl-x b enter ctrl-x o")
 
