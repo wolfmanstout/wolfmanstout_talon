@@ -27,12 +27,15 @@ home_ctx.lists["self.docked_apps"] = {
     "home terminal": "2",
     "firefox": "3",
     "browser": "3",
-    "code": "4",
+    "emacs": "4",
+    "home emacs": "4",
+    "code": "5",
 }
 
 home_ctx.lists["self.known_window_names"] = {
     "rebel": "Talon - REPL",
-    "emacs": "- Emacs editor (Ubuntu)",
+    "weasel emacs": "- Emacs editor (Ubuntu)",
+    "linux emacs": "- Emacs editor (Ubuntu)",
     "dos": "system32\\cmd.exe",
 }
 
