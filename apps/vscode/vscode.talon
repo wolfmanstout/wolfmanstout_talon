@@ -114,7 +114,7 @@ change (preev | last): user.vscode("workbench.action.compareEditor.previousChang
 change next: user.vscode("workbench.action.compareEditor.nextChange")
 # workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup causes the menu
 # to stay up.
-go tab preev: key(ctrl-tab)
+go tab preev | (tab | buff) switch: key(ctrl-tab)
 
 # Bookmarks. Requires Bookmarks plugin
 go marks: user.vscode("workbench.view.extension.bookmarks")

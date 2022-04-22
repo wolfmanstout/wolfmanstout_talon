@@ -2,4 +2,4 @@ mode: command
 mode: dictation
 tag: browser
 -
-go tab preev: key(ctrl-shift-1)
+go tab preev | tab switch: key(ctrl-shift-1)
