@@ -1,7 +1,6 @@
 mode: command
 mode: dictation
-title: /Emacs editor/
-and title: /- Org -/
+app: emacs_org
 -
 new heading above: key(ctrl-a alt-enter)
 new heading: key(ctrl-e alt-enter)

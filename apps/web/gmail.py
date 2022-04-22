@@ -1,13 +1,18 @@
-from talon import Context, actions
+from talon import Context, Module, actions
 
-ctx = Context()
-ctx.matches = r"""
+mod = Module()
+mod.apps.gmail = r"""
 tag: browser
 title: /Gmail/
 title: /Google.com Mail/
 title: /<mail.google.com>/
 title: /<inbox.google.com>/
 title: /messaged you - Chat/
+"""
+
+ctx = Context()
+ctx.matches = r"""
+app: gmail
 """
 
 @ctx.action_class('edit')

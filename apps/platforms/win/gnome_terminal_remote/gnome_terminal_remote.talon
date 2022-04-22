@@ -1,5 +1,4 @@
-title: / - Terminal/
-and not app: windows_terminal
+app: gnome_terminal_remote
 -
 tag(): user.tabs
 tag(): terminal

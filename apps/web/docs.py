@@ -1,10 +1,15 @@
-from talon import Context, actions, clip
+from talon import Context, Module, actions, clip
 from typing import Optional
+
+mod = Module()
+mod.apps.google_docs = r"""
+tag: browser
+title: /<docs.google.com>/
+"""
 
 ctx = Context()
 ctx.matches = r"""
-tag: browser
-title: /<docs.google.com>/
+app: google_docs
 """
 
 @ctx.action_class('edit')

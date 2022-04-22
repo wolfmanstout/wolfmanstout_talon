@@ -1,9 +1,14 @@
 from talon import Context, Module, actions, clip
 from typing import Optional
 
+mod = Module()
+mod.apps.emacs = r"""
+title: /Emacs editor/
+"""
+
 ctx = Context()
 ctx.matches = r"""
-title: /Emacs editor/
+app: emacs
 """
 
 ctx.tags = ['user.find_and_replace', 'user.line_commands', 'user.splits', 'user.snippets']
@@ -210,8 +215,6 @@ class UserActions:
         return after
 
     # dictation.py support end
-
-mod = Module()
 
 @mod.action_class
 class Actions:

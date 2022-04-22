@@ -1,4 +1,4 @@
-title: /Emacs editor/
+app: emacs
 -
 settings():
     user.mouse_wheel_down_amount = 90

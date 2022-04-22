@@ -1,5 +1,5 @@
-title: /Emacs editor/
-and title: /- Shell -/
+app: emacs
+title: /- Shell -/
 -
 tag(): terminal
 shell up: key(alt-p)

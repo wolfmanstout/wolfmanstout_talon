@@ -1,5 +1,4 @@
-tag: browser
-title: /<docs.google.com>/
+app: google_docs
 -
 settings():
     user.clipboard_delay = "10ms"

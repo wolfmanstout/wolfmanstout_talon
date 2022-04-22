@@ -1,6 +1,6 @@
 mode: command
 mode: dictation
-title: /Emacs editor/
+app: emacs
 -
 # General
 cancel: key(ctrl-g)

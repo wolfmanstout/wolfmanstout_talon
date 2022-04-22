@@ -1,7 +1,6 @@
 mode: command
 mode: dictation
-tag: browser
-title: /<docs.google.com>/
+app: google_docs
 -
 select column: key(ctrl-space:2)
 select row: key(shift-space:2)

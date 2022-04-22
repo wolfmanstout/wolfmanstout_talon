@@ -1,9 +1,4 @@
-tag: browser
-title: /Gmail/
-title: /Google.com Mail/
-title: /<mail.google.com>/
-title: /<inbox.google.com>/
-title: /messaged you - Chat/
+app: gmail
 -
 settings():
     user.peek_right_after_insertion = 1

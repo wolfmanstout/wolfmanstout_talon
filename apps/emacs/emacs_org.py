@@ -1,8 +1,14 @@
 from talon import Context, Module, actions
+
+mod = Module()
+mod.apps.emacs_org = r"""
+app: emacs
+title: /- Org -/
+"""
+
 ctx = Context()
 ctx.matches = r"""
-title: /Emacs editor/
-and title: /- Org -/
+app: emacs_org
 """
 
 @ctx.action_class('edit')

@@ -1,4 +1,5 @@
-title: /Emacs editor \(Ubuntu\)/
+app: emacs
+title: /\(Ubuntu\)$/
 -
 settings():
     # Clipboard appears to cause hangs on WSL in Windows 11.

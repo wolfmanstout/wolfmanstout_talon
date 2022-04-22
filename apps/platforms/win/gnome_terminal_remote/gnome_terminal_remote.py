@@ -1,9 +1,14 @@
 from talon import Context, Module, actions
 
-ctx = Context()
-ctx.matches = r"""
+mod = Module()
+mod.apps.gnome_terminal_remote = r"""
 title: / - Terminal/
 and not app: windows_terminal
+"""
+
+ctx = Context()
+ctx.matches = r"""
+app: gnome_terminal_remote
 """
 
 @ctx.action_class('app')
