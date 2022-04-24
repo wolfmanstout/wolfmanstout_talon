@@ -6,19 +6,19 @@ go today: key(g t)
 go upcoming: key(g u)
 go search: key(/)
 go task project: key(G)
-go inside: 
+go inside:
     key(g p)
     insert("inside")
     key(down enter)
-go outside: 
+go outside:
     key(g p)
     insert("outside")
     key(down enter)
-go computer: 
+go computer:
     key(g p)
     insert("computer")
     key(down enter)
-go mom: 
+go mom:
     key(g p)
     insert("mom")
     key(down enter)
