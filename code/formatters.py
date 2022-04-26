@@ -173,10 +173,9 @@ def formatters(m) -> str:
 
 
 @mod.capture(
-    # Note that if the user speaks something like "snake dot", it will
-    # insert "dot" - otherwise, they wouldn't be able to insert punctuation
-    # words directly.
-    rule="<self.formatters> <user.text> (<user.text> | <user.formatter_immune>)*"
+    # HACK: Use a * instead of + to get the desired parse when multiple formatters are chained,
+    # e.g. "score test padded plus".
+    rule="<self.formatters> (<user.text> | <user.formatter_immune>) (<user.text> | <user.formatter_immune>)*"
 )
 def format_text(m) -> str:
     "Formats the text and returns a string"
@@ -184,10 +183,44 @@ def format_text(m) -> str:
     formatters = m[0]
     for chunk in m[1:]:
         if isinstance(chunk, ImmuneString):
-            out += chunk.string
+            # If the only item is an immune string, then format it.
+            if len(m) == 2:
+                out += format_phrase(chunk.string, formatters)
+            else:
+                out += chunk.string
         else:
             out += format_phrase(chunk, formatters)
     return out
+
+
+mod.list("symbol_snippet", desc="A snippet of symbols to insert as-is.")
+ctx.lists["self.symbol_snippet"] = {
+    "double dash": "--",
+    "triple quote": "'''",
+    "back tick thrice": "```",
+    "dot twice": "..",
+    "ellipsis": "...",
+    "dot thrice": "...",
+    "comma and": ", ",
+    "arrow": "->",
+    "fat arrow": "=>",
+    "equals twice": "==",
+    "plus equals": "+=",
+    "minus equals": "-=",
+    "not equals": "!=",
+    "greater equals": ">=",
+    "less equals": "<=",
+    "empty quotes": '""',
+    "empty string": '""',
+    "empty escaped quotes": '\\"\\"',
+    "empty escaped string": '\\"\\"',
+    "empty parens": "()",
+    "empty brackets": "[]",
+    "empty braces": "{}",
+    "empty angles": "<>",
+    "empty single quotes": "''",
+    "empty back ticks": "``",
+}
 
 
 class ImmuneString(object):
@@ -200,7 +233,7 @@ class ImmuneString(object):
 @mod.capture(
     # Add anything else into this that you want to be able to speak during a
     # formatter.
-    rule="(<user.symbol_key> | numb <number>)"
+    rule="(<user.symbol_key> | {self.symbol_snippet} | <user.letter> | numb <number>)"
 )
 def formatter_immune(m) -> ImmuneString:
     """Text that can be interspersed into a formatter, e.g. characters.
@@ -290,5 +323,6 @@ ctx.lists["self.post_dictation_keys"] = {
     "space": " ",
     "spacebar": " ",
     "enter": "enter",
+    "tab": "tab",
     "tab key": "tab",
 }

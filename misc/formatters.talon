@@ -20,6 +20,7 @@ say <user.prose> {user.post_dictation_keys}:
     user.insert_many(format_text_list)
     key(post_dictation_keys)
 <user.formatters> that: user.formatters_reformat_selection(user.formatters)
+{user.symbol_snippet}: "{symbol_snippet}"
 word <user.word>: user.insert_formatted(user.word, "NOOP")
 recent list: user.toggle_phrase_history()
 recent close: user.phrase_history_hide()
