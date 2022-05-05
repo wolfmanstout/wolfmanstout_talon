@@ -1,7 +1,6 @@
 import logging
 import re
-import time
-from typing import Dict, Sequence, Union
+from typing import Dict, Sequence, Tuple, Union
 
 from talon import Context, Module, actions
 from talon.grammar import Phrase
@@ -11,13 +10,7 @@ mod = Module()
 ctx = Context()
 
 mod.list("vocabulary", desc="additional vocabulary words")
-mod.list("vocabulary_keys", desc="spoken forms of additional vocabulary words, used internally for testing")
-vocabulary_recording_dir = mod.setting(
-    "vocabulary_recording_dir",
-    type=str,
-    default=None,
-    desc="If specified, log vocabulary recordings to this directory.",
-)
+
 
 # Default words that will need to be capitalized.
 # DON'T EDIT THIS. Edit settings/words_to_replace.csv instead.
@@ -159,25 +152,6 @@ assert rep.replace_string('this is a tricky one') == 'stopping early a tricky on
 
 phrase_replacer = PhraseReplacer(phrases_to_replace)
 
-mod.mode("vocabulary_test", "a mode used internally to test vocabulary words")
-test_result: str = ""
-
-@mod.capture(rule="({user.vocabulary_keys} | <phrase>)")
-def test_phrase(m) -> str:
-    """User defined spoken forms or phrase."""
-    try:
-        return m.vocabulary_keys
-    except AttributeError:
-        return " ".join(actions.dictate.parse_words(m.phrase))
-
-def _create_vocabulary_entries(spoken_form, written_form, type):
-    entries = {spoken_form: written_form}
-    if type == "name":
-        entries[f"{spoken_form}s"] = f"{written_form}'s"
-    elif type == "noun":
-        entries[f"{spoken_form}s"] = f"{written_form}s"
-    return entries
-
 @ctx.action_class('dictate')
 class OverwrittenActions:
     def replace_words(words: Sequence[str]) -> Sequence[str]:
@@ -188,70 +162,53 @@ class OverwrittenActions:
             logging.error("phrase replacer failed!")
             return actions.next(words)
 
+def _create_vocabulary_entries(spoken_form, written_form, type):
+    """Expands the provided spoken form and written form into multiple variants based on
+    the provided type, which can be either "name" to add a possessive variant or "noun"
+    to add plural.
+    """
+    entries = {spoken_form: written_form}
+    if type == "name":
+        entries[f"{spoken_form}s"] = f"{written_form}'s"
+    elif type == "noun":
+        entries[f"{spoken_form}s"] = f"{written_form}s"
+    return entries
+
+# See https://github.com/wolfmanstout/talon-vocabulary-editor for an experimental version
+# of this which tests if the default spoken form can be used instead of the provided phrase.
+def _add_selection_to_csv(
+    phrase: Union[Phrase, str], type: str, csv: str, headers: Tuple[str, str]
+):
+    written_form = actions.edit.selected_text().strip()
+    if phrase:
+        spoken_form = " ".join(actions.dictate.parse_words(phrase))
+    else:
+        is_acronym = re.fullmatch(r"[A-Z]+", written_form)
+        spoken_form = " ".join(written_form) if is_acronym else written_form
+    phrases = get_list_from_csv(csv, headers=headers, write_default=False)
+    entries = _create_vocabulary_entries(spoken_form, written_form, type)
+    new_entries = {}
+    for spoken_form, written_form in entries.items():
+        if spoken_form in phrases:
+            logging.info(f'Spoken form "{spoken_form}" is already in {csv}')
+        else:
+            new_entries[spoken_form] = written_form
+    append_to_csv(csv, new_entries)
+
 @mod.action_class
 class Actions:
-    def add_selection_to_vocabulary(phrase: Union[Phrase, str], type: str=""):
-        """Permanently adds the currently selected text to the vocabulary."""
-        written_form = actions.edit.selected_text().strip()
-        acronym = re.fullmatch(r"[A-Z]+", written_form)
-        default_spoken_form = " ".join(written_form) if acronym else written_form
-        vocabulary = dict(ctx.lists["user.vocabulary"])
-        if default_spoken_form in vocabulary:
-            logging.info("Default spoken form is already in the vocabulary")
-            add_default_spoken_form = False
-        else:
-            add_default_spoken_form = True
+    def add_selection_to_vocabulary(phrase: Union[Phrase, str] = "", type: str = ""):
+        """Permanently adds the currently selected text to the vocabulary with the provided
+        spoken form and adds variants based on the type ("noun" or "name").
+        """
+        _add_selection_to_csv(
+            phrase, type, "additional_words.csv", ("Word(s)", "Spoken Form (If Different)")
+        )
 
-        if phrase == "":
-            if add_default_spoken_form:
-                append_to_csv("additional_words.csv",
-                              _create_vocabulary_entries(default_spoken_form, written_form, type))
-            return
-
-        # Test out the new vocabulary. Don't modify the file until the end or
-        # else we will invalidate the declarations in this file.
-        vocabulary[default_spoken_form] = written_form
-        ctx.lists["user.vocabulary_keys"] = vocabulary.keys()
-        actions.mode.save()
-        try:
-            actions.mode.disable("command")
-            actions.mode.disable("dictation")
-            actions.mode.enable("user.vocabulary_test")
-            if vocabulary_recording_dir.get():
-                recording_path = "{}/{}_{}.flac".format(
-                    vocabulary_recording_dir.get(),
-                    re.sub(r"[^A-Za-z]", "_", written_form),
-                    round(time.time()))
-            else:
-                recording_path = ""
-            actions.user.parse_phrase(phrase, recording_path)
-        finally:
-            actions.mode.restore()
-            global test_result
-            spoken_form = test_result
-            test_result = ""
-
-        if spoken_form == "":
-            logging.error("vocabulary test failed")
-            return
-        if spoken_form == default_spoken_form:
-            if add_default_spoken_form:
-                append_to_csv("additional_words.csv",
-                              _create_vocabulary_entries(default_spoken_form, written_form, type))
-        else:
-            if spoken_form in vocabulary:
-                logging.info("Spoken form is already in the vocabulary")
-            else:
-                append_to_csv("additional_words.csv",
-                              _create_vocabulary_entries(spoken_form, written_form, type))
-
-    def add_selection_to_words_to_replace(phrase: Phrase, type: str=""):
-        """Permanently adds the currently selected text to words to replace."""
-        written_form = actions.edit.selected_text().strip()
-        spoken_form = " ".join(actions.dictate.parse_words(phrase))
-        append_to_csv("words_to_replace.csv", _create_vocabulary_entries(spoken_form, written_form, type))
-
-    def test_vocabulary_phrase(result: str):
-        """Tests the recognition of the phrase."""
-        global test_result
-        test_result = result
+    def add_selection_to_words_to_replace(phrase: Phrase, type: str = ""):
+        """Permanently adds the currently selected text as replacement for the provided
+        original form and adds variants based on the type ("noun" or "name").
+        """
+        _add_selection_to_csv(
+            phrase, type, "words_to_replace.csv", ("Replacement", "Original")
+        )
