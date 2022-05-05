@@ -158,6 +158,7 @@ punctuation_words = {
     "ampersand": "&",
     "hyphen": "-",
     "high and": "-",
+    "under score": "_",
 
     # Currencies
     "dollar sign": "$",
@@ -182,7 +183,6 @@ symbol_key_words = {
     "tilde": "~",
     "bang": "!",
     "down score": "_",
-    "under score": "_",
     "L paren": "(",
     "leap": "(",
     "R paren": ")",
