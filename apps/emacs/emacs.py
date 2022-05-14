@@ -183,12 +183,7 @@ class UserActions:
 
     # dictation.py support start
 
-    def dictation_peek_left(clobber: bool = False) -> Optional[str]:
-        # Get rid of the selection if it exists.
-        if clobber: actions.user.clobber_selection_if_exists()
-        # Otherwise, if there's a selection, fail.
-        elif "" != actions.edit.selected_text(): return None
-
+    def dictation_peek_left() -> Optional[str]:
         # In principle the previous word should suffice, but some applications
         # have a funny concept of what the previous word is (for example, they
         # may only take the "`" at the end of "`foo`"). To be double sure we

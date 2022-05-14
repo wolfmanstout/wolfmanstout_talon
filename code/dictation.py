@@ -359,7 +359,7 @@ class Actions:
                 if (not omit_space_before(text)
                     or text != auto_capitalize(text, "sentence start")[0]):
                     dictation_formatter.update_context(
-                        actions.user.dictation_peek_left(clobber=False))
+                        actions.user.dictation_peek_left())
                 # Peek right if we might need trailing space. NB. We peek right
                 # BEFORE insertion to avoid breaking the undo-chain between the
                 # inserted text and the trailing space.
@@ -383,22 +383,14 @@ class Actions:
         if add_space_after:
             actions.user.insert_between("", " ")
 
-    def dictation_peek_left(clobber: bool = False) -> Optional[str]:
+    def dictation_peek_left() -> Optional[str]:
         """
         Tries to get some text before the cursor, ideally a word or two, for the
         purpose of auto-spacing & -capitalization. Results are not guaranteed;
         dictation_peek_left() may return None to indicate no information. (Note
         that returning the empty string "" indicates there is nothing before
         cursor, ie. we are at the beginning of the document.)
-
-        If there is currently a selection, dictation_peek_left() must leave it
-        unchanged unless `clobber` is true, in which case it may clobber it.
         """
-        # Get rid of the selection if it exists.
-        if clobber: actions.user.clobber_selection_if_exists()
-        # Otherwise, if there's a selection, fail.
-        elif "" != actions.edit.selected_text(): return None
-
         # In principle the previous word should suffice, but some applications
         # have a funny concept of what the previous word is (for example, they
         # may only take the "`" at the end of "`foo`"). To be double sure we
