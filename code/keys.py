@@ -209,7 +209,6 @@ symbol_key_words = {
     "dubquote": '"',
     "double quote": '"',
     "quote": '"',
-    "semi": ";",
     "back tick": "`",
     "`": "`",
 
