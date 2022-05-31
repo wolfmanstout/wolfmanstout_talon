@@ -126,13 +126,13 @@ formatters_dict = {
 
 # This is the mapping from spoken phrases to formatters
 formatters_words = {
-    "allcaps": formatters_dict["ALL_CAPS"],
+    "all caps": formatters_dict["ALL_CAPS"],
     "upper": formatters_dict["ALL_CAPS"],
-    "alldown": formatters_dict["ALL_LOWERCASE"],
+    "all down": formatters_dict["ALL_LOWERCASE"],
     "spaces": formatters_dict["ALL_LOWERCASE"],
     "camel": formatters_dict["PRIVATE_CAMEL_CASE"],
     "dotted": formatters_dict["DOT_SEPARATED"],
-    "dubstring": formatters_dict["DOUBLE_QUOTED_STRING"],
+    "dub string": formatters_dict["DOUBLE_QUOTED_STRING"],
     "dunder": formatters_dict["DOUBLE_UNDERSCORE"],
     "hammer": formatters_dict["PUBLIC_CAMEL_CASE"],
     "studley": formatters_dict["PUBLIC_CAMEL_CASE"],
@@ -258,7 +258,10 @@ class Actions:
         """Inserts a phrase formatted according to formatters. Formatters is a comma separated list of formatters (e.g. 'CAPITALIZE_ALL_WORDS,DOUBLE_QUOTED_STRING')"""
         actions.insert(format_phrase(phrase, formatters))
 
-
+    def insert_with_history(text: str):
+        """Inserts some text, remembering it in the phrase history."""
+        actions.user.add_phrase_to_history(text)
+        actions.insert(text)
 
     def formatters_reformat_last(formatters: str) -> str:
         """Clears and reformats last formatted phrase"""

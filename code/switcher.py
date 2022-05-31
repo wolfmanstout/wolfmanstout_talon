@@ -355,12 +355,6 @@ def ui_event(event, arg):
         update_running_list()
 
 
-# Currently update_launch_list only does anything on mac, so we should make sure
-# to initialize user launch to avoid getting "List not found: user.launch"
-# errors on other platforms.
-ctx.lists["user.launch"] = {}
-ctx.lists["user.running"] = {}
-
 # Avoid long lists which slow down context switching.
 dragon_ctx = Context()
 dragon_ctx.matches = r"""

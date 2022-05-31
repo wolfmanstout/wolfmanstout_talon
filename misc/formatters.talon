@@ -1,8 +1,8 @@
 #provide both anchored and unachored commands via 'over'
-phrase <user.text>$: user.insert_formatted(text, "NOOP")
-phrase <user.text> over: user.insert_formatted(text, "NOOP")
+phrase <user.text>$: user.insert_with_history(text)
+phrase <user.text> over: user.insert_with_history(text)
 phrase <user.text> {user.post_dictation_keys}:
-    user.insert_formatted(text, "NOOP")
+    user.insert_with_history(text)
     key(post_dictation_keys)
 say <user.prose>$: user.dictation_insert(prose)
 say <user.prose> over: user.dictation_insert(prose)
@@ -21,10 +21,10 @@ say <user.prose> {user.post_dictation_keys}:
     key(post_dictation_keys)
 <user.formatters> that: user.formatters_reformat_selection(user.formatters)
 {user.symbol_snippet}: "{symbol_snippet}"
-word <user.word>: user.insert_formatted(user.word, "NOOP")
+word <user.word>: user.insert_with_history(user.word)
 recent list: user.toggle_phrase_history()
 recent close: user.phrase_history_hide()
-recent repeat <number_small>: insert(user.get_recent_phrase(number_small))
+recent repeat <number_small>: user.insert_with_history(user.get_recent_phrase(number_small))
 recent copy <number_small>: clip.set_text(user.get_recent_phrase(number_small))
 select that: user.select_last_phrase()
 before that: user.before_last_phrase()
