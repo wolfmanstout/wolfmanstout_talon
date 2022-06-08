@@ -1,4 +1,4 @@
-from talon import Context, Module, app, actions, speech_system, ui
+from talon import Module, actions, app, speech_system, ui
 
 mod = Module()
 
@@ -56,16 +56,28 @@ class Actions:
         actions.mode.disable("user.gdb")
         actions.user.dictation_format_reset()
         rect = ui.main_screen().rect
-        regions = [actions.user.hud_create_screen_region('mode', 'FF0000', '', 'Dictation', -1, rect.x, rect.y, rect.width, rect.height)]
+        regions = [
+            actions.user.hud_create_screen_region(
+                "mode",
+                "FF0000",
+                "",
+                "Dictation",
+                -1,
+                rect.x,
+                rect.y,
+                rect.width,
+                rect.height,
+            )
+        ]
         regions[0].text_colour = "FFFFFF"
         regions[0].vertical_centered = False
-        actions.user.hud_publish_screen_regions('overlay', regions, True)
-        actions.user.hud_publish_screen_regions('cursor', regions, True)
+        actions.user.hud_publish_screen_regions("overlay", regions, True)
+        actions.user.hud_publish_screen_regions("cursor", regions, True)
 
     def command_mode():
         """Enables command mode."""
         actions.mode.disable("sleep")
         actions.mode.disable("dictation")
         actions.mode.enable("command")
-        actions.user.hud_clear_screen_regions('overlay', 'mode')
-        actions.user.hud_clear_screen_regions('cursor', 'mode')
+        actions.user.hud_clear_screen_regions("overlay", "mode")
+        actions.user.hud_clear_screen_regions("cursor", "mode")

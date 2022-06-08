@@ -1,5 +1,6 @@
-from talon import Context, Module, actions, clip
 from typing import Optional
+
+from talon import Context, Module, actions
 
 mod = Module()
 mod.apps.emacs = r"""
@@ -11,7 +12,12 @@ ctx.matches = r"""
 app: emacs
 """
 
-ctx.tags = ['user.find_and_replace', 'user.line_commands', 'user.splits', 'user.snippets']
+ctx.tags = [
+    "user.find_and_replace",
+    "user.line_commands",
+    "user.splits",
+    "user.snippets",
+]
 
 ctx.lists["user.snippets"] = {
     "beginend": "beginend",
@@ -61,44 +67,61 @@ ctx.lists["user.snippets"] = {
     "while": "while",
 }
 
-@ctx.action_class('edit')
+
+@ctx.action_class("edit")
 class EditActions:
     def copy():
         # Reactivate transient mark mode after copying.
-        actions.key('alt-w ctrl-x ctrl-x ctrl-x ctrl-x')
+        actions.key("alt-w ctrl-x ctrl-x ctrl-x ctrl-x")
+
     def cut():
-        actions.key('ctrl-w')
-    def find(text: str=None):
-        actions.key('ctrl-s')
+        actions.key("ctrl-w")
+
+    def find(text: str = None):
+        actions.key("ctrl-s")
         actions.actions.insert(text)
+
     def find_next():
-        actions.key('ctrl-s')
+        actions.key("ctrl-s")
+
     def indent_more():
-        actions.key('ctrl-x tab shift-right')
+        actions.key("ctrl-x tab shift-right")
+
     def indent_less():
-        actions.key('ctrl-x tab shift-left')
+        actions.key("ctrl-x tab shift-left")
+
     def line_swap_up():
         actions.key("alt-up")
+
     def line_swap_down():
         actions.key("alt-down")
+
     def line_clone():
         actions.key("shift-alt-down")
+
     def paste():
-        actions.key('ctrl-y')
+        actions.key("ctrl-y")
+
     def paste_match_style():
-        actions.key('ctrl-y')
+        actions.key("ctrl-y")
+
     def redo():
-        actions.key('ctrl-shift-/')
+        actions.key("ctrl-shift-/")
+
     def save():
-        actions.key('ctrl-x ctrl-s')
+        actions.key("ctrl-x ctrl-s")
+
     def save_all():
-        actions.key('ctrl-x ctrl-shift-s')
+        actions.key("ctrl-x ctrl-shift-s")
+
     def select_all():
-        actions.key('ctrl-x h')
+        actions.key("ctrl-x h")
+
     def select_none():
-        actions.key('ctrl-g')
+        actions.key("ctrl-g")
+
     def undo():
-        actions.key('ctrl-/')
+        actions.key("ctrl-/")
 
     def jump_line(n: int):
         actions.key("alt-g alt-g")
@@ -108,10 +131,12 @@ class EditActions:
         # actions.insert(str(n))
         # actions.key("ctrl-c c g")
 
+
 @ctx.action_class("code")
 class CodeActions:
     def toggle_comment():
         actions.key("alt-;")
+
 
 @ctx.action_class("win")
 class WinActions:
@@ -121,6 +146,7 @@ class WinActions:
         if "." in result:
             return result
         return ""
+
 
 @ctx.action_class("user")
 class UserActions:
@@ -195,7 +221,8 @@ class UserActions:
         text = actions.edit.selected_text()
         # if we're at the beginning of the document/text box, we may not have
         # selected any text, in which case we shouldn't move the cursor.
-        if text: actions.key("ctrl-u ctrl-space")
+        if text:
+            actions.key("ctrl-u ctrl-space")
         return text
 
     def dictation_peek_right() -> Optional[str]:
@@ -206,10 +233,12 @@ class UserActions:
         actions.edit.extend_right()
         actions.edit.extend_right()
         after = actions.edit.selected_text()
-        if after: actions.key("ctrl-u ctrl-space")
+        if after:
+            actions.key("ctrl-u ctrl-space")
         return after
 
     # dictation.py support end
+
 
 @mod.action_class
 class Actions:
@@ -219,7 +248,7 @@ class Actions:
         actions.insert(str(n))
         actions.key("ctrl-c c g")
 
-    def mark_lines(n1: int, n2: int=-1, tight: bool=False, tree: bool=False):
+    def mark_lines(n1: int, n2: int = -1, tight: bool = False, tree: bool = False):
         """Marks the lines from n1 to n2."""
         actions.user.jump_modulo_line(n1)
         if tree:
@@ -235,9 +264,15 @@ class Actions:
         else:
             actions.key("down")
 
-    def use_lines(n1: int, n2: int=-1,
-                  pre_key: str="", post_key: str="",
-                  tight: bool=False, other_buffer: bool=False, tree: bool=False):
+    def use_lines(
+        n1: int,
+        n2: int = -1,
+        pre_key: str = "",
+        post_key: str = "",
+        tight: bool = False,
+        other_buffer: bool = False,
+        tree: bool = False,
+    ):
         """Uses the lines from n1 to n2."""
         if other_buffer:
             actions.key("ctrl-x o")

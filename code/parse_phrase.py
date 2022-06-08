@@ -1,5 +1,6 @@
 # From https://github.com/AndreasArvidsson/andreas-talon/blob/3631f25d426a9fb7526c240cb0c9961ea90072c2/andreas/misc/rephrase.py
-from typing import Optional, Union
+from typing import Union
+
 from talon import Context, Module, actions, speech_system
 from talon.grammar import Phrase
 from talon.lib import flac
@@ -23,7 +24,7 @@ speech_system.register("post:phrase", on_post_phrase)
 
 @mod.action_class
 class Actions:
-    def parse_phrase(phrase: Union[Phrase, str], recording_path: str=""):
+    def parse_phrase(phrase: Union[Phrase, str], recording_path: str = ""):
         """Rerun phrase"""
         if phrase == "":
             return
@@ -39,16 +40,20 @@ class Actions:
             flac.write_file(recording_path, samples)
         speech_system._on_audio_frame(samples)
 
+
 # Dragon doesn't support timestamps, so we fall back to mimic()
 ctx = Context()
 ctx.matches = r"""
 speech.engine: dragon
 """
 
+
 @ctx.action_class("self")
 class DragonActions:
-    def parse_phrase(phrase: Union[Phrase, str], recording_path: str=""):
+    def parse_phrase(phrase: Union[Phrase, str], recording_path: str = ""):
         if phrase == "":
             return
-        command = " ".join(actions.dictate.replace_words(actions.dictate.parse_words(phrase)))
+        command = " ".join(
+            actions.dictate.replace_words(actions.dictate.parse_words(phrase))
+        )
         actions.mimic(command)

@@ -1,8 +1,9 @@
-from talon import Context, actions, ui, Module, app, clip
+from talon import Context, Module, ui
 
 mod = Module()
 mod.list("docked_apps", desc="The indices of apps docked on the taskbar")
 mod.list("known_window_names", desc="Known window substrings")
+
 
 @mod.capture(rule="{self.known_window_names}")
 def known_windows(m) -> ui.Window:
@@ -15,6 +16,7 @@ def known_windows(m) -> ui.Window:
         for window in app.windows():
             if win in window.title and (not exe or exe in app.exe):
                 return window
+
 
 home_ctx = Context()
 home_ctx.matches = r"""

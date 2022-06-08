@@ -1,5 +1,4 @@
-from talon import Context, Module, actions, clip
-from typing import Optional
+from talon import Context, Module, actions
 
 mod = Module()
 mod.apps.google_docs = r"""
@@ -12,9 +11,10 @@ ctx.matches = r"""
 app: google_docs
 """
 
-@ctx.action_class('edit')
+
+@ctx.action_class("edit")
 class EditActions:
     def extend_word_right():
         # Without this hack, docs may select a single whitespace character
         # instead of the next word.
-        actions.key('ctrl-left ctrl-right ctrl-shift-right')
+        actions.key("ctrl-left ctrl-right ctrl-shift-right")

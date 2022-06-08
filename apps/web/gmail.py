@@ -15,9 +15,11 @@ ctx.matches = r"""
 app: gmail
 """
 
-@ctx.action_class('edit')
+
+@ctx.action_class("edit")
 class EditActions:
     def indent_more():
-        actions.key('ctrl-]')
+        actions.key("ctrl-]")
+
     def indent_less():
-        actions.key('ctrl-[')
+        actions.key("ctrl-[")

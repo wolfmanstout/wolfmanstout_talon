@@ -11,9 +11,11 @@ ctx.matches = r"""
 app: emacs_org
 """
 
-@ctx.action_class('edit')
+
+@ctx.action_class("edit")
 class EditActions:
     def indent_more():
-        actions.key('alt-right')
+        actions.key("alt-right")
+
     def indent_less():
-        actions.key('alt-left')
+        actions.key("alt-left")
