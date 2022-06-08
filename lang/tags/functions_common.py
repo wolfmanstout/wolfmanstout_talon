@@ -69,9 +69,7 @@ def gui_functions(gui: imgui.GUI):
     for i, entry in enumerate(function_list, 1):
         if entry in registry.lists["user.code_common_function"][0]:
             gui.text(
-                "{}. {}: {}".format(
-                    i, entry, registry.lists["user.code_common_function"][0][entry]
-                )
+                f"{i}. {entry}: {registry.lists['user.code_common_function'][0][entry]}"
             )
 
     gui.spacer()

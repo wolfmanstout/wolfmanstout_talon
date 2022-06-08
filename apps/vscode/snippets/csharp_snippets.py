@@ -1,6 +1,6 @@
-# from user.knausj_talon.code.snippet_watcher import snippet_watcher
-
 from talon import Context
+
+# from user.knausj_talon.code.snippet_watcher import snippet_watcher
 
 ctx = Context()
 ctx.matches = r"""

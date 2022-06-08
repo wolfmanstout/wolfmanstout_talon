@@ -8,7 +8,6 @@
 # Solution in design mode: [documentName] - [parentPath]\[solutionName] - [ideName]
 # Solution in running mode: [documentName] - [parentPath]\[solutionName] (Running) - [ideName]
 
-
 from talon import Context, Module, actions
 
 # is_mac = app.platform == "mac"
