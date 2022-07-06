@@ -8,3 +8,4 @@ os: windows
 <user.known_windows> win$: user.switcher_focus_window(known_windows)
 swap$: key(alt-tab)
 show desktop$: key(win-d)
+show (apps | windows)$: key(win-tab)
