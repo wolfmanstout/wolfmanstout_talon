@@ -21,11 +21,11 @@ spell that <user.formatters> <user.letters>:
     result = user.formatted_text(letters, formatters)
     user.dictation_insert_raw(result)
 
-(halt | now do) [<phrase>]$:
+now do [<phrase>]$:
     user.command_mode()
     user.parse_phrase(phrase or "")
 
-(halt | now do) [<phrase>] prose:
+now do [<phrase>] prose:
     user.command_mode()
     user.parse_phrase(phrase or "")
     user.dictation_mode()

@@ -21,3 +21,14 @@ this numbers: key(ctrl-shift-7)
 this bullets: key(ctrl-shift-8)
 this link: key(ctrl-k)
 kill: key(ctrl-k)
+
+# Repeated from dictation_mode.talon so these can be chained with commands outside that file.
+# For some reason, Talon does not prefer this parse if used in dictation_commands.talon.
+now do [<phrase>]$:
+    user.command_mode()
+    user.parse_phrase(phrase or "")
+
+now do [<phrase>] prose:
+    user.command_mode()
+    user.parse_phrase(phrase or "")
+    user.dictation_mode()
