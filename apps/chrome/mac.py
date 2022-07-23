@@ -48,6 +48,7 @@ class BrowserActions:
 
     def focus_address():
         actions.key("cmd-l")
+        actions.sleep("50ms")
         # action(browser.focus_page):
 
     def focus_search():
