@@ -77,6 +77,12 @@ class EditActions:
     def cut():
         actions.key("ctrl-w")
 
+    def file_end():
+        actions.key("alt->")
+
+    def file_start():
+        actions.key("alt-<")
+
     def find(text: str = None):
         actions.key("ctrl-s")
         actions.actions.insert(text)
