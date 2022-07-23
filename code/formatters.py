@@ -199,10 +199,10 @@ def format_text(m) -> str:
     "Formats the text and returns a string"
     out = ""
     formatters = m[0]
-    for chunk in m[1:]:
+    for i, chunk in enumerate(m[1:]):
         if isinstance(chunk, ImmuneString):
-            # If the only item is an immune string, then format it.
-            if len(m) == 2:
+            # If the first item is an immune string, then format it.
+            if i == 0:
                 out += format_phrase(chunk.string, formatters)
             else:
                 out += chunk.string
@@ -251,7 +251,7 @@ class ImmuneString:
 @mod.capture(
     # Add anything else into this that you want to be able to speak during a
     # formatter.
-    rule="(<user.symbol_key> | {self.symbol_snippet} | <user.letter> | numb <number>)"
+    rule="(<user.symbol_key> | {self.symbol_snippet} | <user.letter> | <number>)"
 )
 def formatter_immune(m) -> ImmuneString:
     """Text that can be interspersed into a formatter, e.g. characters.
