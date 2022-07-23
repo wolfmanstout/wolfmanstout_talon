@@ -320,13 +320,6 @@ class DictationFormat:
         self.force_capitalization = "no cap"
 
     def no_space(self):
-        # This is typically used after repositioning the cursor, so it is helpful to
-        # reset capitalization as well.
-        #
-        # FIXME: this sets state to "sentence start", capitalizing the next
-        # word. probably undesirable, since most places are not the start of
-        # sentences?
-        self.reset_context()
         self.force_no_space = True
 
 
