@@ -12,12 +12,12 @@ cap: user.dictation_format_cap()
 (no-space | no space): user.dictation_format_no_space()
 
 # Formatting
-formatted <user.format_text>:
+formatted <user.format_text> [over]:
     user.dictation_insert_raw(format_text)
 
 # Corrections
-spell that <user.letters>: auto_insert(letters)
-spell that <user.formatters> <user.letters>:
+spell that <user.letters> [over]: auto_insert(letters)
+spell that <user.formatters> <user.letters> [over]:
     result = user.formatted_text(letters, formatters)
     user.dictation_insert_raw(result)
 
