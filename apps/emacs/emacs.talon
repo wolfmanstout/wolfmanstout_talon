@@ -2,7 +2,6 @@ app: emacs
 -
 settings():
     user.mouse_wheel_down_amount = 90
-    user.ocr_click_offset_right = 7
 
 # General
 ^emacs close now$: key(ctrl-x ctrl-c)

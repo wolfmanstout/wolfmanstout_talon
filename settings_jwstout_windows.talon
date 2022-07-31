@@ -1,3 +1,4 @@
+os: windows
 hostname: /jwstout/
 -
 settings():

@@ -1,3 +1,4 @@
+os: windows
 app: emacs
 title: /\(Ubuntu\)$/
 -
