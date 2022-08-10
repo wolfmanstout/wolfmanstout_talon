@@ -69,8 +69,13 @@ def prose_number_with_colon(m) -> str:
     return m.number_string_1 + ":" + m.number_string_2
 
 
+@mod.capture(rule="(numeral | numb) <user.number_string> slash <user.number_string>")
+def prose_number_with_slash(m) -> str:
+    return m.number_string_1 + "/" + m.number_string_2
+
+
 @mod.capture(
-    rule="<user.prose_simple_number> | <user.prose_number_with_dot> | <user.prose_number_with_colon>"
+    rule="<user.prose_simple_number> | <user.prose_number_with_dot> | <user.prose_number_with_colon> | <user.prose_number_with_slash>"
 )
 def prose_number(m) -> str:
     return str(m)
@@ -435,7 +440,6 @@ class Actions:
         # spacing. The formatter context still has the original curly quotes
         # so that future dictation is properly formatted.
         text = text.replace("“", '"').replace("”", '"')
-        actions.user.add_phrase_to_history(text)
         actions.insert(text)
         if needs_check_after:
             char = actions.user.dictation_peek_right()
@@ -444,6 +448,7 @@ class Actions:
             )
         if add_space_after:
             actions.user.insert_between("", " ")
+        actions.user.add_phrase_to_history(text, " " if add_space_after else "")
 
     def dictation_peek_left() -> Optional[str]:
         """

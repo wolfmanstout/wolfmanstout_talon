@@ -5,6 +5,7 @@ from talon import Module, actions, imgui
 mod = Module()
 
 # list of recent phrases, most recent first
+# Each phrase is a tuple (before, after).
 phrase_history = []
 phrase_history_length = 40
 phrase_history_display_length = 40
@@ -14,12 +15,12 @@ phrase_history_display_length = 40
 class Actions:
     def get_last_phrase() -> str:
         """Gets the last phrase"""
-        return phrase_history[0] if phrase_history else ""
+        return phrase_history[0][0] if phrase_history else ""
 
     def get_recent_phrase(number: int) -> str:
         """Gets the nth most recent phrase"""
         try:
-            return phrase_history[number - 1]
+            return phrase_history[number - 1][0]
         except IndexError:
             return ""
 
@@ -33,7 +34,10 @@ class Actions:
         if not phrase_history:
             logging.warning("clear_last_phrase(): No last phrase to clear!")
             return
-        for _ in phrase_history.pop(0):
+        phrase = phrase_history.pop(0)
+        for _ in phrase[1]:
+            actions.key("delete")
+        for _ in phrase[0]:
             actions.key("backspace")
 
     def select_last_phrase():
@@ -41,21 +45,21 @@ class Actions:
         if not phrase_history:
             logging.warning("select_last_phrase(): No last phrase to select!")
             return
-        for _ in phrase_history[0]:
+        for _ in phrase_history[0][0]:
             actions.edit.extend_left()
 
     def before_last_phrase():
         """Moves left before the last phrase"""
         try:
-            for _ in phrase_history.pop(0):
+            for _ in phrase_history.pop(0)[0]:
                 actions.edit.left()
         except IndexError:
             logging.warning("before_last_phrase(): No last phrase to move before!")
 
-    def add_phrase_to_history(text: str):
+    def add_phrase_to_history(before: str, after: str = ""):
         """Adds a phrase to the phrase history"""
         global phrase_history
-        phrase_history.insert(0, text)
+        phrase_history.insert(0, (before, after))
         phrase_history = phrase_history[:phrase_history_length]
 
     def toggle_phrase_history():
@@ -77,8 +81,8 @@ def gui(gui: imgui.GUI):
     gui.text("Say 'recent repeat <number>' retype a phrase on this list.")
     gui.text("Say 'recent copy <number>' to copy a phrase from this list.")
     gui.line()
-    for index, text in enumerate(phrase_history[:phrase_history_display_length], 1):
-        gui.text(f"{index}: {text}")
+    for index, phrase in enumerate(phrase_history[:phrase_history_display_length], 1):
+        gui.text(f"{index}: {phrase[0]}")
 
     gui.spacer()
     if gui.button("Recent close"):
