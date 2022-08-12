@@ -20,7 +20,7 @@ class EditActions:
             if setting_clipboard_delay.get():
                 actions.sleep(setting_clipboard_delay.get())
         try:
-            return s.get()
+            return s.text()
         except clip.NoChange:
             return ""
 
