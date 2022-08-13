@@ -28,7 +28,7 @@ settings():
     user.mouse_wake_hides_cursor = 0
 
     # The amount to scroll up/down (equivalent to mouse wheel on Windows by default)
-    user.mouse_wheel_down_amount = 120
+    user.mouse_wheel_down_amount = 840
 
     # The amount to scroll left/right
     user.mouse_wheel_horizontal_amount = 40
