@@ -41,12 +41,13 @@ home_ctx.lists["self.known_window_names"] = {
     "dos": "system32\\cmd.exe",
 }
 
-work_ctx = Context()
-work_ctx.matches = r"""
+work_windows_ctx = Context()
+work_windows_ctx.matches = r"""
+os: windows
 hostname: /jwstout/
 """
 
-work_ctx.lists["self.docked_apps"] = {
+work_windows_ctx.lists["self.docked_apps"] = {
     "explorer": "1",
     "home chrome": "2",
     "home browser": "2",
@@ -59,11 +60,23 @@ work_ctx.lists["self.docked_apps"] = {
     "code": "5",
 }
 
-work_ctx.lists["self.known_window_names"] = {
+work_windows_ctx.lists["self.known_window_names"] = {
     "rebel": "Talon - REPL",
     "dos": "system32\\cmd.exe",
     "terminal": " - Terminal::Xpra-Launcher.exe",
     "work terminal": " - Terminal::Xpra-Launcher.exe",
     "work emacs": " - Emacs editor::Xpra-Launcher.exe",
     "studio": " - Android Studio::Xpra-Launcher.exe",
+}
+
+work_mac_ctx = Context()
+work_mac_ctx.matches = r"""
+os: mac
+hostname: /jwstout/
+"""
+
+work_mac_ctx.lists["self.known_window_names"] = {
+    "work terminal": " - Terminal::Xpra",
+    "work emacs": " - Emacs editor::Xpra",
+    "studio": " - Android Studio::Xpra",
 }
