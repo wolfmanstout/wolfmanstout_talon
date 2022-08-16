@@ -75,9 +75,62 @@ def prose_number_with_slash(m) -> str:
 
 
 @mod.capture(
-    rule="<user.prose_simple_number> | <user.prose_number_with_dot> | <user.prose_number_with_colon> | <user.prose_number_with_slash>"
+    rule=(
+        "<user.prose_simple_number> "
+        "| <user.prose_number_with_dot> "
+        "| <user.prose_number_with_colon> "
+        "| <user.prose_number_with_slash>"
+    )
 )
 def prose_number(m) -> str:
+    return str(m)
+
+
+@mod.capture(
+    rule="email [address] of {user.contact_emails}",
+)
+def prose_email(m) -> str:
+    return m.contact_emails
+
+
+@mod.capture(
+    rule="(username | L dap) of {user.contact_emails}",
+)
+def prose_username(m) -> str:
+    return actions.user.username_from_email(m.contact_emails)
+
+
+@mod.capture(
+    rule="full name of {user.contact_full_names}",
+)
+def prose_full_name(m) -> str:
+    return m.contact_full_names
+
+
+@mod.capture(
+    rule="first name of {user.contact_full_names}",
+)
+def prose_first_name(m) -> str:
+    return actions.user.first_name_from_full_name(m.contact_full_names)
+
+
+@mod.capture(
+    rule="last name of {user.contact_full_names}",
+)
+def prose_last_name(m) -> str:
+    return actions.user.last_name_from_full_name(m.contact_full_names)
+
+
+@mod.capture(
+    rule=(
+        "<user.prose_email> "
+        "| <user.prose_username> "
+        "| <user.prose_full_name> "
+        "| <user.prose_first_name> "
+        "| <user.prose_last_name>"
+    ),
+)
+def prose_contact(m) -> str:
     return str(m)
 
 
@@ -99,7 +152,18 @@ def text(m) -> str:
 
 
 @mod.capture(
-    rule="({user.vocabulary} | {user.punctuation} | {user.prose_snippets} | <phrase> | <user.prose_number> | <user.prose_letter> | <user.prose_modifier>)+"
+    rule=(
+        "("
+        "{user.vocabulary} "
+        "| {user.punctuation} "
+        "| {user.prose_snippets} "
+        "| <phrase> "
+        "| <user.prose_number> "
+        "| <user.prose_letter> "
+        "| <user.prose_contact>"
+        "| <user.prose_modifier>"
+        ")+"
+    )
 )
 def prose(m) -> str:
     """Mixed words and punctuation, auto-spaced & capitalized."""
@@ -108,7 +172,17 @@ def prose(m) -> str:
 
 
 @mod.capture(
-    rule="({user.vocabulary} | {user.punctuation} | {user.prose_snippets} | <phrase> | <user.prose_number> | <user.prose_letter>)+"
+    rule=(
+        "("
+        "{user.vocabulary} "
+        "| {user.punctuation} "
+        "| {user.prose_snippets} "
+        "| <phrase> "
+        "| <user.prose_number> "
+        "| <user.prose_letter>"
+        "| <user.prose_contact>"
+        ")+"
+    )
 )
 def raw_prose(m) -> str:
     """Mixed words and punctuation, auto-spaced & capitalized, without quote straightening and commands (for use in dictation mode)."""
