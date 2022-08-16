@@ -213,7 +213,7 @@ terminal new: user.vscode("workbench.action.terminal.new")
 terminal next: user.vscode("workbench.action.terminal.focusNext")
 terminal last: user.vscode("workbench.action.terminal.focusPrevious")
 terminal split: user.vscode("workbench.action.terminal.split")
-terminal zoom: user.vscode("workbench.action.toggleMaximizedPanel")
+terminal (zoom | max): user.vscode("workbench.action.toggleMaximizedPanel")
 terminal trash: user.vscode("workbench.action.terminal.kill")
 terminal toggle: user.vscode_and_wait("workbench.action.terminal.toggleTerminal")
 terminal scroll up: user.vscode("workbench.action.terminal.scrollUp")
@@ -229,8 +229,6 @@ select less: user.vscode("editor.action.smartSelect.shrink")
 select (more|this): user.vscode("editor.action.smartSelect.expand")
 
 minimap: user.vscode("editor.action.toggleMinimap")
-maximize editor: user.vscode("workbench.action.minimizeOtherEditors")
-restore editor: user.vscode("workbench.action.evenEditorWidths")
 
 #breadcrumb
 select breadcrumb: user.vscode('breadcrumbs.focusAndSelect')
