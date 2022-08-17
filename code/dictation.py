@@ -87,35 +87,35 @@ def prose_number(m) -> str:
 
 
 @mod.capture(
-    rule="email [address] of {user.contact_emails}",
+    rule="{user.contact_emails} email [address]",
 )
 def prose_email(m) -> str:
     return m.contact_emails
 
 
 @mod.capture(
-    rule="(username | L dap) of {user.contact_emails}",
+    rule="{user.contact_emails} (username | L dap)",
 )
 def prose_username(m) -> str:
     return actions.user.username_from_email(m.contact_emails)
 
 
 @mod.capture(
-    rule="full name of {user.contact_full_names}",
+    rule="{user.contact_full_names} full name",
 )
 def prose_full_name(m) -> str:
     return m.contact_full_names
 
 
 @mod.capture(
-    rule="first name of {user.contact_full_names}",
+    rule="{user.contact_full_names} first name",
 )
 def prose_first_name(m) -> str:
     return actions.user.first_name_from_full_name(m.contact_full_names)
 
 
 @mod.capture(
-    rule="last name of {user.contact_full_names}",
+    rule="{user.contact_full_names} last name",
 )
 def prose_last_name(m) -> str:
     return actions.user.last_name_from_full_name(m.contact_full_names)
