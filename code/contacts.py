@@ -1,4 +1,4 @@
-from talon import Context, Module
+from talon import Context, Module, actions
 
 from .user_settings import get_list_from_csv
 
@@ -54,6 +54,134 @@ ctx.lists["user.contact_names"] = create_contact_names()
 ctx.lists["user.contact_name_possessives"] = [
     f"{name}'s" for name in create_contact_names()
 ]
+
+
+# We extend str so this can be used with no changes to the <user.prose> implementation.
+class TimestampedString(str):
+    def __new__(cls, string: str, start: float, end: float):
+        return super().__new__(cls, string)
+
+    def __init__(self, string: str, start: float, end: float):
+        super().__init__()
+        self.start = start
+        self.end = end
+
+
+@mod.capture(
+    rule="{user.contact_names} [name]",
+)
+def prose_name(m) -> TimestampedString:
+    return TimestampedString(m.contact_names, m[0].start, m[0].end)
+
+
+@mod.capture(
+    rule="{user.contact_name_possessives} | {user.contact_names} [names]",
+)
+def prose_name_possessive(m) -> TimestampedString:
+    if hasattr(m, "contact_name_possessives"):
+        return TimestampedString(m.contact_name_possessives, m[0].start, m[0].end)
+    else:
+        return TimestampedString(
+            actions.user.make_name_possessive(m.contact_names), m[0].start, m[0].end
+        )
+
+
+@mod.capture(
+    rule="{user.contact_emails} email [address]",
+)
+def prose_email(m) -> TimestampedString:
+    return TimestampedString(m.contact_emails, m[0].start, m[0].end)
+
+
+@mod.capture(
+    rule="{user.contact_emails} (username | L dap)",
+)
+def prose_username(m) -> TimestampedString:
+    return TimestampedString(
+        actions.user.username_from_email(m.contact_emails), m[0].start, m[0].end
+    )
+
+
+@mod.capture(
+    rule="{user.contact_full_names} full name",
+)
+def prose_full_name(m) -> TimestampedString:
+    return TimestampedString(m.contact_full_names, m[0].start, m[0].end)
+
+
+@mod.capture(
+    rule="{user.contact_full_names} full names",
+)
+def prose_full_name_possessive(m) -> TimestampedString:
+    return TimestampedString(
+        actions.user.make_name_possessive(m.contact_full_names), m[0].start, m[0].end
+    )
+
+
+@mod.capture(
+    rule="{user.contact_full_names} first name",
+)
+def prose_first_name(m) -> TimestampedString:
+    return TimestampedString(
+        actions.user.first_name_from_full_name(m.contact_full_names),
+        m[0].start,
+        m[0].end,
+    )
+
+
+@mod.capture(
+    rule="{user.contact_full_names} first names",
+)
+def prose_first_name_possessive(m) -> TimestampedString:
+    return TimestampedString(
+        actions.user.make_name_possessive(
+            actions.user.first_name_from_full_name(m.contact_full_names)
+        ),
+        m[0].start,
+        m[0].end,
+    )
+
+
+@mod.capture(
+    rule="{user.contact_full_names} last name",
+)
+def prose_last_name(m) -> TimestampedString:
+    return TimestampedString(
+        actions.user.last_name_from_full_name(m.contact_full_names),
+        m[0].start,
+        m[0].end,
+    )
+
+
+@mod.capture(
+    rule="{user.contact_full_names} last names",
+)
+def prose_last_name_possessive(m) -> TimestampedString:
+    return TimestampedString(
+        actions.user.make_name_possessive(
+            actions.user.last_name_from_full_name(m.contact_full_names)
+        ),
+        m[0].start,
+        m[0].end,
+    )
+
+
+@mod.capture(
+    rule=(
+        "<user.prose_name> "
+        "| <user.prose_name_possessive> "
+        "| <user.prose_email> "
+        "| <user.prose_username> "
+        "| <user.prose_full_name> "
+        "| <user.prose_full_name_possessive> "
+        "| <user.prose_first_name> "
+        "| <user.prose_first_name_possessive> "
+        "| <user.prose_last_name>"
+        "| <user.prose_last_name_possessive>"
+    ),
+)
+def prose_contact(m) -> TimestampedString:
+    return m[0]
 
 
 @mod.action_class
