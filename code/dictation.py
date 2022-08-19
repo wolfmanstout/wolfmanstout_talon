@@ -87,6 +87,23 @@ def prose_number(m) -> str:
 
 
 @mod.capture(
+    rule="{user.contact_names} [name]",
+)
+def prose_name(m) -> str:
+    return m.contact_names
+
+
+@mod.capture(
+    rule="{user.contact_name_possessives} | {user.contact_names} [names]",
+)
+def prose_name_possessive(m) -> str:
+    if hasattr(m, "contact_name_possessives"):
+        return m.contact_name_possessives
+    else:
+        return actions.user.make_name_possessive(m.contact_names)
+
+
+@mod.capture(
     rule="{user.contact_emails} email [address]",
 )
 def prose_email(m) -> str:
@@ -108,10 +125,26 @@ def prose_full_name(m) -> str:
 
 
 @mod.capture(
+    rule="{user.contact_full_names} full names",
+)
+def prose_full_name_possessive(m) -> str:
+    return actions.user.make_name_possessive(m.contact_full_names)
+
+
+@mod.capture(
     rule="{user.contact_full_names} first name",
 )
 def prose_first_name(m) -> str:
     return actions.user.first_name_from_full_name(m.contact_full_names)
+
+
+@mod.capture(
+    rule="{user.contact_full_names} first names",
+)
+def prose_first_name_possessive(m) -> str:
+    return actions.user.make_name_possessive(
+        actions.user.first_name_from_full_name(m.contact_full_names)
+    )
 
 
 @mod.capture(
@@ -122,12 +155,26 @@ def prose_last_name(m) -> str:
 
 
 @mod.capture(
+    rule="{user.contact_full_names} last names",
+)
+def prose_last_name_possessive(m) -> str:
+    return actions.user.make_name_possessive(
+        actions.user.last_name_from_full_name(m.contact_full_names)
+    )
+
+
+@mod.capture(
     rule=(
-        "<user.prose_email> "
+        "<user.prose_name> "
+        "| <user.prose_name_possessive> "
+        "| <user.prose_email> "
         "| <user.prose_username> "
         "| <user.prose_full_name> "
+        "| <user.prose_full_name_possessive> "
         "| <user.prose_first_name> "
+        "| <user.prose_first_name_possessive> "
         "| <user.prose_last_name>"
+        "| <user.prose_last_name_possessive>"
     ),
 )
 def prose_contact(m) -> str:
