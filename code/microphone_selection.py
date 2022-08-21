@@ -6,6 +6,7 @@ mod = Module()
 
 
 microphone_device_list = []
+last_microphone = None
 
 # by convention, None and System Default are listed first
 # to match the Talon context menu.
@@ -60,6 +61,20 @@ class Actions:
             actions.speech.set_microphone(microphone_device_list[index - 1])
             app.notify(f"Activating microphone: {microphone_device_list[index - 1]}")
             gui.hide()
+
+    def microphone_toggle():
+        """Toggles the microphone"""
+        global last_microphone
+        active_microphone = actions.sound.active_microphone()
+        if active_microphone != "None":
+            last_microphone = actions.sound.active_microphone()
+            actions.sound.set_microphone("None")
+        else:
+            if not last_microphone:
+                actions.app.notify("Previously used microphone not known")
+                return
+            actions.sound.set_microphone(last_microphone)
+            last_microphone = None
 
 
 def on_ready():
