@@ -68,14 +68,14 @@ class TimestampedString(str):
 
 
 @mod.capture(
-    rule="{user.contact_names} [name]",
+    rule="{user.contact_names} name",
 )
 def prose_name(m) -> TimestampedString:
     return TimestampedString(m.contact_names, m[0].start, m[0].end)
 
 
 @mod.capture(
-    rule="{user.contact_name_possessives} | {user.contact_names} [names]",
+    rule="{user.contact_names} names",
 )
 def prose_name_possessive(m) -> TimestampedString:
     if hasattr(m, "contact_name_possessives"):
