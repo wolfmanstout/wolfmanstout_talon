@@ -1,3 +1,7 @@
+from collections import defaultdict
+from itertools import product
+from typing import List, Mapping
+
 from talon import Context, Module, actions
 
 from .user_settings import get_list_from_csv
@@ -8,9 +12,6 @@ ctx = Context()
 mod.list("contact_emails", desc="Maps names to email addresses.")
 mod.list("contact_full_names", desc="Maps names to full names.")
 mod.list("contact_names", desc="Contact first names and full names.")
-mod.list(
-    "contact_name_possessives", desc="Contact first name and full name possessives."
-)
 
 # To export from Gmail, go to https://contacts.google.com/, then click "Frequently contacted", then
 # "Export". Then run `pipx install csvkit` and `csvcut -c 1,31 contacts.csv`.
@@ -19,6 +20,16 @@ email_to_full_name = get_list_from_csv(
     headers=("Name", "Email"),
 )
 full_name_to_email = {v: k for k, v in email_to_full_name.items()}
+
+vocabulary = get_list_from_csv(
+    "additional_words.csv",
+    headers=("Word(s)", "Spoken Form (If Different)"),
+    read_only=True,
+)
+spoken_forms = defaultdict(list)
+for spoken_form, written_form in vocabulary.items():
+    if spoken_form != written_form:
+        spoken_forms[written_form].append(spoken_form)
 
 
 def create_name_to_email_dict():
@@ -40,20 +51,33 @@ def create_name_to_full_name_dict():
 
 
 def create_contact_names():
-    return [
-        name
+    return {
+        name: name
         for full_name in full_name_to_email
         for name in [full_name.split(" ")[0], full_name]
         if name
-    ]
+    }
 
 
-ctx.lists["user.contact_emails"] = create_name_to_email_dict()
-ctx.lists["user.contact_full_names"] = create_name_to_full_name_dict()
-ctx.lists["user.contact_names"] = create_contact_names()
-ctx.lists["user.contact_name_possessives"] = [
-    f"{name}'s" for name in create_contact_names()
-]
+def get_spoken_forms(name: str) -> List[str]:
+    name_parts = name.split(" ")
+    split_names = list(
+        product(*[spoken_forms[name_part] + [name_part] for name_part in name_parts])
+    )
+    return [" ".join(name) for name in split_names]
+
+
+def add_spoken_forms(d: Mapping[str, str]):
+    return {
+        spoken_form: value
+        for name, value in d.items()
+        for spoken_form in get_spoken_forms(name)
+    }
+
+
+ctx.lists["user.contact_emails"] = add_spoken_forms(create_name_to_email_dict())
+ctx.lists["user.contact_full_names"] = add_spoken_forms(create_name_to_full_name_dict())
+ctx.lists["user.contact_names"] = add_spoken_forms(create_contact_names())
 
 
 # We extend str so this can be used with no changes to the <user.prose> implementation.

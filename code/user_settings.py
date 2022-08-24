@@ -13,13 +13,16 @@ if not SETTINGS_DIR.is_dir():
 
 
 def get_list_from_csv(
-    filename: str, headers: tuple[str, str], default: dict[str, str] = {}
+    filename: str,
+    headers: tuple[str, str],
+    default: dict[str, str] = {},
+    read_only: bool = False,
 ):
     """Retrieves list from CSV"""
     path = SETTINGS_DIR / filename
     assert filename.endswith(".csv")
 
-    if not path.is_file():
+    if not read_only and not path.is_file():
         with open(path, "w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(headers)
