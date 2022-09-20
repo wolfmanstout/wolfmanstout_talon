@@ -2,9 +2,9 @@ from collections import defaultdict
 from itertools import product
 from typing import List, Mapping
 
-from talon import Context, Module, actions
+from talon import Context, Module, actions, fs
 
-from .user_settings import get_list_from_csv
+from .user_settings import get_list_from_csv, get_settings_path
 
 mod = Module()
 ctx = Context()
@@ -21,11 +21,24 @@ email_to_full_name = get_list_from_csv(
 )
 full_name_to_email = {v: k for k, v in email_to_full_name.items()}
 
-vocabulary = get_list_from_csv(
-    "additional_words.csv",
-    headers=("Word(s)", "Spoken Form (If Different)"),
-    read_only=True,
-)
+# Manually reload the CSV if it changes. resource.open() breaks if called by
+# multiple files.
+vocabulary_path = get_settings_path("additional_words.csv")
+
+
+def update_vocabulary(ignored_path=None, ignored_flags=None):
+    global vocabulary
+    vocabulary = get_list_from_csv(
+        vocabulary_path.name,
+        headers=("Word(s)", "Spoken Form (If Different)"),
+        read_only=True,
+        auto_reload=False,
+    )
+
+
+update_vocabulary()
+fs.watch(str(vocabulary_path), update_vocabulary)
+
 spoken_forms = defaultdict(list)
 for spoken_form, written_form in vocabulary.items():
     if spoken_form != written_form:

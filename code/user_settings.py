@@ -12,11 +12,16 @@ if not SETTINGS_DIR.is_dir():
     os.mkdir(SETTINGS_DIR)
 
 
+def get_settings_path(filename: str):
+    return SETTINGS_DIR / filename
+
+
 def get_list_from_csv(
     filename: str,
     headers: tuple[str, str],
     default: dict[str, str] = {},
     read_only: bool = False,
+    auto_reload: bool = True,
 ):
     """Retrieves list from CSV"""
     path = SETTINGS_DIR / filename
@@ -31,7 +36,7 @@ def get_list_from_csv(
 
     # Now read via resource to take advantage of talon's
     # ability to reload this script for us when the resource changes
-    with resource.open(str(path), "r") as f:
+    with resource.open(str(path), "r") if auto_reload else open(str(path), "r") as f:
         rows = list(csv.reader(f))
 
     # print(str(rows))
