@@ -196,3 +196,24 @@ class EditActions:
 
     def zoom_reset():
         actions.key("ctrl-0")
+
+
+@ctx.action_class("user")
+class Actions:
+    def bold():
+        actions.key("ctrl-b")
+
+    def italic():
+        actions.key("ctrl-i")
+
+    def strikethrough():
+        actions.key("alt-shift-5")
+
+    def number_list():
+        actions.key("ctrl-shift-7")
+
+    def bullet_list():
+        actions.key("ctrl-shift-8")
+
+    def hyperlink():
+        actions.key("ctrl-k")

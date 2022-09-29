@@ -49,3 +49,21 @@ class Actions:
         """Moves right by n words."""
         for _ in range(n):
             actions.edit.word_right()
+
+    def bold():
+        """Toggles bold formatting."""
+
+    def italic():
+        """Toggles italic formatting."""
+
+    def strikethrough():
+        """Toggles strikethrough formatting."""
+
+    def number_list():
+        """Toggles numbered list."""
+
+    def bullet_list():
+        """Toggles bullet list."""
+
+    def hyperlink():
+        """Inserts a hyperlink."""
