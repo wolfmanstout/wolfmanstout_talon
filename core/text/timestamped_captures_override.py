@@ -5,7 +5,10 @@ from ....talon_gaze_ocr.timestamped_captures import TimestampedText
 ctx = Context()
 
 
-@ctx.capture(rule="<user.timestamped_phrase_default> | <user.prose_contact>")
+@ctx.capture(
+    "user.timestamped_phrase",
+    rule="<user.timestamped_phrase_default> | <user.prose_contact>",
+)
 def timestamped_phrase(m) -> TimestampedText:
     item = m[0]
     if isinstance(item, TimestampedText):
