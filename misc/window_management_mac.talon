@@ -3,7 +3,7 @@ mode: dictation
 os: mac
 -
 <user.running_applications> win$: user.switcher_focus(running_applications)
-<user.known_windows> win$: 
+<user.known_windows> win$:
     # Hack to work around issue with Xpra not recognizing window changes.
     user.switcher_focus("finder")
     user.switcher_focus_window(known_windows)

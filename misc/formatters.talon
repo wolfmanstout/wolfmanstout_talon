@@ -9,8 +9,10 @@ say <user.prose> over: user.dictation_insert(prose)
 say <user.prose> {user.post_dictation_keys}:
     user.dictation_insert(prose)
     key(post_dictation_keys)
-{user.prose_formatter} <user.prose>$: user.insert_formatted(prose, prose_formatter)
-{user.prose_formatter} <user.prose> over: user.insert_formatted(prose, prose_formatter)
+{user.prose_formatter} <user.prose>$:
+    user.insert_formatted(prose, prose_formatter)
+{user.prose_formatter} <user.prose> over:
+    user.insert_formatted(prose, prose_formatter)
 {user.prose_formatter} <user.prose> {user.post_dictation_keys}:
     user.insert_formatted(prose, prose_formatter)
     key(post_dictation_keys)
@@ -24,7 +26,8 @@ say <user.prose> {user.post_dictation_keys}:
 word <user.word>: user.insert_with_history(user.word)
 recent list: user.toggle_phrase_history()
 recent close: user.phrase_history_hide()
-recent repeat <number_small>: user.insert_with_history(user.get_recent_phrase(number_small))
+recent repeat <number_small>:
+    user.insert_with_history(user.get_recent_phrase(number_small))
 recent copy <number_small>: clip.set_text(user.get_recent_phrase(number_small))
 select that: user.select_last_phrase()
 before that: user.before_last_phrase()

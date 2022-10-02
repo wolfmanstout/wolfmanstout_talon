@@ -26,10 +26,14 @@ tree select: key(alt-h)
 tree paste: key(ctrl-c ctrl-x ctrl-y)
 tree delete: key(alt-h ctrl-c c ctrl-w)
 <number_small> tree [select]: user.mark_lines(number_small, -1, 0, 1)
-<number_small> tree copy here: user.use_lines(number_small, -1, "alt-w", "ctrl-c ctrl-x ctrl-y", 0, 0, 1)
-<number_small> tree move here: user.use_lines(number_small, -1, "ctrl-w", "ctrl-c ctrl-x ctrl-y", 0, 0, 1)
-other <number_small> tree copy here: user.use_lines(number_small, -1, "alt-w", "ctrl-c ctrl-x ctrl-y", 0, 1, 1)
-other <number_small> tree move here: user.use_lines(number_small, -1, "ctrl-w", "ctrl-c ctrl-x ctrl-y", 0, 1, 1)
+<number_small> tree copy here:
+    user.use_lines(number_small, -1, "alt-w", "ctrl-c ctrl-x ctrl-y", 0, 0, 1)
+<number_small> tree move here:
+    user.use_lines(number_small, -1, "ctrl-w", "ctrl-c ctrl-x ctrl-y", 0, 0, 1)
+other <number_small> tree copy here:
+    user.use_lines(number_small, -1, "alt-w", "ctrl-c ctrl-x ctrl-y", 0, 1, 1)
+other <number_small> tree move here:
+    user.use_lines(number_small, -1, "ctrl-w", "ctrl-c ctrl-x ctrl-y", 0, 1, 1)
 open org link: key(ctrl-c ctrl-o)
 show todos: key(ctrl-c / t)
 archive: key(ctrl-c ctrl-x ctrl-a)

@@ -12,8 +12,7 @@ scratch that: user.clear_last_phrase()
 select that: user.select_last_phrase()
 
 # Escape, type things that would otherwise be commands
-escape <user.text>:
-    auto_insert(user.text)
+escape <user.text>: auto_insert(user.text)
 
 command <phrase>$:
     user.command_mode()

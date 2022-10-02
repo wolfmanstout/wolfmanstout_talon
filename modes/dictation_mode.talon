@@ -1,7 +1,8 @@
 mode: dictation
 experiment: anchor-file
 -
-settings(): speech.timeout = 0.5
+settings():
+    speech.timeout = 0.5
 
 # Everything here should call `auto_insert()` (instead of `insert()`), to preserve the state to correctly auto-capitalize/auto-space.
 # (Talonscript string literals implicitly call `auto_insert`, so there's no need to wrap those)
@@ -12,8 +13,7 @@ cap: user.dictation_format_cap()
 (no-space | no space): user.dictation_format_no_space()
 
 # Formatting
-formatted <user.format_text> [over]:
-    user.dictation_insert_raw(format_text)
+formatted <user.format_text> [over]: user.dictation_insert_raw(format_text)
 
 # Corrections
 spell that <user.letters> [over]: auto_insert(letters)

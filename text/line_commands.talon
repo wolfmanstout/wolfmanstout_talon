@@ -37,7 +37,8 @@ cut [line] <number> until <number>:
     user.select_range(number_1, number_2)
     edit.paste()
 (select | cell | sell) [line] <number>: user.select_range(number, number)
-(select | cell | sell) <number> until <number>: user.select_range(number_1, number_2)
+(select | cell | sell) <number> until <number>:
+    user.select_range(number_1, number_2)
 tab that: edit.indent_more()
 tab [line] <number>:
     edit.jump_line(number)
@@ -66,7 +67,7 @@ drag down [line] <number>:
 drag down <number> until <number>:
     user.select_range(number_1, number_2)
     edit.line_swap_down()
-clone (line|that) | (this | line) copy down: edit.line_clone()
+clone (line | that) | (this | line) copy down: edit.line_clone()
 
 select camel left: user.extend_camel_left()
 select camel right: user.extend_camel_right()

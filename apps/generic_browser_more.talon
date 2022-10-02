@@ -6,12 +6,12 @@ link tab | tab [new] link: key(ctrl-.)
 tab move left: key(ctrl-shift-pageup)
 tab move right: key(ctrl-shift-pagedown)
 workspace open: key(alt-a)
-workspace tab (open|new): key(alt-s)
+workspace tab (open | new): key(alt-s)
 workspace close: key(alt-w)
 workspace new: key(alt-n)
 workspace [tab] save: key(alt-shift-d)
-(caret|carrot) browsing: key(f7)
-code search (voice access|VA):
+(caret | carrot) browsing: key(f7)
+code search (voice access | VA):
     browser.focus_address()
     insert("csva")
     key(tab)
@@ -55,19 +55,19 @@ sheets site:
     browser.focus_address()
     insert("sheets.google.com")
     key(enter)
-new (docs|doc) site:
+new (docs | doc) site:
     browser.focus_address()
     insert("doc.new")
     key(enter)
-new (slides|slide) site:
+new (slides | slide) site:
     browser.focus_address()
     insert("slides.new")
     key(enter)
-new (sheets|sheet) site:
+new (sheets | sheet) site:
     browser.focus_address()
     insert("sheet.new")
     key(enter)
-new (scripts|script) site:
+new (scripts | script) site:
     browser.focus_address()
     insert("script.new")
     key(enter)

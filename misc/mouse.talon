@@ -6,22 +6,22 @@ zoom mouse: user.mouse_toggle_zoom_mouse()
 camera overlay: user.mouse_toggle_camera_overlay()
 run calibration: user.mouse_calibrate()
 here [left] touch:
-	mouse_click(0)
-	# close the mouse grid if open
-	user.grid_close()
-    	# End any open drags
-	# Touch automatically ends left drags so this is for right drags specifically
-	user.mouse_drag_end()
+    mouse_click(0)
+    # close the mouse grid if open
+    user.grid_close()
+    # End any open drags
+    # Touch automatically ends left drags so this is for right drags specifically
+    user.mouse_drag_end()
 
 here right touch:
-	mouse_click(1)
-	# close the mouse grid if open
-	user.grid_close()
+    mouse_click(1)
+    # close the mouse grid if open
+    user.grid_close()
 
 here middle touch:
-	mouse_click(2)
-	# close the mouse grid
-	user.grid_close()
+    mouse_click(2)
+    # close the mouse grid
+    user.grid_close()
 
 #see keys.py for modifiers.
 #defaults
@@ -31,38 +31,37 @@ here middle touch:
 #shift
 #super = windows key
 here <user.modifiers> touch:
-	key("{modifiers}:down")
-	mouse_click(0)
-	key("{modifiers}:up")
-	# close the mouse grid
-	user.grid_close()
+    key("{modifiers}:down")
+    mouse_click(0)
+    key("{modifiers}:up")
+    # close the mouse grid
+    user.grid_close()
 here <user.modifiers> right touch:
-	key("{modifiers}:down")
-	mouse_click(1)
-	key("{modifiers}:up")
-	# close the mouse grid
-	user.grid_close()
+    key("{modifiers}:down")
+    mouse_click(1)
+    key("{modifiers}:up")
+    # close the mouse grid
+    user.grid_close()
 here double touch:
-	mouse_click()
-	mouse_click()
-	# close the mouse grid
-	user.grid_close()
+    mouse_click()
+    mouse_click()
+    # close the mouse grid
+    user.grid_close()
 here triple touch:
-	mouse_click()
-	mouse_click()
-	mouse_click()
-	# close the mouse grid
-	user.grid_close()
+    mouse_click()
+    mouse_click()
+    mouse_click()
+    # close the mouse grid
+    user.grid_close()
 here [left] drag:
-	user.mouse_drag(0)
-	# close the mouse grid
-	user.grid_close()
+    user.mouse_drag(0)
+    # close the mouse grid
+    user.grid_close()
 here right drag:
-	user.mouse_drag(1)
-	# close the mouse grid
-	user.grid_close()
-end drag:
-    user.mouse_drag_end()
+    user.mouse_drag(1)
+    # close the mouse grid
+    user.grid_close()
+end drag: user.mouse_drag_end()
 wheel down: user.mouse_scroll_down()
 wheel down here:
     user.mouse_move_center_active_window()
