@@ -140,6 +140,7 @@ punctuation_words = {
     "@": "@",
     ",": ",",  # <== these things
     "comma": ",",
+    # Workaround for issue with conformer b-series; see #946
     "coma": ",",
     "come a": ",",
     "period": ".",
