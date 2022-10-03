@@ -440,7 +440,7 @@ class Actions:
             global context_check_phrase_timestamp, phrase_timestamp
             if context_check_phrase_timestamp != phrase_timestamp:
                 # Clobber selection in case we need to peek either left or right.
-                actions.user.clobber_selection_if_exists()
+                actions.key("space backspace")
                 # Peek left if we might need leading space or auto-capitalization.
                 if (
                     not omit_space_before(text)
