@@ -439,8 +439,6 @@ class Actions:
         if setting_context_sensitive_dictation.get():
             global context_check_phrase_timestamp, phrase_timestamp
             if context_check_phrase_timestamp != phrase_timestamp:
-                # Clobber selection in case we need to peek either left or right.
-                actions.key("space backspace")
                 # Peek left if we might need leading space or auto-capitalization.
                 if (
                     not omit_space_before(text)
