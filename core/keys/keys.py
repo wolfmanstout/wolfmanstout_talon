@@ -150,6 +150,7 @@ punctuation_words = {
     "corn": ":",
     "slash": "/",
     "question mark": "?",
+    "questioner": "?",
     "exclamation mark": "!",
     "number sign": "#",
     "percent sign": "%",
