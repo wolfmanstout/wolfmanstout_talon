@@ -145,7 +145,7 @@ punctuation_words = {
     "come a": ",",
     "period": ".",
     "buried": ".",
-    "semicolon": ";",
+    "semi colon": ";",
     "colon": ":",
     "corn": ":",
     "slash": "/",
