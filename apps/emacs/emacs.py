@@ -215,55 +215,49 @@ class UserActions:
 
     # dictation.py support start
 
-    def dictation_peek_left() -> Optional[str]:
-
+    def dictation_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
+        if not (left or right):
+            return None, None
+        before, after = None, None
         # Inserting a space ensures we select something even if we're at
         # document start; some editors 'helpfully' copy the current line if we
         # edit.copy() while nothing is selected.
         actions.insert(" ")
-        # In principle the previous word should suffice, but some applications
-        # have a funny concept of what the previous word is (for example, they
-        # may only take the "`" at the end of "`foo`"). To be double sure we
-        # take two words left. I also tried taking a line up + a word left, but
-        # edit.extend_up() = key(shift-up) doesn't work consistently in the
-        # Slack webapp (sometimes escapes the text box).
-        actions.edit.extend_word_left()
-        actions.edit.extend_word_left()
-        text = actions.edit.selected_text()
-        if text:
+        if left:
+            # In principle the previous word should suffice, but some applications
+            # have a funny concept of what the previous word is (for example, they
+            # may only take the "`" at the end of "`foo`"). To be double sure we
+            # take two words left. I also tried taking a line up + a word left, but
+            # edit.extend_up() = key(shift-up) doesn't work consistently in the
+            # Slack webapp (sometimes escapes the text box).
+            actions.edit.extend_word_left()
+            actions.edit.extend_word_left()
+            before = actions.edit.selected_text()[:-1]
             # Jump back to the right of the selected text.
             actions.key("ctrl-u ctrl-space")
-        actions.key("backspace")  # remove the space we added
-        return text[:-1]
-
-    def dictation_peek_right() -> Optional[str]:
-        # We grab two characters because I think that's what no_space_before
-        # needs in the worst case. An example where the second character matters
-        # is inserting before (1) "' hello" vs (2) "'hello". In case (1) we
-        # don't want to add space, in case (2) we do.
-        # Insert space to ensure something to select (see dictation_peek_left).
-        actions.insert(" ")
-        actions.edit.left()
-        # We want to select at least two characters to the right, plus the space
-        # we inserted, because no_space_before needs two characters in the worst
-        # case -- for example, inserting before "' hello" we don't want to add
-        # space, while inserted before "'hello" we do.
-        #
-        # We use 2x extend_word_right() because it's fewer keypresses (lower
-        # latency) than 3x extend_right(). Other options all seem to have
-        # problems. For instance, extend_line_end() might not select all the way
-        # to the next newline if text has been wrapped across multiple lines;
-        # extend_line_down() sometimes escapes the current text box (eg. in a
-        # browser address bar). 1x extend_word_right() _usually_ works, but on
-        # Windows in Firefox it doesn't always select enough characters.
-        actions.edit.extend_word_right()
-        actions.edit.extend_word_right()
-        after = actions.edit.selected_text()
-        if after:
+        if not right:
+            actions.key("backspace")  # remove the space
+        else:
+            actions.edit.left()  # go left before space
+            # We want to select at least two characters to the right, plus the space
+            # we inserted, because no_space_before needs two characters in the worst
+            # case -- for example, inserting before "' hello" we don't want to add
+            # space, while inserted before "'hello" we do.
+            #
+            # We use 2x extend_word_right() because it's fewer keypresses (lower
+            # latency) than 3x extend_right(). Other options all seem to have
+            # problems. For instance, extend_line_end() might not select all the way
+            # to the next newline if text has been wrapped across multiple lines;
+            # extend_line_down() sometimes escapes the current text box (eg. in a
+            # browser address bar). 1x extend_word_right() _usually_ works, but on
+            # Windows in Firefox it doesn't always select enough characters.
+            actions.edit.extend_word_right()
+            actions.edit.extend_word_right()
+            after = actions.edit.selected_text()[1:]
             # Jump back to the left of the selected text.
             actions.key("ctrl-u ctrl-space")
-        actions.key("delete")  # remove space
-        return after[1:]
+            actions.key("delete")  # remove space
+        return before, after
 
     # dictation.py support end
 
