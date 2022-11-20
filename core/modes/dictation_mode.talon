@@ -4,9 +4,8 @@ experiment: anchor-file
 settings():
     speech.timeout = 0.5
 
-# Everything here should call `auto_insert()` (instead of `insert()`), to preserve the state to correctly auto-capitalize/auto-space.
-# (Talonscript string literals implicitly call `auto_insert`, so there's no need to wrap those)
-<user.raw_prose>: auto_insert(raw_prose)
+# Everything here should call `user.dictation_insert()` instead of `insert()`, to correctly auto-capitalize/auto-space.
+<user.raw_prose>: user.dictation_insert(raw_prose)
 cap: user.dictation_format_cap()
 # Hyphenated variants are for Dragon.
 (no-caps | no caps): user.dictation_format_no_cap()
@@ -16,7 +15,7 @@ cap: user.dictation_format_cap()
 formatted <user.format_text> [over]: user.dictation_insert_raw(format_text)
 
 # Corrections
-spell that <user.letters> [over]: auto_insert(letters)
+spell that <user.letters> [over]: user.dictation_insert(letters)
 spell that <user.formatters> <user.letters> [over]:
     result = user.formatted_text(letters, formatters)
     user.dictation_insert_raw(result)
