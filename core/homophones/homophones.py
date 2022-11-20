@@ -232,7 +232,3 @@ class Actions:
         if word in all_homophones:
             return all_homophones[word]
         return None
-
-    def homophones_get_all() -> dict[str, Sequence[str]]:
-        """Get a copy of the homophones dict"""
-        return deepcopy(all_homophones)
