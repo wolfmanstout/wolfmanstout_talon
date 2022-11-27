@@ -114,3 +114,28 @@ copy mouse position: user.copy_mouse_position()
 curse no:
     # Command added 2021-12-13, can remove after 2022-06-01
     app.notify("Please activate the user.mouse_cursor_commands_enable tag to enable this command")
+
+scroll up:
+    user.move_cursor_to_gaze_point(0, 40)
+    user.mouse_scroll_up()
+scroll up half:
+    user.move_cursor_to_gaze_point(0, 40)
+    user.mouse_scroll_up(0.5)
+scroll down:
+    user.move_cursor_to_gaze_point(0, -40)
+    user.mouse_scroll_down()
+scroll down half:
+    user.move_cursor_to_gaze_point(0, -40)
+    user.mouse_scroll_down(0.5)
+scroll left:
+    user.move_cursor_to_gaze_point(40, 0)
+    user.mouse_scroll_left()
+scroll left half:
+    user.move_cursor_to_gaze_point(40, 0)
+    user.mouse_scroll_left(0.5)
+scroll right:
+    user.move_cursor_to_gaze_point(-40, 0)
+    user.mouse_scroll_right()
+scroll right half:
+    user.move_cursor_to_gaze_point(-40, 0)
+    user.mouse_scroll_right(0.5)
