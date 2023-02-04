@@ -10,6 +10,7 @@ modes = {
     "presentation": "a more strict form of sleep where only a more strict wake up command works",
     "windbg": "a way to force windbg commands to be loaded",
     "private": "a mode that disables recording",
+    "context_insensitive": "a mode that disables context sensitivity",
 }
 
 for key, value in modes.items():
@@ -81,3 +82,11 @@ class Actions:
         actions.mode.enable("command")
         actions.user.hud_clear_screen_regions("overlay", "mode")
         actions.user.hud_clear_screen_regions("cursor", "mode")
+
+    def context_sensitive_mode():
+        """Enables context sensitivity."""
+        actions.mode.disable("user.context_insensitive")
+
+    def context_insensitive_mode():
+        """Disables context sensitivity."""
+        actions.mode.enable("user.context_insensitive")
