@@ -1,0 +1,12 @@
+{
+	"cluck": {
+		"sounds": ["click_alveolar"],
+		"threshold": {
+			">power": 5,
+			">probability": 0.99
+		},
+		"throttle": {
+			"cluck": 0.1
+		}
+	}
+}
