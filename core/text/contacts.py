@@ -204,6 +204,13 @@ def prose_last_name_possessive(m) -> TimestampedString:
 
 
 @mod.capture(
+    rule="(hi | hello) {user.contact_names}",
+)
+def prose_contact_snippet(m) -> TimestampedString:
+    return TimestampedString(" ".join(m), m[0].start, m[-1].end)
+
+
+@mod.capture(
     rule=(
         "<user.prose_name> "
         "| <user.prose_name_possessive> "
@@ -215,6 +222,7 @@ def prose_last_name_possessive(m) -> TimestampedString:
         "| <user.prose_first_name_possessive> "
         "| <user.prose_last_name>"
         "| <user.prose_last_name_possessive>"
+        "| <user.prose_contact_snippet>"
     ),
 )
 def prose_contact(m) -> TimestampedString:
