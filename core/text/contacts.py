@@ -204,10 +204,10 @@ def prose_last_name_possessive(m) -> TimestampedString:
 
 
 @mod.capture(
-    rule="(hi | hello) {user.contact_names}",
+    rule="(hi | high) {user.contact_names} [name]",
 )
 def prose_contact_snippet(m) -> TimestampedString:
-    return TimestampedString(" ".join(m), m[0].start, m[-1].end)
+    return TimestampedString(f"hi {m.contact_names}", m[0].start, m[-1].end)
 
 
 @mod.capture(
