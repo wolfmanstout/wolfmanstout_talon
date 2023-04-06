@@ -14,6 +14,10 @@ and app.bundle: com.google.Chrome
 """
 mod.apps.chrome = """
 os: mac
+and app.bundle: com.google.Chrome.canary
+"""
+mod.apps.chrome = """
+os: mac
 and app.bundle: org.chromium.Chromium
 """
 mod.apps.chrome = """
