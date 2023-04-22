@@ -23,7 +23,7 @@ bar run: user.vscode("workbench.view.debug")
 bar search: user.vscode("workbench.view.search")
 bar source: user.vscode("workbench.view.scm")
 bar (test | testing): user.vscode("workbench.view.testing.focus")
-bar switch: user.vscode("workbench.action.toggleSidebarVisibility")
+bar (hide | show | switch): user.vscode("workbench.action.toggleSidebarVisibility")
 
 # Symbol search
 symbol hunt [<user.text>]:
@@ -40,19 +40,19 @@ symbol hunt all [<user.text>]:
 panel control: user.vscode("workbench.panel.repl.view.focus")
 panel output: user.vscode("workbench.panel.output.focus")
 panel problems: user.vscode("workbench.panel.markers.view.focus")
-panel switch: user.vscode("workbench.action.togglePanel")
+panel (hide | show | switch): user.vscode("workbench.action.togglePanel")
 panel terminal: user.vscode("workbench.action.terminal.focus")
 focus editor: user.vscode("workbench.action.focusActiveEditorGroup")
 
 # Settings
-show settings: user.vscode("workbench.action.openGlobalSettings")
-show settings json: user.vscode("workbench.action.openSettingsJson")
-show settings folder: user.vscode("workbench.action.openFolderSettings")
-show settings folder json: user.vscode("workbench.action.openFolderSettingsFile")
-show settings workspace: user.vscode("workbench.action.openWorkspaceSettings")
-show settings workspace json: user.vscode("workbench.action.openWorkspaceSettingsFile")
-show shortcuts: user.vscode("workbench.action.openGlobalKeybindings")
-show snippets: user.vscode("workbench.action.openSnippets")
+settings show: user.vscode("workbench.action.openGlobalSettings")
+settings show json: user.vscode("workbench.action.openSettingsJson")
+settings show folder: user.vscode("workbench.action.openFolderSettings")
+settings show folder json: user.vscode("workbench.action.openFolderSettingsFile")
+settings show workspace: user.vscode("workbench.action.openWorkspaceSettings")
+settings show workspace json: user.vscode("workbench.action.openWorkspaceSettingsFile")
+shortcuts show: user.vscode("workbench.action.openGlobalKeybindings")
+snippets show: user.vscode("workbench.action.openSnippets")
 
 # Display
 centered switch: user.vscode("workbench.action.toggleCenteredLayout")
