@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 -
 find [it]: edit.find()
 

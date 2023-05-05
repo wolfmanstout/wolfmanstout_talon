@@ -1,4 +1,4 @@
-mode: dictation
+mode: user.dictation_command
 -
 format selection <user.formatters>:
     user.formatters_reformat_selection(formatters)

@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 tag: user.tabs
 -
 tab (open | new): app.tab_open()

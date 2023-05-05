@@ -11,6 +11,7 @@ modes = {
     "windbg": "a way to force windbg commands to be loaded",
     "private": "a mode that disables recording",
     "context_insensitive": "a mode that disables context sensitivity",
+    "dictation_command": "a mode that enables commands within dictation mode",
 }
 
 for key, value in modes.items():
@@ -53,6 +54,7 @@ class Actions:
         actions.mode.disable("sleep")
         actions.mode.disable("command")
         actions.mode.enable("dictation")
+        actions.mode.enable("user.dictation_command")
         actions.user.code_clear_language_mode()
         actions.mode.disable("user.gdb")
         actions.user.dictation_format_reset()
@@ -79,6 +81,7 @@ class Actions:
         """Enables command mode."""
         actions.mode.disable("sleep")
         actions.mode.disable("dictation")
+        actions.mode.disable("user.dictation_command")
         actions.mode.enable("command")
         actions.user.hud_clear_screen_regions("overlay", "mode")
         actions.user.hud_clear_screen_regions("cursor", "mode")

@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 -
 <user.letter>: key(letter)
 (ship | uppercase | upper) <user.letters> [(lowercase | sunk)]:

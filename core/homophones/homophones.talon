@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 -
 phones <user.homophones_canonical>: user.homophones_show(homophones_canonical)
 phones that: user.homophones_show_auto()

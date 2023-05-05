@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 app: emacs
 -
 # General

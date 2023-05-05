@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 -
 control mouse: user.mouse_toggle_control_mouse()
 zoom mouse: user.mouse_toggle_zoom_mouse()

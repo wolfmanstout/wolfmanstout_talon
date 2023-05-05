@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 tag: user.splits
 -
 split right: user.split_window_right()

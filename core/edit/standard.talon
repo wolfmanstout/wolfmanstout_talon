@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 -
 zoom in: edit.zoom_in()
 zoom out: edit.zoom_out()
@@ -25,7 +25,7 @@ link this: user.hyperlink()
 kill: key(ctrl-k)
 
 # Repeated from dictation_mode.talon so these can be chained with commands outside that file.
-# For some reason, Talon does not prefer this parse if used in dictation_commands.talon.
+# For some reason, Talon does not prefer this parse if used in user.dictation_commands.talon.
 now do [<phrase>]$:
     user.command_mode()
     user.parse_phrase(phrase or "")

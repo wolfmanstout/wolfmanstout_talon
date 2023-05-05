@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 os: mac
 -
 <user.running_applications> win$: user.switcher_focus(running_applications)

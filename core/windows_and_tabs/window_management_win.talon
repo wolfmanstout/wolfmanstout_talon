@@ -1,5 +1,5 @@
 mode: command
-mode: dictation
+mode: user.dictation_command
 os: windows
 -
 {user.docked_apps} win$: key("win-ctrl-{docked_apps}")
