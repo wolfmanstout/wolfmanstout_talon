@@ -1,3 +1,3 @@
-parrot(cluck): 
-    app.notify("cluck")
-    core.repeat_phrase()
+# parrot(cluck): 
+#     app.notify("cluck")
+#     core.repeat_phrase()
