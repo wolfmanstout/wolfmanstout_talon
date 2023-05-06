@@ -25,7 +25,9 @@ nickname_to_full_name = get_list_from_csv(
     "nicknames.csv",
     headers=("Full Name", "Nickname"),
 )
-full_name_to_nickname = {v: k for k, v in nickname_to_full_name.items()}
+full_name_to_nicknames = defaultdict(list)
+for nickname, full_name in nickname_to_full_name.items():
+    full_name_to_nicknames[full_name].append(nickname)
 
 # Manually reload the CSV if it changes. resource.open() breaks if called by
 # multiple files.
@@ -51,17 +53,13 @@ for spoken_form, written_form in vocabulary.items():
         spoken_forms[written_form].append(spoken_form)
 
 
-def get_nicknames(full_name: str) -> List[str]:
-    return (
-        [full_name_to_nickname[full_name]] if full_name in full_name_to_nickname else []
-    )
-
-
 def create_name_to_email_dict():
     return {
         name: email
         for full_name, email in full_name_to_email.items()
-        for name in full_name.split(" ") + [full_name] + get_nicknames(full_name)
+        for name in full_name.split(" ")
+        + [full_name]
+        + full_name_to_nicknames[full_name]
         if name
     }
 
@@ -70,7 +68,9 @@ def create_name_to_full_name_dict():
     return {
         name: full_name
         for full_name in full_name_to_email
-        for name in full_name.split(" ") + [full_name] + get_nicknames(full_name)
+        for name in full_name.split(" ")
+        + [full_name]
+        + full_name_to_nicknames[full_name]
         if name
     }
 
@@ -79,7 +79,8 @@ def create_contact_names():
     return {
         name: name
         for full_name in full_name_to_email
-        for name in [full_name.split(" ")[0], full_name] + get_nicknames(full_name)
+        for name in [full_name.split(" ")[0], full_name]
+        + full_name_to_nicknames[full_name]
         if name
     }
 
