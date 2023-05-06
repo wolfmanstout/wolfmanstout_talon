@@ -1,5 +1,4 @@
 mode: dictation
-experiment: anchor-file
 -
 settings():
     speech.timeout = 0.5
