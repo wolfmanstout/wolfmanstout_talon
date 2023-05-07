@@ -126,6 +126,33 @@ suggest clear: user.vscode("editor.action.inlineSuggest.hide")
 suggest next: user.vscode("editor.action.inlineSuggest.showNext")
 suggest last: user.vscode("editor.action.inlineSuggest.showPrevious")
 suggest trigger: user.vscode("editor.action.inlineSuggest.trigger")
+copilot <user.cursorless_target> to <user.prose>:
+    user.cursorless_command("setSelection", cursorless_target)
+    user.vscode("interactiveEditor.start")
+    sleep(350ms)
+    insert(prose)
+    key(enter)
+copilot explain <user.cursorless_target> [to <user.prose>]:
+    user.cursorless_command("setSelection", cursorless_target)
+    user.vscode("interactiveEditor.start")
+    sleep(350ms)
+    insert("/explain ")
+    insert(prose or "")
+    key(enter)
+copilot test <user.cursorless_target> [to <user.prose>]:
+    user.cursorless_command("setSelection", cursorless_target)
+    user.vscode("interactiveEditor.start")
+    sleep(350ms)
+    insert("/test ")
+    insert(prose or "")
+    key(enter)
+copilot fix <user.cursorless_target> [to <user.prose>]:
+    user.cursorless_command("setSelection", cursorless_target)
+    user.vscode("interactiveEditor.start")
+    sleep(350ms)
+    insert("/fix ")
+    insert(prose or "")
+    key(enter)
 
 #code navigation
 (go declaration | follow): user.vscode("editor.action.revealDefinition")
