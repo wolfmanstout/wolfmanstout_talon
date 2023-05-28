@@ -23,7 +23,7 @@ bar run: user.vscode("workbench.view.debug")
 bar search: user.vscode("workbench.view.search")
 bar source: user.vscode("workbench.view.scm")
 bar (test | testing): user.vscode("workbench.view.testing.focus")
-bar chat: user.vscode("workbench.panel.interactiveSession.view.copilot.focus")
+bar chat: user.vscode("workbench.panel.chat.view.copilot.focus")
 bar copilot: user.vscode("workbench.view.extension.copilot-labs")
 bar (hide | show | switch): user.vscode("workbench.action.toggleSidebarVisibility")
 
