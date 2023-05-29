@@ -117,6 +117,8 @@ rename that: user.vscode("editor.action.rename")
 refactor that: user.vscode("editor.action.refactor")
 whitespace trim: user.vscode("editor.action.trimTrailingWhitespace")
 language switch: user.vscode("workbench.action.editor.changeLanguageMode")
+mode {user.language_id}:
+    user.vscode_with_plugin("commands.setEditorLanguage", language_id)
 refactor rename: user.vscode("editor.action.rename")
 refactor this: user.vscode("editor.action.refactor")
 

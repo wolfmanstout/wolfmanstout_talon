@@ -384,3 +384,19 @@ class UserActions:
         actions.edit.find(text)
         actions.sleep("100ms")
         actions.key("esc")
+
+mod.list("language_id", "language id")
+ctx.lists["user.language_id"] = {
+    "bash": "bash",
+    "html": "html",
+    "jason": "json",
+    "java": "java",
+    "lay tech": "tex",
+    "markdown": "markdown",
+    "python": "python",
+    "ruby": "ruby",
+    "rust": "rust",
+    "scala": "scala",
+    "text": "plaintext",
+    "typescript": "typescript",
+}
