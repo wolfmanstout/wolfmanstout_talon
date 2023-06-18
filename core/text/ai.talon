@@ -3,3 +3,4 @@ hostname: Player-One
 -
 edit text to <user.prose>$: user.ai_edit_selection(prose)
 edit code to <user.prose>$: user.ai_edit_code_selection(prose)
+query text with <user.prose>$: user.ai_query_selection(prose)
