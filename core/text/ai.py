@@ -2,11 +2,28 @@ import os
 
 import openai
 import openai.error
+import tiktoken
 from talon import Module, actions
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 mod = Module()
+
+
+def num_tokens_from_string(string: str, model: str) -> int:
+    """Returns the number of tokens in a text string."""
+    encoding = tiktoken.encoding_for_model(model)
+    num_tokens = len(encoding.encode(string))
+    return num_tokens
+
+
+def get_chatgpt_model(prompt: str) -> str:
+    """Returns the appropriate model based on the number of tokens in the prompt."""
+    return (
+        "gpt-3.5-turbo-16k-0613"
+        if num_tokens_from_string(prompt, "gpt-3.5-turbo-0613") > 4096
+        else "gpt-3.5-turbo-0613"
+    )
 
 
 @mod.action_class
@@ -52,7 +69,7 @@ class Actions:
         )
         try:
             completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model=get_chatgpt_model(prompt),
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt},
