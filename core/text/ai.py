@@ -19,9 +19,10 @@ def num_tokens_from_string(string: str, model: str) -> int:
 
 def get_chatgpt_model(prompt: str) -> str:
     """Returns the appropriate model based on the number of tokens in the prompt."""
+    # Use 4000 instead of 4096 to account for tokens added internally by ChatGPT.
     return (
         "gpt-3.5-turbo-16k-0613"
-        if num_tokens_from_string(prompt, "gpt-3.5-turbo-0613") > 4096
+        if num_tokens_from_string(prompt, "gpt-3.5-turbo-0613") > 4000
         else "gpt-3.5-turbo-0613"
     )
 
