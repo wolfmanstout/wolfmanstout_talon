@@ -1,9 +1,10 @@
 import os
+from typing import Optional
 
 import openai
 import openai.error
 import tiktoken
-from talon import Module, actions
+from talon import Module, actions, registry
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -25,6 +26,27 @@ def get_chatgpt_model(prompt: str) -> str:
         if num_tokens_from_string(prompt, "gpt-3.5-turbo-0613") > 4000
         else "gpt-3.5-turbo-0613"
     )
+
+
+def get_chatgpt_response(user_prompt: str, system_prompt: str = "") -> Optional[str]:
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": user_prompt})
+    try:
+        completion = openai.ChatCompletion.create(
+            model=get_chatgpt_model(system_prompt + user_prompt),
+            messages=messages,
+        )
+    except openai.error.InvalidRequestError as e:
+        actions.app.notify(
+            "Invalid request, try a different prompt: " + e.error.message
+        )
+        return
+    if not completion.choices:
+        actions.app.notify("No response provided")
+        return
+    return completion.choices[0].message.content
 
 
 @mod.action_class
@@ -63,25 +85,34 @@ class Actions:
         if not selected:
             actions.app.notify("No text selected")
             return
-        prompt = (
-            f'Selected text: """{selected}"""\n\n'
-            f'Question: """{question}"""\n\n'
-            f"Answer the above question with respect to the currently selected text."
+        system_prompt = (
+            "Answer questions about the provided text. The text will be delimited with"
+            " triple quotes."
         )
-        try:
-            completion = openai.ChatCompletion.create(
-                model=get_chatgpt_model(prompt),
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt},
-                ],
-            )
-        except openai.error.InvalidRequestError as e:
-            actions.app.notify(
-                "Invalid request, try a different prompt: " + e.error.message
-            )
+        user_prompt = f'Question: {question}\n\nText: """{selected}"""'
+        response = get_chatgpt_response(user_prompt, system_prompt)
+        if not response:
             return
-        if not completion.choices:
-            actions.app.notify("No response provided")
+        actions.app.notify(response)
+
+    def ai_query_active_commands(question: str):
+        """Queries the list of active commands."""
+        system_prompt = (
+            "Describe how to perform the user request using currently active Talon"
+            " commands. Talon is a voice control system for desktop computers. All"
+            " active commands will be listed. They will be grouped into contexts and"
+            " listed under each context."
+        )
+        user_prompt = f'Request: {question}\n\nActive Commands: """\n'
+        for context in registry.active_contexts():
+            if not context.commands:
+                continue
+            user_prompt += f"{context.path}\n"
+            for _, command in context.commands.items():
+                user_prompt += f"- {command.rule.rule}\n"
+            user_prompt += "\n"
+        user_prompt += '"""'
+        response = get_chatgpt_response(user_prompt, system_prompt)
+        if not response:
             return
-        actions.app.notify(completion.choices[0].message.content)
+        actions.app.notify(response)
