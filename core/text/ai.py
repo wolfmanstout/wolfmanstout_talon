@@ -3,7 +3,6 @@ from typing import Optional
 
 import openai
 import openai.error
-import tiktoken
 from talon import Module, actions, registry
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -19,13 +18,10 @@ def num_tokens_from_string(string: str, model: str) -> int:
 
 
 def get_chatgpt_model(prompt: str) -> str:
-    """Returns the appropriate model based on the number of tokens in the prompt."""
-    # Use 4000 instead of 4096 to account for tokens added internally by ChatGPT.
-    return (
-        "gpt-3.5-turbo-16k-0613"
-        if num_tokens_from_string(prompt, "gpt-3.5-turbo-0613") > 4000
-        else "gpt-3.5-turbo-0613"
-    )
+    """Returns the appropriate model based on the length of the prompt."""
+    # Use characters instead of tokens to avoid dependency on tiktoken library
+    # which doesn't work on Talon Mac. 4092 * 3 characters/token ~= 12000.
+    return "gpt-3.5-turbo-16k-0613" if len(prompt) > 12000 else "gpt-3.5-turbo-0613"
 
 
 def get_chatgpt_response(user_prompt: str, system_prompt: str = "") -> Optional[str]:
@@ -98,10 +94,10 @@ class Actions:
     def ai_query_active_commands(question: str):
         """Queries the list of active commands."""
         system_prompt = (
-            "Describe how to perform the user request using currently active Talon"
-            " commands. Talon is a voice control system for desktop computers. All"
-            " active commands will be listed. They will be grouped into contexts and"
-            " listed under each context."
+            "Describe tersely how to perform the user request using currently active"
+            " Talon commands. Talon is a voice control system for desktop computers."
+            " All active commands will be listed. They will be grouped into contexts"
+            " and listed under each context."
         )
         user_prompt = f'Request: {question}\n\nActive Commands: """\n'
         for context in registry.active_contexts():
