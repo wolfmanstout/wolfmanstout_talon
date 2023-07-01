@@ -3,11 +3,13 @@ from typing import Optional
 
 import openai
 import openai.error
-from talon import Module, actions, registry
+from talon import Module, actions, imgui, registry
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 mod = Module()
+
+response = ""
 
 
 def get_chatgpt_model(prompt: str) -> str:
@@ -18,6 +20,7 @@ def get_chatgpt_model(prompt: str) -> str:
 
 
 def get_chatgpt_response(user_prompt: str, system_prompt: str = "") -> Optional[str]:
+    global response
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
@@ -35,11 +38,40 @@ def get_chatgpt_response(user_prompt: str, system_prompt: str = "") -> Optional[
     if not completion.choices:
         actions.app.notify("No response provided")
         return
-    return completion.choices[0].message.content
+    response = completion.choices[0].message.content
+    return response
+
+
+@imgui.open(y=0)
+def gui(gui: imgui.GUI):
+    global response
+    gui.text("AI Chat")
+    gui.line()
+    for line in response.split("\n"):
+        while len(line) > 80:
+            pos = line.rfind(" ", 0, 80)
+            if pos != -1:
+                gui.text(line[:pos])
+                line = line[pos + 1 :]
+            else:
+                gui.text(line[:80])
+                line = line[80:]
+        gui.text(line)
+    gui.spacer()
+    if gui.button("AI Chat close"):
+        actions.user.ai_chat_disable()
 
 
 @mod.action_class
 class Actions:
+    def ai_chat_enable():
+        """Enable the AI chat window."""
+        gui.show()
+
+    def ai_chat_disable():
+        """Disable the AI chat window."""
+        gui.hide()
+
     def ai_edit_selection(instruction: str, model: str = "text-davinci-edit-001"):
         """Applies the provided instruction to the currently-selected text."""
         selected = actions.edit.selected_text()
@@ -82,7 +114,7 @@ class Actions:
         response = get_chatgpt_response(user_prompt, system_prompt)
         if not response:
             return
-        actions.app.notify(response)
+        actions.self.ai_chat_enable()
 
     def ai_query_active_commands(question: str):
         """Queries the list of active commands."""
@@ -104,4 +136,4 @@ class Actions:
         response = get_chatgpt_response(user_prompt, system_prompt)
         if not response:
             return
-        actions.app.notify(response)
+        actions.self.ai_chat_enable()
