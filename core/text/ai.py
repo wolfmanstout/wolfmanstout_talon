@@ -10,13 +10,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 mod = Module()
 
 
-def num_tokens_from_string(string: str, model: str) -> int:
-    """Returns the number of tokens in a text string."""
-    encoding = tiktoken.encoding_for_model(model)
-    num_tokens = len(encoding.encode(string))
-    return num_tokens
-
-
 def get_chatgpt_model(prompt: str) -> str:
     """Returns the appropriate model based on the length of the prompt."""
     # Use characters instead of tokens to avoid dependency on tiktoken library
