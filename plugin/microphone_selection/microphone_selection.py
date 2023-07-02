@@ -8,6 +8,14 @@ mod = Module()
 microphone_device_list = []
 last_microphone = None
 
+preferred_microphones = mod.setting(
+    "preferred_microphones",
+    type=str,
+    default="",
+    desc="Comma separated list of preferred microphones.",
+)
+
+
 # by convention, None and System Default are listed first
 # to match the Talon context menu.
 def update_microphone_list():
@@ -71,6 +79,13 @@ class Actions:
             actions.sound.set_microphone("None")
         else:
             if not last_microphone:
+                # Find the first preferred microphone in the device list
+                for preferred_microphone in preferred_microphones.get().split(","):
+                    preferred_microphone = preferred_microphone.strip()
+                    for device in microphone_device_list:
+                        if preferred_microphone.lower() in device.lower():
+                            actions.sound.set_microphone(device)
+                            return
                 actions.app.notify("Previously used microphone not known")
                 return
             actions.sound.set_microphone(last_microphone)
