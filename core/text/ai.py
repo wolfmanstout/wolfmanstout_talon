@@ -32,7 +32,7 @@ def get_chatgpt_response(user_prompt: str, system_prompt: str = "") -> Optional[
         )
     except openai.error.InvalidRequestError as e:
         actions.app.notify(
-            "Invalid request, try a different prompt: " + e.error.message
+            "Invalid request, try a different prompt: " + (e.user_message or "")
         )
         return
     if not completion.choices:
@@ -85,9 +85,9 @@ class Actions:
                 instruction=instruction,
                 temperature=0.5,
             )
-        except openai.error.InvalidRequestError:
+        except openai.error.InvalidRequestError as e:
             actions.app.notify(
-                "Invalid request, try a different prompt: " + e.error.message
+                "Invalid request, try a different prompt: " + (e.user_message or "")
             )
             return
         if not result.choices:
