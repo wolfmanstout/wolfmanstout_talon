@@ -268,6 +268,8 @@ debug continue: user.vscode("workbench.action.debug.continue")
 debug restart: user.vscode("workbench.action.debug.restart")
 debug console: user.vscode("workbench.debug.action.toggleRepl")
 debug clean: user.vscode("workbench.debug.panel.action.clearReplAction")
+debug python: user.vscode("python.debugInTerminal")
+run python: user.vscode("python.execInTerminal")
 
 # Terminal
 terminal external: user.vscode("workbench.action.terminal.openNativeConsole")
