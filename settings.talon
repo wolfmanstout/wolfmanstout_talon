@@ -54,7 +54,7 @@ settings():
 
     user.draft_editor = "Visual Studio Code - Insiders, Visual Studio Code"
 
-    user.preferred_microphones = "Sennheiser, TableMike"
+    user.preferred_microphones = "Samson, Sennheiser, TableMike"
 
 # Uncomment this to enable the curse yes/curse no commands (show hide mouse cursor). See issue #688.
 # tag(): user.mouse_cursor_commands_enable
