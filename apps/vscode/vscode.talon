@@ -19,7 +19,7 @@ please [<user.text>]:
 bar explore: user.vscode("workbench.view.explorer")
 bar extensions: user.vscode("workbench.view.extensions")
 bar outline: user.vscode("outline.focus")
-bar run: user.vscode("workbench.view.debug")
+bar (run | debug): user.vscode("workbench.view.debug")
 bar search: user.vscode("workbench.view.search")
 bar source: user.vscode("workbench.view.scm")
 bar (test | testing): user.vscode("workbench.view.testing.focus")
@@ -39,7 +39,7 @@ symbol hunt all [<user.text>]:
     insert(text or "")
 
 # Panels
-panel control: user.vscode("workbench.panel.repl.view.focus")
+panel (debug | console): user.vscode("workbench.panel.repl.view.focus")
 panel output: user.vscode("workbench.panel.output.focus")
 panel problems: user.vscode("workbench.panel.markers.view.focus")
 panel (hide | show | switch): user.vscode("workbench.action.togglePanel")
@@ -258,7 +258,7 @@ test cancel: user.vscode("testing.cancelRun")
 
 # Debugging
 break point: user.vscode("editor.debug.action.toggleBreakpoint")
-step over: user.vscode("workbench.action.debug.stepOver")
+[debug] step over: user.vscode("workbench.action.debug.stepOver")
 debug step into: user.vscode("workbench.action.debug.stepInto")
 debug step out [of]: user.vscode("workbench.action.debug.stepOut")
 debug start: user.vscode("workbench.action.debug.start")
