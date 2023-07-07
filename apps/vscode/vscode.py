@@ -163,14 +163,6 @@ class MacUserActions:
 
 @ctx.action_class("user")
 class UserActions:
-    # ai.py support begin
-    def ai_edit_code_selection(instruction: str):
-        actions.mimic("copilot this")
-        actions.insert(instruction)
-        actions.key("enter")
-
-    # ai.py support end
-
     # splits.py support begin
     def split_clear_all():
         actions.user.vscode("workbench.action.editorLayoutSingle")
@@ -384,6 +376,7 @@ class UserActions:
         actions.edit.find(text)
         actions.sleep("100ms")
         actions.key("esc")
+
 
 mod.list("language_id", "language id")
 ctx.lists["user.language_id"] = {

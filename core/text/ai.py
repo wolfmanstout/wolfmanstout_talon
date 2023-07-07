@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import List, Optional, Union
 
 import openai
 import openai.error
@@ -12,22 +12,39 @@ mod = Module()
 response = ""
 
 
-def get_chatgpt_model(prompt: str) -> str:
-    """Returns the appropriate model based on the length of the prompt."""
-    # Use characters instead of tokens to avoid dependency on tiktoken library
-    # which doesn't work on Talon Mac. 4092 * 3 characters/token ~= 12000.
-    return "gpt-3.5-turbo-16k-0613" if len(prompt) > 12000 else "gpt-3.5-turbo-0613"
+def get_chatgpt_model(prompt: str, use_smart: bool) -> str:
+    """Returns the appropriate model based on the length of the prompt and use_smart
+    parameter."""
+    # Use characters instead of tokens to avoid dependency on tiktoken library which
+    # doesn't work on Talon Mac. 4092 * 3 characters/token ~= 12000.
+    if use_smart:
+        return "gpt-4"
+    else:
+        return "gpt-3.5-turbo-16k-0613" if len(prompt) > 12000 else "gpt-3.5-turbo-0613"
 
 
-def get_chatgpt_response(user_prompt: str, system_prompt: str = "") -> Optional[str]:
+def get_chatgpt_response(
+    user_prompt: Union[str, List[str]],
+    system_prompt: str = "",
+    use_smart_model: bool = False,
+) -> Optional[str]:
     global response
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
-    messages.append({"role": "user", "content": user_prompt})
+    if isinstance(user_prompt, str):
+        messages.append({"role": "user", "content": user_prompt})
+    elif isinstance(user_prompt, list):
+        for prompt in user_prompt:
+            messages.append({"role": "user", "content": prompt})
+    else:
+        raise ValueError(f"Invalid user_prompt type: {type(user_prompt)}")
     try:
+        total_prompt = system_prompt + (
+            user_prompt if isinstance(user_prompt, str) else "\n".join(user_prompt)
+        )
         completion = openai.ChatCompletion.create(
-            model=get_chatgpt_model(system_prompt + user_prompt),
+            model=get_chatgpt_model(total_prompt, use_smart_model),
             messages=messages,
         )
     except openai.error.InvalidRequestError as e:
@@ -72,33 +89,31 @@ class Actions:
         """Disable the AI chat window."""
         gui.hide()
 
-    def ai_edit_selection(instruction: str, model: str = "text-davinci-edit-001"):
+    def ai_edit_selection(
+        instruction: str,
+        system_prompt: str = "Apply the change requested by the user to the text.",
+    ):
         """Applies the provided instruction to the currently-selected text."""
         selected = actions.edit.selected_text()
         if not selected:
             actions.app.notify("No text selected")
             return
-        try:
-            result = openai.Edit.create(
-                model=model,
-                input=selected,
-                instruction=instruction,
-                temperature=0.5,
-            )
-        except openai.error.InvalidRequestError as e:
-            actions.app.notify(
-                "Invalid request, try a different prompt: " + (e.user_message or "")
-            )
+        response = get_chatgpt_response(
+            user_prompt=[selected, instruction],
+            system_prompt=system_prompt,
+            use_smart_model=True,
+        )
+        if not response:
             return
-        if not result.choices:
-            actions.app.notify("No response provided")
-            return
-        actions.clip.set_text(result.choices[0].text)
+        actions.clip.set_text(response)
         actions.edit.paste()
 
     def ai_edit_code_selection(instruction: str):
         """Applies the provided instruction to the currently-selected code."""
-        actions.self.ai_edit_selection(instruction, model="code-davinci-edit-001")
+        actions.self.ai_edit_selection(
+            instruction,
+            system_prompt="Apply the change requested by the user to the code.",
+        )
 
     def ai_query_selection(question: str):
         """Queries the currently-selected text with the provided question."""
@@ -111,7 +126,9 @@ class Actions:
             " triple quotes."
         )
         user_prompt = f'Question: {question}\n\nText: """{selected}"""'
-        response = get_chatgpt_response(user_prompt, system_prompt)
+        response = get_chatgpt_response(
+            user_prompt, system_prompt, use_smart_model=True
+        )
         if not response:
             return
         actions.self.ai_chat_enable()
