@@ -77,3 +77,19 @@ message preev: key(+ p)
 message next: key(+ n)
 section next: key(+ `)
 section preev: key(+ ~)
+
+touch expand all:
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2023-08-12_15.59.43.893343.png", 0)
+    sleep(0.05)
+    mouse_click(0)
+    sleep(0.05)
+    user.mouse_helper_position_restore()
+
+touch collapse all:
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2023-08-12_16.01.41.668613.png", 0)
+    sleep(0.05)
+    mouse_click(0)
+    sleep(0.05)
+    user.mouse_helper_position_restore()
