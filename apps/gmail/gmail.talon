@@ -56,6 +56,12 @@ label taxes:
     insert("taxes")
     sleep(500ms)
     key(enter)
+label hiring:
+    key(+ l)
+    sleep(500ms)
+    insert("hiring")
+    sleep(500ms)
+    key(enter)
 label: key(+ l)
 this select: key(+ x)
 # <n> select: {['plus, x, plus, j']}n
