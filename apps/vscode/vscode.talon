@@ -31,6 +31,7 @@ bar (hide | show | switch): user.vscode("workbench.action.toggleSidebarVisibilit
 symbol hunt [<user.text>]:
     user.vscode("workbench.action.gotoSymbol")
     sleep(50ms)
+    insert(":")
     insert(text or "")
 
 symbol hunt all [<user.text>]:
