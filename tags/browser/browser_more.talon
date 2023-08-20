@@ -81,7 +81,7 @@ meet site:
     key(enter)
 insert text box: key(alt-i t)
 match next: user.browser_match_next()
-match preev: user.browser_match_previous()
+match (last | preev): user.browser_match_previous()
 bookmark open: key(ctrl-;)
 tab [new] bookmark: key(ctrl-')
 frame next: key(ctrl-[)
