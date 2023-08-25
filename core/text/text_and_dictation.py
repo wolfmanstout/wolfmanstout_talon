@@ -463,8 +463,12 @@ class Actions:
         text = text.replace("“", '"').replace("”", '"')
         actions.insert(text)
         if needs_check_after:
+            # Determined experimentally in Gmail on Mac.
+            time.sleep(0.2)
             _, after = actions.user.dictation_peek(False, True)
-            add_space_after = after is not None and needs_space_between(original_text, after)
+            add_space_after = after is not None and needs_space_between(
+                original_text, after
+            )
         if add_space_after:
             actions.user.insert_between("", " ")
         actions.user.add_phrase_to_history(text, " " if add_space_after else "")
