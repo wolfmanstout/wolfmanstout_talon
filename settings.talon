@@ -52,7 +52,7 @@ settings():
 
     speech.timeout = 0.4
 
-    user.draft_editor = "Visual Studio Code - Insiders, Visual Studio Code"
+    user.draft_editor = "Visual Studio Code - Insiders, Visual Studio Code, Code"
 
     user.preferred_microphones = "Samson, Sennheiser, TableMike"
 
