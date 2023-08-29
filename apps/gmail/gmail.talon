@@ -83,6 +83,7 @@ message (last | preev): key(+ p)
 message next: key(+ n)
 section next: key(+ `)
 section (last | preev): key(+ ~)
+[suggest] keep: key(tab)
 
 touch expand all:
     user.mouse_helper_position_save()
