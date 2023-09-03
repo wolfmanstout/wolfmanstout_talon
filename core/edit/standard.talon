@@ -15,6 +15,8 @@ cut that: edit.cut()
 ^undo [that]$: edit.undo()
 ^redo [that]$: edit.redo()
 paste (match | raw): edit.paste_match_style()
+paste auto:
+    user.dictation_insert(clip.text())
 [file] save: edit.save()
 bold this: user.bold()
 italics this: user.italic()
