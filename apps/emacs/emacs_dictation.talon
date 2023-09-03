@@ -65,17 +65,17 @@ this select: key(ctrl-x ctrl-x)
     user.mark_lines(number_small_1, number_small_2 or -1)
 <number_small> (through | until) [<number_small>] short [select]:
     user.mark_lines(number_small_1, number_small_2 or -1, 1)
-<number_small> (through | until) [<number_small>] copy here:
+<number_small> (through | until) [<number_small>] (bring | copy) here:
     user.use_lines(number_small_1, number_small_2 or -1, "alt-w", "ctrl-y")
-<number_small> (through | until) [<number_small>] short copy here:
+<number_small> (through | until) [<number_small>] short (bring | copy) here:
     user.use_lines(number_small_1, number_small_2 or -1, "alt-w", "ctrl-y", 1)
 <number_small> (through | until) [<number_small>] move here:
     user.use_lines(number_small_1, number_small_2 or -1, "ctrl-w", "ctrl-y")
 <number_small> (through | until) [<number_small>] short move here:
     user.use_lines(number_small_1, number_small_2 or -1, "ctrl-w", "ctrl-y", 1)
-other <number_small> (through | until) [<number_small>] copy here:
+other <number_small> (through | until) [<number_small>] (bring | copy) here:
     user.use_lines(number_small_1, number_small_2 or -1, "alt-w", "ctrl-y", 0, 1)
-other <number_small> (through | until) [<number_small>] short copy here:
+other <number_small> (through | until) [<number_small>] short (bring | copy) here:
     user.use_lines(number_small_1, number_small_2 or -1, "alt-w", "ctrl-y", 1, 1)
 other <number_small> (through | until) [<number_small>] move here:
     user.use_lines(number_small_1, number_small_2 or -1, "ctrl-w", "ctrl-y", 0, 1)
