@@ -19,14 +19,5 @@ spell that <user.formatters> <user.letters> [over]:
     result = user.formatted_text(letters, formatters)
     user.dictation_insert_raw(result)
 
-now do [<phrase>]$:
-    user.command_mode()
-    user.parse_phrase(phrase or "")
-
-now do [<phrase>] prose:
-    user.command_mode()
-    user.parse_phrase(phrase or "")
-    user.dictation_mode()
-
 # Ignore accidental usage of "prose" in dictation mode.
 ^prose: skip()

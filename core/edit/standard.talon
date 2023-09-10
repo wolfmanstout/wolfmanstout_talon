@@ -26,21 +26,4 @@ bullet this: user.bullet_list()
 link this: user.hyperlink()
 kill: key(ctrl-k)
 
-# Repeated from dictation_mode.talon so these can be chained with commands
-# outside that file and used (accidentally) in command mode.
-now do [<phrase>]$:
-    user.command_mode()
-    user.parse_phrase(phrase or "")
-
-# This should be covered by the previous command, but the parse in
-# dictation_mode.talon is often preferred, such that the previous command
-# becomes text.
-now do$:
-    user.command_mode()
-
-now do [<phrase>] prose:
-    user.command_mode()
-    user.parse_phrase(phrase or "")
-    user.dictation_mode()
-
 ((hey | OK) google | hey Siri) [<phrase>]$: skip()
