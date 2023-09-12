@@ -526,7 +526,13 @@ class Actions:
             # Windows in Firefox it doesn't always select enough characters.
             actions.edit.extend_word_right()
             actions.edit.extend_word_right()
-            after = actions.edit.selected_text()[1:]
+            selection = actions.edit.selected_text()
+            if selection:
+                after = selection[1:]
+            else:
+                # Observed on Mac in Gmail.
+                print("Unable to get selected text.")
+                after = ""
             actions.edit.left()
             actions.key("delete")  # remove space
         return before, after
