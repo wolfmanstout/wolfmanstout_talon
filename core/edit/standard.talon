@@ -20,7 +20,7 @@ paste auto:
 [file] save: edit.save()
 bold this: user.bold()
 italics this: user.italic()
-strikethrough this: user.strikethrough()
+strike through this: user.strikethrough()
 number this: user.number_list()
 bullet this: user.bullet_list()
 link this: user.hyperlink()
