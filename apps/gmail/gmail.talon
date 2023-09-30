@@ -86,7 +86,7 @@ section (last | preev): key(+ ~)
 
 touch expand all:
     user.mouse_helper_position_save()
-    user.mouse_helper_move_image_relative("2023-08-12_15.59.43.893343.png", 0)
+    user.mouse_helper_move_image_relative("2023-09-26_12.58.32.898292.png", 0)
     sleep(0.05)
     mouse_click(0)
     sleep(0.05)
