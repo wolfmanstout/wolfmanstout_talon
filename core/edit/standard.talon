@@ -23,7 +23,10 @@ italics this: user.italic()
 strike through this: user.strikethrough()
 number this: user.number_list()
 bullet this: user.bullet_list()
-link this: user.hyperlink()
+link this:
+    user.hyperlink()
+    sleep(100ms)
+    edit.paste()
 kill: key(ctrl-k)
 
 ((hey | OK) google | hey Siri) [<phrase>]$: skip()
