@@ -491,10 +491,11 @@ class Actions:
         if not (left or right):
             return None, None
         before, after = None, None
-        # Inserting a space ensures we select something even if we're at
+        # Inserting a character ensures we select something even if we're at
         # document start; some editors 'helpfully' copy the current line if we
-        # edit.copy() while nothing is selected.
-        actions.insert(" ")
+        # edit.copy() while nothing is selected. We use "." instead of " "
+        # because Gmail Chat merges adjacent whitespace in the clipboard.
+        actions.insert(".")
         if left:
             # In principle the previous word should suffice, but some applications
             # have a funny concept of what the previous word is (for example, they
