@@ -28,9 +28,9 @@ touch discard:
     sleep(0.05)
     user.mouse_helper_position_restore()
 
-touch more options:
+touch message options:
     user.mouse_helper_position_save()
-    user.mouse_helper_move_image_relative("2023-10-09_17.20.54.079391.png", 0)
+    user.mouse_helper_move_image_relative("2023-10-09_17.20.54.079391.png", 0, 0, 0, user.mouse_helper_calculate_relative_rect("0 -200 -0 -0"))
     sleep(0.05)
     mouse_click(0)
     sleep(0.05)
