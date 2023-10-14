@@ -1,4 +1,5 @@
 # Descended from https://github.com/dwiel/talon_community/blob/master/misc/dictation.py
+import logging
 import re
 import time
 from typing import Callable, Optional
@@ -505,7 +506,16 @@ class Actions:
             # Slack webapp (sometimes escapes the text box).
             actions.edit.extend_word_left()
             actions.edit.extend_word_left()
-            before = actions.edit.selected_text()[:-1]
+            selected_text = actions.edit.selected_text()
+            if selected_text[-1] == ".":
+                before = selected_text[:-1]
+            elif selected_text[-2:] == ".\n":  # Observed in Google Docs after a bullet.
+                before = selected_text[:-2]
+            else:
+                logging.warning(
+                    f"Selected text did not contain newly-added period: {selected_text}"
+                )
+                before = selected_text
             # Unfortunately, in web Slack, if our selection ends at newline,
             # this will go right over the newline. Argh.
             actions.edit.right()
