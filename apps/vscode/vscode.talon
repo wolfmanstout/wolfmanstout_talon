@@ -124,11 +124,6 @@ refactor rename: user.vscode("editor.action.rename")
 refactor this: user.vscode("editor.action.refactor")
 
 # Copilot
-[suggest] keep: user.vscode("editor.action.inlineSuggest.commit")
-suggest clear: user.vscode("editor.action.inlineSuggest.hide")
-suggest next: user.vscode("editor.action.inlineSuggest.showNext")
-suggest last: user.vscode("editor.action.inlineSuggest.showPrevious")
-suggest trigger: user.vscode("editor.action.inlineSuggest.trigger")
 copilot <user.cursorless_target> to <user.prose>:
     user.cursorless_command("setSelection", cursorless_target)
     user.vscode("interactiveEditor.start")
