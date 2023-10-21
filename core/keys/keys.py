@@ -143,6 +143,7 @@ punctuation_words = {
     # Workaround for issue with conformer b-series; see #946
     "coma": ",",
     "come a": ",",
+    "kama": ",",
     "period": ".",
     "buried": ".",
     "semi colon": ";",
@@ -222,8 +223,10 @@ punctuation_words.update(
     {
         "open paren": "(",
         "open brand": "(",
+        "open print": "(",
         "close paren": ")",
         "close brand": ")",
+        "close print": ")",
     }
 )
 ctx.lists["self.punctuation"] = punctuation_words
