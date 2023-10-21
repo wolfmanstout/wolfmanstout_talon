@@ -76,6 +76,7 @@ class Actions:
         active_microphone = actions.sound.active_microphone()
         if active_microphone != "None":
             last_microphone = actions.sound.active_microphone()
+            actions.user.command_mode()
             actions.sound.set_microphone("None")
         else:
             if not last_microphone:
