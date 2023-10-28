@@ -4,7 +4,7 @@ app: gmail
 -
 [suggest] keep: key(tab)
 
-touch expand all:
+touch expand (all | al):
     user.mouse_helper_position_save()
     user.mouse_helper_move_image_relative("2023-09-26_12.58.32.898292.png", 0)
     sleep(0.05)
@@ -12,7 +12,7 @@ touch expand all:
     sleep(0.05)
     user.mouse_helper_position_restore()
 
-touch collapse all:
+touch collapse (all | al):
     user.mouse_helper_position_save()
     user.mouse_helper_move_image_relative("2023-08-12_16.01.41.668613.png", 0)
     sleep(0.05)
