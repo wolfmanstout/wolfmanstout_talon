@@ -14,7 +14,11 @@ cut that: edit.cut()
     key(enter)
 ^undo [that]$: edit.undo()
 ^redo [that]$: edit.redo()
-paste (match | raw): edit.paste_match_style()
+(pace | paste) (match | raw): edit.paste_match_style()
+(pace | paste) link: 
+    user.hyperlink()
+    sleep(100ms)
+    edit.paste()
 paste auto:
     user.dictation_insert(clip.text())
 [file] save: edit.save()
@@ -24,10 +28,6 @@ strike through this: user.strikethrough()
 number this: user.number_list()
 bullet this: user.bullet_list()
 link this: user.hyperlink()
-link (pace | paste):
-    user.hyperlink()
-    sleep(100ms)
-    edit.paste()
 kill: key(ctrl-k)
 
 ((hey | OK) google | hey Siri) [<phrase>]$: skip()
