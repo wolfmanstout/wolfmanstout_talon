@@ -501,9 +501,10 @@ class Actions:
             # In principle the previous word should suffice, but some applications
             # have a funny concept of what the previous word is (for example, they
             # may only take the "`" at the end of "`foo`"). To be double sure we
-            # take two words left. I also tried taking a line up + a word left, but
+            # take three words left. I also tried taking a line up + a word left, but
             # edit.extend_up() = key(shift-up) doesn't work consistently in the
             # Slack webapp (sometimes escapes the text box).
+            actions.edit.extend_word_left()
             actions.edit.extend_word_left()
             actions.edit.extend_word_left()
             selected_text = actions.edit.selected_text()
@@ -528,13 +529,14 @@ class Actions:
             # case -- for example, inserting before "' hello" we don't want to add
             # space, while inserted before "'hello" we do.
             #
-            # We use 2x extend_word_right() because it's fewer keypresses (lower
+            # We use 3x extend_word_right() because it's fewer keypresses (lower
             # latency) than 3x extend_right(). Other options all seem to have
             # problems. For instance, extend_line_end() might not select all the way
             # to the next newline if text has been wrapped across multiple lines;
             # extend_line_down() sometimes escapes the current text box (eg. in a
             # browser address bar). 1x extend_word_right() _usually_ works, but on
             # Windows in Firefox it doesn't always select enough characters.
+            actions.edit.extend_word_right()
             actions.edit.extend_word_right()
             actions.edit.extend_word_right()
             selection = actions.edit.selected_text()
