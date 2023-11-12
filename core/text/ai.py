@@ -15,18 +15,16 @@ response = ""
 def get_chatgpt_model(prompt: str, use_smart: bool) -> str:
     """Returns the appropriate model based on the length of the prompt and use_smart
     parameter."""
-    # Use characters instead of tokens to avoid dependency on tiktoken library which
-    # doesn't work on Talon Mac. 4092 * 3 characters/token ~= 12000.
     if use_smart:
-        return "gpt-4"
+        return "gpt-4-1106-preview"
     else:
-        return "gpt-3.5-turbo-16k-0613" if len(prompt) > 12000 else "gpt-3.5-turbo-0613"
+        return "gpt-3.5-turbo-1106"
 
 
 def get_chatgpt_response(
     user_prompt: Union[str, List[str]],
     system_prompt: str = "",
-    use_smart_model: bool = False,
+    use_smart_model: bool = True,
 ) -> Optional[str]:
     global response
     messages = []
@@ -101,7 +99,6 @@ class Actions:
         response = get_chatgpt_response(
             user_prompt=[selected, instruction],
             system_prompt=system_prompt,
-            use_smart_model=True,
         )
         if not response:
             return
@@ -126,9 +123,7 @@ class Actions:
             " triple quotes."
         )
         user_prompt = f'Question: {question}\n\nText: """{selected}"""'
-        response = get_chatgpt_response(
-            user_prompt, system_prompt, use_smart_model=True
-        )
+        response = get_chatgpt_response(user_prompt, system_prompt)
         if not response:
             return
         actions.self.ai_chat_enable()
