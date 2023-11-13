@@ -36,6 +36,7 @@ class BrowserActions:
 
     def focus_address():
         actions.key("ctrl-l")
+        actions.sleep("50ms")
         # action(browser.focus_page):
 
     def go_blank():
