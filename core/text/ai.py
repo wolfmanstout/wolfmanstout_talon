@@ -1,9 +1,13 @@
 import os
 from typing import List, Optional, Union
 
-import openai
-from openai import OpenAI
-from talon import Module, actions, imgui, registry
+try:
+    import openai
+    from openai import OpenAI
+except ImportError as e:
+    print(f"Unable to import openai: {e}")
+    openai = None
+from talon import Module, actions, app, imgui, registry
 
 mod = Module()
 setting_openai_api_key = mod.setting(
@@ -13,11 +17,17 @@ setting_openai_api_key = mod.setting(
     desc="API key to use in calls to the OpenAI API. Keep this secret.",
 )
 
-if setting_openai_api_key.get():
-    client = OpenAI(api_key=setting_openai_api_key.get())
-else:
-    print("Set the openai_api_key setting to use the AI chat feature.")
-    client = None
+
+def on_ready():
+    if setting_openai_api_key.get():
+        client = OpenAI(api_key=setting_openai_api_key.get())
+    else:
+        print("Set the openai_api_key setting to use the AI chat feature.")
+        client = None
+
+
+if openai:
+    app.register("ready", on_ready)
 
 response = ""
 
