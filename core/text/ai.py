@@ -2,12 +2,22 @@ import os
 from typing import List, Optional, Union
 
 import openai
-import openai.error
+from openai import OpenAI
 from talon import Module, actions, imgui, registry
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 mod = Module()
+setting_openai_api_key = mod.setting(
+    "openai_api_key",
+    type=str,
+    default=None,
+    desc="API key to use in calls to the OpenAI API. Keep this secret.",
+)
+
+if setting_openai_api_key.get():
+    client = OpenAI(api_key=setting_openai_api_key.get())
+else:
+    print("Set the openai_api_key setting to use the AI chat feature.")
+    client = None
 
 response = ""
 
@@ -27,6 +37,7 @@ def get_chatgpt_response(
     use_smart_model: bool = True,
 ) -> Optional[str]:
     global response
+    assert client is not None
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
@@ -41,19 +52,17 @@ def get_chatgpt_response(
         total_prompt = system_prompt + (
             user_prompt if isinstance(user_prompt, str) else "\n".join(user_prompt)
         )
-        completion = openai.ChatCompletion.create(
+        completion = client.chat.completions.create(
             model=get_chatgpt_model(total_prompt, use_smart_model),
             messages=messages,
         )
-    except openai.error.InvalidRequestError as e:
-        actions.app.notify(
-            "Invalid request, try a different prompt: " + (e.user_message or "")
-        )
+    except openai.APIStatusError as e:
+        actions.app.notify("Invalid request, try a different prompt: " + e.message)
         return
     if not completion.choices:
         actions.app.notify("No response provided")
         return
-    response = completion.choices[0].message.content
+    response = completion.choices[0].message.content or ""
     return response
 
 
