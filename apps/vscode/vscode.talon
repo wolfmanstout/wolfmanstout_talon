@@ -43,6 +43,7 @@ symbol hunt all [<user.text>]:
 panel (debug | console): user.vscode("workbench.panel.repl.view.focus")
 panel output: user.vscode("workbench.panel.output.focus")
 panel problems: user.vscode("workbench.panel.markers.view.focus")
+panel ports: user.vscode("~remote.forwardedPorts.focus")
 panel (hide | show | switch): user.vscode("workbench.action.togglePanel")
 panel (terminal | shell): user.vscode("workbench.action.terminal.focus")
 focus editor: user.vscode("workbench.action.focusActiveEditorGroup")
