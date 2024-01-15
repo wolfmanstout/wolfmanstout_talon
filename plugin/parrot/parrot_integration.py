@@ -1,18 +1,19 @@
-from copy import copy
-from dataclasses import dataclass
-from typing import Callable, Optional, Sequence
 import json
 import logging
 import time
+from copy import copy
+from dataclasses import dataclass
+from typing import Callable, Optional, Sequence
 
-from talon import Module, resource, events
+from talon import Module, events, resource
 from talon.debug import log_exception
-from talon.experimental.parrot import ParrotSystem, ParrotDelegate, ParrotFrame
+from talon.experimental.parrot import ParrotDelegate, ParrotFrame, ParrotSystem
 from talon_init import TALON_HOME
 
 PARROT_HOME = TALON_HOME / "user" / "wolfmanstout_talon" / "plugin" / "parrot"
 pattern_path = str(PARROT_HOME / "patterns.json")
 model_path = str(PARROT_HOME / "model.pkl")
+
 
 ## START PARROT CLASSES ##
 class PatternMatcher:
@@ -280,7 +281,7 @@ class PatternBuilder:
         if "<power" in thresholds:
             detection_calls.append(
                 lambda self, frame, threshold=thresholds["<power"]: frame.power
-                >= threshold
+                < threshold
             )
         if "<ratio" in thresholds and len(sounds) > 1:
             detection_calls.append(
@@ -308,18 +309,24 @@ class PatternBuilder:
 
 
 class Delegate(ParrotDelegate):
+    raw_patterns: list[NoisePattern]
     patterns: dict[str, NoisePattern]
     debug: bool
     last_frame_was_forwardpass: bool
+    classes: Optional[set[str]]
 
-    def __init__(self, pattern_path: str, *, debug: bool = False):
-        self.pattern_path = pattern_path
+    def __init__(self, *, debug: bool = False):
         self.debug = debug
         self.patterns = {}
         self.last_frame_was_forwardpass = False
+        self.classes = None
+        self.raw_patterns = []
 
-    def set_class_names(self, classes: set[str]) -> None:
-        patterns_to_validate = self.load_patterns(self.pattern_path, classes)
+    def apply_patterns(self) -> None:
+        classes = self.classes
+        patterns_to_validate = self.raw_patterns
+        if classes is None:
+            return
         # discard invalid patterns
         invalid_patterns: set[str] = set()
         patterns: dict[str, NoisePattern] = {}
@@ -340,20 +347,19 @@ class Delegate(ParrotDelegate):
             class_names = ", ".join(classes)
             logging.warning(f"[parrot] use one of the following labels: {class_names}")
 
-    def load_patterns(self, pattern_path: str, classes: set[str]) -> list[NoisePattern]:
-        """Load the patterns"""
-        try:
-            json_patterns = json.loads(resource.read(pattern_path))
-            pattern_builder = PatternBuilder()
-            patterns: list[NoisePattern] = []
-            for key, config in json_patterns.items():
-                pattern = pattern_builder.build(key, config)
-                if pattern is not None:
-                    patterns.append(pattern)
-            return patterns
-        except Exception:
-            log_exception(f"[parrot] invalid pattern file: {pattern_path}")
-            return []
+    def set_class_names(self, classes: set[str]) -> None:
+        self.classes = classes
+        self.apply_patterns()
+
+    def set_patterns(self, json_patterns: dict) -> None:
+        pattern_builder = PatternBuilder()
+        patterns: list[NoisePattern] = []
+        for key, config in json_patterns.items():
+            pattern = pattern_builder.build(key, config)
+            if pattern is not None:
+                patterns.append(pattern)
+        self.raw_patterns = patterns
+        self.apply_patterns()
 
     def calculate_silence_threshold(self) -> float:
         """Calculate the power threshold needed before we need to do noise recognition given the currently active noises"""
@@ -412,5 +418,13 @@ class Delegate(ParrotDelegate):
         return active
 
 
-parrot_delegate = Delegate(pattern_path, debug=False)
+parrot_delegate = Delegate(debug=False)
 system = ParrotSystem(model_path, parrot_delegate)
+
+
+@resource.watch(pattern_path)
+def on_pattern(f):
+    try:
+        parrot_delegate.set_patterns(json.load(f))
+    except Exception:
+        log_exception(f"[parrot] invalid pattern file: {pattern_path}")
