@@ -7,3 +7,4 @@ mode: user.dictation_command
 thrice: core.repeat_command(2)
 once: skip()
 repeat that <number_small> [times]: core.repeat_command(number_small)
+repeat phrase <number_small> [times]: core.repeat_phrase(number_small)
