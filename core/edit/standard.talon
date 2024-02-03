@@ -6,7 +6,9 @@ zoom out: edit.zoom_out()
 zoom reset: edit.zoom_reset()
 screen up: edit.page_up()
 screen down: edit.page_down()
-copy that: edit.copy()
+copy that: 
+    edit.copy()
+    sleep(100ms)
 cut that: edit.cut()
 (pace | paste) that: edit.paste()
 (pace | paste) enter:
