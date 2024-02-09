@@ -506,9 +506,11 @@ class Actions:
             actions.edit.extend_word_left()
             actions.edit.extend_word_left()
             selected_text = actions.edit.selected_text()
-            if selected_text[-1] == ".":
+            if selected_text and selected_text[-1] == ".":
                 before = selected_text[:-1]
-            elif selected_text[-2:] == ".\n":  # Observed in Google Docs after a bullet.
+            elif (
+                selected_text and selected_text[-2:] == ".\n"
+            ):  # Observed in Google Docs after a bullet.
                 before = selected_text[:-2]
             else:
                 logging.warning(
