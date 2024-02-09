@@ -287,7 +287,7 @@ def auto_capitalize(text, state=None):
         # Alphanumeric characters and commas/colons absorb charge & try to
         # capitalize (for numbers & punctuation this does nothing, which is what
         # we want).
-        elif charge and (c.isalnum() or c in ",:"):
+        elif charge and (c.isalnum() or c in ",:@"):
             charge = False
             c = c.capitalize()
         # Otherwise the charge just passes through.
@@ -299,9 +299,7 @@ def auto_capitalize(text, state=None):
     return output, (
         "sentence start"
         if charge or sentence_end
-        else "after newline"
-        if newline
-        else None
+        else "after newline" if newline else None
     )
 
 
