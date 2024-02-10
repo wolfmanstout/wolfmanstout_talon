@@ -2,7 +2,6 @@
 from typing import Union
 
 from talon import Context, Module, actions, speech_system
-from talon.grammar import Phrase
 from talon.lib import flac
 
 mod = Module()
@@ -24,7 +23,7 @@ speech_system.register("post:phrase", on_post_phrase)
 
 @mod.action_class
 class Actions:
-    def parse_phrase(phrase: Union[Phrase, str], recording_path: str = ""):
+    def parse_phrase(phrase: Union[list[str], str], recording_path: str = ""):
         """Rerun phrase"""
         if phrase == "":
             return
@@ -51,7 +50,7 @@ speech.engine: dragon
 
 @ctx.action_class("self")
 class DragonActions:
-    def parse_phrase(phrase: Union[Phrase, str], recording_path: str = ""):
+    def parse_phrase(phrase: Union[list[str], str], recording_path: str = ""):
         if phrase == "":
             return
         command = " ".join(
