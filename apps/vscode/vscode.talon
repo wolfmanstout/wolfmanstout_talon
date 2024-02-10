@@ -28,16 +28,14 @@ bar copilot: user.vscode("workbench.view.extension.copilot-labs")
 bar (hide | show | switch): user.vscode("workbench.action.toggleSidebarVisibility")
 
 # Symbol search
-symbol hunt [<user.text>]:
+symbol hunt:
     user.vscode("workbench.action.gotoSymbol")
     sleep(50ms)
     insert(":")
-    insert(text or "")
 
-symbol hunt all [<user.text>]:
+symbol hunt all:
     user.vscode("workbench.action.showAllSymbols")
     sleep(50ms)
-    insert(text or "")
 
 # Panels
 panel (debug | console): user.vscode("workbench.panel.repl.view.focus")
@@ -66,10 +64,9 @@ wrap switch: user.vscode("editor.action.toggleWordWrap")
 zen switch: user.vscode("workbench.action.toggleZenMode")
 
 # File Commands
-file hunt [<user.text>]:
+file hunt:
     user.vscode("workbench.action.quickOpen")
     sleep(50ms)
-    insert(text or "")
 file hunt (pace | paste):
     user.vscode("workbench.action.quickOpen")
     sleep(50ms)
