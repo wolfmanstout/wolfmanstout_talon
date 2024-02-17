@@ -10,3 +10,6 @@ now do [<phrase>] prose:
     user.command_mode()
     user.parse_phrase(phrase or "")
     user.dictation_mode()
+
+paste auto:
+    user.dictation_insert(clip.text())

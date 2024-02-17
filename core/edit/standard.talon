@@ -21,8 +21,6 @@ cut that: edit.cut()
     user.hyperlink()
     sleep(100ms)
     edit.paste()
-paste auto:
-    user.dictation_insert(clip.text())
 [file] save: edit.save()
 bold this: user.bold()
 italics this: user.italic()
