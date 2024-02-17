@@ -136,9 +136,11 @@ formatters_dict = {
     ),
     "CAPITALIZE_ALL_WORDS": (
         SEP,
-        lambda i, word, _: word.capitalize()
-        if i == 0 or word not in words_to_keep_lowercase
-        else word,
+        lambda i, word, _: (
+            (word[0].capitalize() + word[1:] if word else "")
+            if i == 0 or word not in words_to_keep_lowercase
+            else word
+        ),
     ),
 }
 
