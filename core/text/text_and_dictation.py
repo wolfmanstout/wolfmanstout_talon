@@ -23,6 +23,7 @@ setting_peek_right_after_insertion = mod.setting(
 
 mod.list("prose_modifiers", desc="Modifiers that can be used within prose")
 mod.list("prose_snippets", desc="Snippets that can be used within prose")
+mod.list("prose_number_punctuation", desc="Punctuation that can be used in a number")
 ctx = Context()
 # Maps spoken forms to DictationFormat method names (see DictationFormat below).
 ctx.lists["user.prose_modifiers"] = {
@@ -43,6 +44,13 @@ ctx.lists["user.prose_snippets"] = {
     "winky": ";-)",
     "frowny": ":-(",
 }
+ctx.lists["user.prose_number_punctuation"] = {
+    "dot": ".",
+    "point": ".",
+    "colon": ":",
+    "slash": "/",
+    "percent": "%",
+}
 
 
 @mod.capture(rule="{user.prose_modifiers}")
@@ -50,41 +58,29 @@ def prose_modifier(m) -> Callable:
     return getattr(DictationFormat, m.prose_modifiers)
 
 
-@mod.capture(rule="(numeral | numb) <user.number_string>")
-def prose_simple_number(m) -> str:
-    return m.number_string
-
-
 @mod.capture(rule="letter <user.letter>")
 def prose_letter(m) -> str:
     return m.letter.capitalize()
 
 
-@mod.capture(rule="(numeral | numb) <user.number_string> (dot | point) <digit_string>")
+@mod.capture(rule="<user.number_string> (dot | point) <digit_string>")
 def prose_number_with_dot(m) -> str:
     return m.number_string + "." + m.digit_string
 
 
-@mod.capture(rule="(numeral | numb) <user.number_string> colon <user.number_string>")
-def prose_number_with_colon(m) -> str:
-    return m.number_string_1 + ":" + m.number_string_2
-
-
-@mod.capture(rule="(numeral | numb) <user.number_string> slash <user.number_string>")
-def prose_number_with_slash(m) -> str:
-    return m.number_string_1 + "/" + m.number_string_2
-
-
 @mod.capture(
     rule=(
-        "<user.prose_simple_number> "
-        "| <user.prose_number_with_dot> "
-        "| <user.prose_number_with_colon> "
-        "| <user.prose_number_with_slash>"
+        "(numeral | numb) (<user.number_string> | <user.prose_number_with_dot>)"
+        " [{user.prose_number_punctuation} | (<user.number_string> | <user.prose_number_with_dot>)]*"
     )
 )
 def prose_number(m) -> str:
-    return str(m)
+    return "".join(m[1:])
+
+
+@mod.capture(rule=("<user.prose_number> dollars"))
+def prose_money(m) -> str:
+    return f"${m.prose_number}"
 
 
 @mod.capture(rule="({user.vocabulary} | <word>)")
@@ -112,6 +108,7 @@ def text(m) -> str:
         "| {user.prose_snippets} "
         "| <phrase> "
         "| <user.prose_number> "
+        "| <user.prose_money> "
         "| <user.prose_letter> "
         "| <user.prose_contact>"
         "| <user.prose_modifier>"
@@ -132,6 +129,7 @@ def prose(m) -> str:
         "| {user.prose_snippets} "
         "| <phrase> "
         "| <user.prose_number> "
+        "| <user.prose_money> "
         "| <user.prose_letter>"
         "| <user.prose_contact>"
         ")+"
@@ -198,7 +196,6 @@ no_space_before = re.compile(
     r"""
   ^(?:
     [\s\-_.,!?/%)\]}’”]   # characters that never need space before them
-  | [$£€¥₩₽₹](?!\w)        # currency symbols not followed by a word character
   | [;:](?!-\)|-\()        # colon or semicolon except for smiley faces
   # quotes followed by end of string, space, closing braces, dash, other quotes, or some punctuation.
   | ['"] (?: $ | [\s)\]}\-'".,!?;:/] )
