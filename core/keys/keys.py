@@ -162,6 +162,7 @@ punctuation_words = {
     "under score": "_",
     # Currencies
     "dollar sign": "$",
+    "plus sign": "+",
 }
 symbol_key_words = {
     "dot": ".",

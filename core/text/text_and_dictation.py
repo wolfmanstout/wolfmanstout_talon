@@ -185,7 +185,7 @@ def apply_formatting(m):
 no_space_after = re.compile(
     r"""
   (?:
-    [\s\-_/#@([{‘“]     # characters that never need space after them
+    [\s\-_/#@+([{‘“]     # characters that never need space after them
   | (?<!\w)[$£€¥₩₽₹]    # currency symbols not preceded by a word character
   # quotes preceded by beginning of string, space, opening braces, dash, or other quotes
   | (?: ^ | [\s([{\-'"] ) ['"]
@@ -284,7 +284,7 @@ def auto_capitalize(text, state=None):
         # Alphanumeric characters and commas/colons absorb charge & try to
         # capitalize (for numbers & punctuation this does nothing, which is what
         # we want).
-        elif charge and (c.isalnum() or c in ",:@"):
+        elif charge and (c.isalnum() or c in ",:@+"):
             charge = False
             c = c.capitalize()
         # Otherwise the charge just passes through.
