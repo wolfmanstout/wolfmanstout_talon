@@ -1,6 +1,4 @@
-tag: browser
-title: /Google Calendar/
-title: /Google.com - Calendar/
+app: google_calendar
 -
 today: key(t)
 last | preev: key(k)

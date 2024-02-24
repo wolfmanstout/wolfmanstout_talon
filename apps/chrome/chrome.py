@@ -10,7 +10,7 @@ and app.exe: chrome.exe
 """
 mod.apps.chrome = """
 os: mac
-and app.bundle: com.google.Chrome
+and app.bundle: /^com.google.Chrome/
 """
 mod.apps.chrome = """
 os: mac
