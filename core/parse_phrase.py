@@ -30,7 +30,7 @@ class Actions:
         current_phrase = phrase_stack[-1]
         ts = current_phrase["_ts"]
         # Add padding for Conformer D. Value determined experimentally.
-        start = phrase[0].start - ts - 0.2
+        start = phrase[0].start - ts - 0.15
         end = phrase[-1].end - ts
         samples = current_phrase["samples"]
         pstart = int(start * 16_000)
