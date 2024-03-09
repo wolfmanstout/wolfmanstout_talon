@@ -153,6 +153,8 @@ punctuation_words = {
     "question mark": "?",
     "questioner": "?",
     "exclamation mark": "!",
+    "estimation mark": "!",
+    "exclamation work": "!",
     "number sign": "#",
     "percent sign": "%",
     "at sign": "@",
