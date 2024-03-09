@@ -16,10 +16,10 @@ brace that:
 percent that:
     text = edit.selected_text()
     user.paste("%{text}%")
-single quote that:
+single (quote | quad) that:
     text = edit.selected_text()
     user.paste("'{text}'")
-(quote | dub quote) that:
+((quote | quad) | dub (quote | quad)) that:
     text = edit.selected_text()
     user.paste('"{text}"')
 (grave | back tick) that:

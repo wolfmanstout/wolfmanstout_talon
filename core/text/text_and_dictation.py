@@ -38,7 +38,9 @@ ctx.lists["user.prose_snippets"] = {
     "new paragraph": "\n\n",
     # Curly quotes are used to obtain proper spacing for left and right quotes, but will later be straightened.
     "open quote": "“",
+    "open quad": "“",
     "close quote": "”",
+    "close quad": "”",
     "apostrophe S": "'s",
     "smiley": ":-)",
     "winky": ";-)",
