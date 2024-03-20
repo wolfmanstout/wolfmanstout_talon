@@ -248,3 +248,13 @@ class Actions:
             phrases_to_replace,
             True,
         )
+
+    def check_vocabulary_for_selection():
+        """Checks if the currently selected text is in the vocabulary."""
+        text = actions.edit.selected_text().strip()
+        for spoken, written in vocabulary.items():
+            if text == written:
+                actions.app.notify(f'"{text}" is spoken as "{spoken}"')
+                break
+        else:
+            actions.app.notify(f'"{text}" is not in the vocabulary')
