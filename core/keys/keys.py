@@ -130,15 +130,6 @@ ctx.lists["self.letter"] = alphabet
 # `punctuation_words` is for words you want available BOTH in dictation and as key names in command mode.
 # `symbol_key_words` is for key names that should be available in command mode, but NOT during dictation.
 punctuation_words = {
-    # TODO: I'm not sure why we need these, I think it has something to do with
-    # Dragon. Possibly it has been fixed by later improvements to talon? -rntz
-    "?": "?",
-    "!": "!",
-    "#": "#",
-    "(": "(",
-    ")": ")",
-    "@": "@",
-    ",": ",",  # <== these things
     "comma": ",",
     # Workaround for issue with conformer b-series; see #946
     "coma": ",",
@@ -173,11 +164,9 @@ symbol_key_words = {
     "single quad": "'",
     "L square": "[",
     "open bracket": "[",
-    "[": "[",
     "lobe": "[",
     "R square": "]",
     "close bracket": "]",
-    "]": "]",
     "robe": "]",
     "backslash": "\\",
     "minus": "-",
@@ -217,7 +206,6 @@ symbol_key_words = {
     "quote": '"',
     "quad": '"',
     "back tick": "`",
-    "`": "`",
     # Currencies
     "dollar": "$",
     "pound": "£",
