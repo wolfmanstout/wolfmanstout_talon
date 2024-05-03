@@ -88,18 +88,19 @@ def prose_money(m) -> str:
     return f"${m.prose_number}"
 
 
-@mod.capture(rule="({user.vocabulary} | <word>)")
+@mod.capture(rule="({user.vocabulary} | <user.prose_contact> | <word>)")
 def word(m) -> str:
     """A single word, including user-defined vocabulary."""
-    try:
-        return m.vocabulary
-    except AttributeError:
+    item = m[0]
+    if isinstance(item, grammar.vm.Phrase):
         return " ".join(
-            actions.dictate.replace_words(actions.dictate.parse_words(m.word))
+            actions.dictate.replace_words(actions.dictate.parse_words(item))
         )
+    else:
+        return item
 
 
-@mod.capture(rule="({user.vocabulary} | <phrase>)+")
+@mod.capture(rule="({user.vocabulary} | <user.prose_contact> | <phrase>)+")
 def text(m) -> str:
     """A sequence of words, including user-defined vocabulary."""
     return format_phrase(m)
