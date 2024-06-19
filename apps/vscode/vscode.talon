@@ -231,6 +231,7 @@ debug console: user.vscode("workbench.debug.action.toggleRepl")
 debug clean: user.vscode("workbench.debug.panel.action.clearReplAction")
 debug python: user.vscode("python.debugInTerminal")
 run python: user.vscode("python.execInTerminal")
+debug choose: user.vscode("workbench.action.debug.selectandstart")
 
 # Terminal
 (terminal | shell) external: user.vscode("workbench.action.terminal.openNativeConsole")
@@ -282,3 +283,4 @@ cell run: user.vscode("notebook.cell.execute")
 
 install local: user.vscode("workbench.extensions.action.installVSIX")
 preview markdown: user.vscode("markdown.showPreview")
+dev tools: user.vscode("workbench.action.toggleDevTools")
