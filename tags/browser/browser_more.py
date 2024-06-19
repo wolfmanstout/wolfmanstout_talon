@@ -40,7 +40,7 @@ class MacActions:
 win_ctx = Context()
 win_ctx.matches = r"""
 tag: browser
-os: win
+os: windows
 """
 
 
