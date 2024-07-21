@@ -87,26 +87,26 @@ tab [new] bookmark: key(ctrl-')
 frame next: key(ctrl-[)
 # webdriver test: 'test_driver'()
 # go search: ClickElementAction('q')
-search <user.text>$:
+search <user.prose>$:
     browser.focus_search()
-    insert(text)
+    insert(prose)
     sleep(15ms)
     key(enter)
-history search <user.text>$:
+history search <user.prose>$:
     browser.focus_search()
     insert("history")
     key(tab)
-    insert(text)
+    insert(prose)
     key(enter)
 history search:
     browser.focus_search()
     insert("history")
     key(tab)
-moma search <user.text>$:
+moma search <user.prose>$:
     browser.focus_search()
     insert("moma")
     key(tab)
-    insert(text)
+    insert(prose)
     key(enter)
 moma search:
     browser.focus_search()
