@@ -32,6 +32,8 @@ home_ctx.lists["self.docked_apps"] = {
     "emacs": "4",
     "home emacs": "4",
     "code": "5",
+    "studio": "6",
+    "spotify": "7",
 }
 
 home_ctx.lists["self.known_window_names"] = {
