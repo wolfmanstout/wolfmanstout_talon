@@ -231,6 +231,8 @@ ctx.lists["self.symbol_snippet"] = {
     "not equals": "!=",
     "greater equals": ">=",
     "less equals": "<=",
+    "pipe twice": "||",
+    "amper twice": "&&",
     "empty quotes": '""',
     "empty string": '""',
     "empty escaped quotes": '\\"\\"',
