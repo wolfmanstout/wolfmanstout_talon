@@ -24,7 +24,6 @@ bar search: user.vscode("workbench.view.search")
 bar source: user.vscode("workbench.view.scm")
 bar (test | testing): user.vscode("workbench.view.testing.focus")
 bar chat: user.vscode("workbench.panel.chat.view.copilot.focus")
-bar copilot: user.vscode("workbench.view.extension.copilot-labs")
 bar (hide | show | switch): user.vscode("workbench.action.toggleSidebarVisibility")
 
 # Symbol search
@@ -120,35 +119,6 @@ mode {user.language_id}:
     user.vscode_with_plugin("commands.setEditorLanguage", language_id)
 refactor rename: user.vscode("editor.action.rename")
 refactor this: user.vscode("editor.action.refactor")
-
-# Copilot
-copilot <user.cursorless_target> to <user.prose>:
-    user.cursorless_command("setSelection", cursorless_target)
-    user.vscode("interactiveEditor.start")
-    sleep(350ms)
-    insert(prose)
-    key(enter)
-copilot explain <user.cursorless_target> [to <user.prose>]:
-    user.cursorless_command("setSelection", cursorless_target)
-    user.vscode("interactiveEditor.start")
-    sleep(350ms)
-    insert("/explain ")
-    insert(prose or "")
-    key(enter)
-copilot test <user.cursorless_target> [to <user.prose>]:
-    user.cursorless_command("setSelection", cursorless_target)
-    user.vscode("interactiveEditor.start")
-    sleep(350ms)
-    insert("/test ")
-    insert(prose or "")
-    key(enter)
-copilot fix <user.cursorless_target> [to <user.prose>]:
-    user.cursorless_command("setSelection", cursorless_target)
-    user.vscode("interactiveEditor.start")
-    sleep(350ms)
-    insert("/fix ")
-    insert(prose or "")
-    key(enter)
 
 #code navigation
 (go declaration | follow): user.vscode("editor.action.revealDefinition")
