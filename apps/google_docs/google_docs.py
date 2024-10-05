@@ -81,6 +81,9 @@ class Actions:
     def rename_document():
         """Rename the document."""
 
+    def duplicate_selection():
+        """Duplicate the selected object."""
+
 
 @mac_ctx.action_class("self")
 class MacActions:
@@ -124,9 +127,12 @@ class MacActions:
     def rename_document():
         actions.key("ctrl-alt-f r")
 
+    def duplicate_selection():
+        actions.key("cmd-d")
+
 
 @win_ctx.action_class("self")
-class MacActions:
+class WinActions:
     def move_row_up():
         actions.user.select_row()
         actions.key("alt-e m k")
@@ -166,3 +172,6 @@ class MacActions:
 
     def rename_document():
         actions.key("alt-shift-f r")
+
+    def duplicate_selection():
+        actions.key("ctrl-d")
