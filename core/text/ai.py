@@ -7,7 +7,7 @@ try:
 except ImportError as e:
     print(f"Unable to import openai: {e}")
     openai = None
-from talon import Module, actions, app, imgui, registry
+from talon import Module, actions, app, imgui, registry, settings
 
 mod = Module()
 setting_openai_api_key = mod.setting(
@@ -19,11 +19,12 @@ setting_openai_api_key = mod.setting(
 
 
 def on_ready():
-    if setting_openai_api_key.get():
+    global client
+    api_key = setting_openai_api_key.get()
+    if api_key:
         client = OpenAI(api_key=setting_openai_api_key.get())
         # For use in talon-ai-tools.
-        api_key = setting_openai_api_key.get()
-        if api_key:
+        if settings.get("user.model_endpoint") != "llm":
             os.environ["OPENAI_API_KEY"] = api_key
     else:
         print("Set the openai_api_key setting to use the AI chat feature.")
