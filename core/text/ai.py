@@ -21,6 +21,10 @@ setting_openai_api_key = mod.setting(
 def on_ready():
     if setting_openai_api_key.get():
         client = OpenAI(api_key=setting_openai_api_key.get())
+        # For use in talon-ai-tools.
+        api_key = setting_openai_api_key.get()
+        if api_key:
+            os.environ["OPENAI_API_KEY"] = api_key
     else:
         print("Set the openai_api_key setting to use the AI chat feature.")
         client = None
