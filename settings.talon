@@ -57,6 +57,7 @@ settings():
     user.preferred_microphones = "Samson, TableMike"
 
     user.model_endpoint = "llm"
+    user.openai_model = "gemini-1.5-flash-002"
 
 # Uncomment this to enable the curse yes/curse no commands (show hide mouse cursor). See issue #688.
 # tag(): user.mouse_cursor_commands_enable
