@@ -58,6 +58,7 @@ settings():
 
     user.model_endpoint = "llm"
     user.openai_model = "claude-3.5-sonnet"
+    user.model_system_prompt = "You are an assistant helping an office worker to be more productive. Output just the response to the request and no additional content. Do not generate any additional formatting such as wrapping with quotes or markdown such as backticks for programming languages unless it is explicitly requested. If the user requests code generation, output just code and not additional natural language explanation."
 
 # Uncomment this to enable the curse yes/curse no commands (show hide mouse cursor). See issue #688.
 # tag(): user.mouse_cursor_commands_enable
