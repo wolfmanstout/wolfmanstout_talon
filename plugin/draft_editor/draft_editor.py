@@ -80,6 +80,30 @@ class Actions:
             actions.user.paste(selected_text)
         add_tag("user.draft_editor_active")
 
+    def draft_editor_open_diff(old: str = "", new: str = ""):
+        """Open draft editor with diff view. If old or new is not provided, use selected
+        text."""
+        global original_window
+        original_window = ui.active_window()
+        editor_app = get_editor_app()
+        selected_text = actions.edit.selected_text()
+        actions.user.switcher_focus_app(editor_app)
+        # Wait additional time for talon context to update.
+        actions.sleep("200ms")
+        actions.user.vscode("workbench.files.action.compareNewUntitledTextFiles")
+        actions.user.vscode("diffEditor.switchSide")
+        if old != "":
+            actions.user.paste(old)
+        elif selected_text != "":
+            actions.user.paste(selected_text)
+        actions.user.vscode("diffEditor.switchSide")
+        actions.sleep("1000ms")
+        if new != "":
+            actions.user.paste(new)
+        elif selected_text != "":
+            actions.user.paste(selected_text)
+        add_tag("user.draft_editor_active")
+
     def draft_editor_submit():
         """Submit/save draft editor"""
         close_editor(submit_draft=True)
