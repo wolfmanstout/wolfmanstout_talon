@@ -10,4 +10,5 @@ please [<user.text>]$:
 please <user.text> enter$:
     key(alt-/)
     insert(user.text)
+    sleep(500ms)
     key(enter)
