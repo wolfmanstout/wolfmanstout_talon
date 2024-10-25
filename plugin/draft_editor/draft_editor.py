@@ -68,8 +68,8 @@ diff_mode = False
 
 @mod.action_class
 class Actions:
-    def draft_editor_open():
-        """Open draft editor"""
+    def draft_editor_open(contents: str = ""):
+        """Open draft editor. If contents is not provided, use selected text."""
         global original_window, diff_mode
         original_window = ui.active_window()
         diff_mode = False
@@ -79,7 +79,9 @@ class Actions:
         # Wait additional time for talon context to update.
         actions.sleep("200ms")
         actions.app.tab_open()
-        if selected_text != "":
+        if contents:
+            actions.user.paste(contents)
+        elif selected_text:
             actions.user.paste(selected_text)
         add_tag("user.draft_editor_active")
 
@@ -96,15 +98,15 @@ class Actions:
         actions.sleep("200ms")
         actions.user.vscode("workbench.files.action.compareNewUntitledTextFiles")
         actions.user.vscode("diffEditor.switchSide")
-        if old != "":
+        if old:
             actions.user.paste(old)
         elif selected_text != "":
             actions.user.paste(selected_text)
         actions.user.vscode("diffEditor.switchSide")
         actions.sleep("1000ms")
-        if new != "":
+        if new:
             actions.user.paste(new)
-        elif selected_text != "":
+        elif selected_text:
             actions.user.paste(selected_text)
         add_tag("user.draft_editor_active")
 
