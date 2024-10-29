@@ -63,13 +63,16 @@ original_window = None
 
 last_draft = None
 
+diff_mode = False
+
 
 @mod.action_class
 class Actions:
     def draft_editor_open():
         """Open draft editor"""
-        global original_window
+        global original_window, diff_mode
         original_window = ui.active_window()
+        diff_mode = False
         editor_app = get_editor_app()
         selected_text = actions.edit.selected_text()
         actions.user.switcher_focus_app(editor_app)
@@ -83,8 +86,9 @@ class Actions:
     def draft_editor_open_diff(old: str = "", new: str = ""):
         """Open draft editor with diff view. If old or new is not provided, use selected
         text."""
-        global original_window
+        global original_window, diff_mode
         original_window = ui.active_window()
+        diff_mode = True
         editor_app = get_editor_app()
         selected_text = actions.edit.selected_text()
         actions.user.switcher_focus_app(editor_app)
@@ -134,6 +138,10 @@ def close_editor(submit_draft: bool):
     actions.edit.select_all()
     selected_text = actions.edit.selected_text()
     actions.edit.delete()
+    if diff_mode:
+        actions.user.vscode("diffEditor.switchSide")
+        actions.edit.select_all()
+        actions.edit.delete()
     actions.app.tab_close()
     actions.user.switcher_focus_window(original_window)
     actions.sleep("300ms")
