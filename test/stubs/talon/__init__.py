@@ -134,6 +134,15 @@ class Context:
 
         return __funcwrapper
 
+    def capture(self, name: str, rule: str = None):
+        def __funcwrapper(func):
+            def __inner(*args, **kwargs):
+                return func(*args, **kwargs)
+
+            return __inner
+
+        return __funcwrapper
+
 
 class ImgUI:
     """
@@ -176,13 +185,34 @@ class Settings:
     """
 
 
+class Resource:
+    """
+    Implements something like the talon resource system
+    """
+
+    def open(self, path: str, mode: str = "r"):
+        return open(path, mode, encoding="utf-8")
+
+    def watch(self, path: str):
+        return lambda f: f
+
+
+class App:
+    """
+    Implements something like the talon app variable
+    """
+
+    platform = "mac"
+
+
 actions = Actions()
-app = None
+app = App
 clip = None
 imgui = ImgUI()
 speech_system = SpeechSystem()
 ui = UI()
 settings = Settings()
+resource = Resource()
 
 # Indicate to test files that they should load since we're running in test mode
 test_mode = True

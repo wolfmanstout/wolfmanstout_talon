@@ -1,6 +1,4 @@
 import os
-from copy import deepcopy
-from typing import Sequence
 
 from talon import Context, Module, actions, app, clip, fs, imgui, ui
 
@@ -22,8 +20,12 @@ show_help = False
 
 ctx = Context()
 mod = Module()
-mod.mode("homophones")
+
 mod.list("homophones_canonicals", desc="list of words ")
+mod.tag(
+    "homophones_open",
+    desc="Tag for enabling homophones commands when the associated gui is open",
+)
 
 main_screen = ui.main_screen()
 
@@ -37,6 +39,7 @@ def update_homophones(name, flags):
     with open(homophones_file) as f:
         for line in f:
             words = line.rstrip().split(",")
+            words = [x for x in words if x.strip() != ""]
             canonical_list.append(words[0])
             merged_words = set(words)
             for word in words:
@@ -66,7 +69,7 @@ dragon_ctx.lists["self.homophones_canonicals"] = {}
 
 def close_homophones():
     gui.hide()
-    actions.mode.disable("user.homophones")
+    ctx.tags = []
 
 
 PHONES_FORMATTERS = [
@@ -98,7 +101,6 @@ def raise_homophones(word_to_find_homophones_for, forced=False, selection=False)
 
     if is_selection:
         word_to_find_homophones_for = word_to_find_homophones_for.strip()
-
     formatter = find_matching_format_function(
         word_to_find_homophones_for, PHONES_FORMATTERS
     )
@@ -145,10 +147,9 @@ def raise_homophones(word_to_find_homophones_for, forced=False, selection=False)
 
         clip.set(new)
         actions.edit.paste()
-
         return
 
-    actions.mode.enable("user.homophones")
+    ctx.tags = ["user.homophones_open"]
     show_help = False
     gui.show()
 
@@ -157,7 +158,7 @@ def raise_homophones(word_to_find_homophones_for, forced=False, selection=False)
 def gui(gui: imgui.GUI):
     global active_word_list
     if show_help:
-        gui.text("Homephone help - todo")
+        gui.text("Homophone help - todo")
     else:
         gui.text("Select a homophone")
         gui.line()
@@ -198,7 +199,7 @@ class Actions:
         """Show homophones for selection, or current word if selection is empty."""
         text = actions.edit.selected_text()
         if text:
-            actions.user.homophones_show(text)
+            raise_homophones(text, False, True)
         else:
             actions.edit.select_word()
             actions.user.homophones_show_selection()
@@ -232,3 +233,18 @@ class Actions:
         if word in all_homophones:
             return all_homophones[word]
         return None
+
+
+ctx_homophones_open = Context()
+ctx_homophones_open.matches = """
+tag: user.homophones_open
+"""
+
+
+@ctx_homophones_open.action_class("user")
+class UserActions:
+    def choose(number_small: int):
+        """Choose the nth homophone"""
+        result = actions.user.homophones_select(number_small)
+        actions.insert(result)
+        actions.user.homophones_hide()

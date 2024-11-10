@@ -2,8 +2,12 @@ tag: user.line_commands
 and not app: vscode
 -
 #this defines some common line commands. More may be defined that are ide-specific.
-lend: edit.line_end()
-bend: edit.line_start()
+lend:
+    user.deprecate_command("2024-07-30", "lend", "go line end | tail")
+    edit.line_end()
+bend:
+    user.deprecate_command("2024-07-30", "bend", "go line start | head")
+    edit.line_start()
 go <number> | line <number> long: edit.jump_line(number)
 go <number> end:
     edit.jump_line(number)
@@ -15,7 +19,6 @@ comment <number> until <number>:
     user.select_range(number_1, number_2)
     code.toggle_comment()
 clear [line] <number>:
-    edit.jump_line(number)
     user.select_range(number, number)
     edit.delete()
 clear <number> until <number>:
@@ -66,7 +69,7 @@ drag down [line] <number>:
 drag down <number> until <number>:
     user.select_range(number_1, number_2)
     edit.line_swap_down()
-clone (line | that) | (this | line) copy down: edit.line_clone()
+clone [line] <number>: user.line_clone(number)
 
 select camel left: user.extend_camel_left()
 select camel right: user.extend_camel_right()

@@ -5,13 +5,13 @@ from talon import Context, Module, actions, app, ui
 mod = Module()
 apps = mod.apps
 
-apps.windows_explorer = """
+apps.windows_explorer = r"""
 os: windows
 and app.name: Windows Explorer
 os: windows
 and app.name: Windows-Explorer
 os: windows
-and app.exe: explorer.exe
+and app.exe: /^explorer\.exe$/i
 """
 
 # many commands should work in most save/open dialog.
@@ -49,7 +49,6 @@ if app.platform == "windows":
 
     # this is probably not the correct way to check for onedrive, quick and dirty
     if os.path.isdir(os.path.expanduser(os.path.join("~", r"OneDrive\Desktop"))):
-
         directories_to_remap = {
             "Desktop": os.path.join(one_drive_path, "Desktop"),
             "Documents": os.path.join(one_drive_path, "Documents"),
@@ -87,11 +86,6 @@ if app.platform == "windows":
 
 @ctx.action_class("user")
 class UserActions:
-    def file_manager_go_back():
-        actions.key("alt-left")
-
-    def file_manager_go_forward():
-        actions.key("alt-right")
 
     def file_manager_open_parent():
         actions.key("alt-up")

@@ -14,14 +14,13 @@ ctx = Context()
 # note: this context match is intentionally made more complex so that it is more specific
 # than the context defined in apps/win/windows_terminal/windows_terminal.py (and thereby
 # takes precedence).
-ctx.matches = rf"""
+ctx.matches = """
 app: windows_terminal
 and tag: user.wsl
 tag: user.wsl
 """
 
 if app.platform == "windows":
-    import atexit
     import platform
 
     import win32api
@@ -66,10 +65,6 @@ if app.platform == "windows":
         if registry_key_handle:
             win32api.RegCloseKey(registry_key_handle)
             registry_key_handle = None
-
-    # make sure registry is closed on exit
-    def atexit():
-        _close_key()
 
     # open the registry key containing the list of installed wsl distros
     def _initialize_key():
@@ -152,7 +147,7 @@ if app.platform == "windows":
                 error = win32api.GetLastError()
                 _close_key()
                 raise Exception(
-                    "failed while checking for wsl registry updates: {result=}: {error=}"
+                    f"failed while checking for wsl registry updates: {result=}: {error=}"
                 )
         except OSError:
             if distro_handle:
@@ -199,7 +194,6 @@ if app.platform == "windows":
 
     # this is probably not the correct way to check for onedrive, quick and dirty
     if os.path.isdir(os.path.expanduser(os.path.join("~", r"OneDrive\Desktop"))):
-
         directories_to_remap = {
             "Desktop": os.path.join(one_drive_path, "Desktop"),
             "Documents": os.path.join(one_drive_path, "Documents"),
@@ -255,7 +249,6 @@ MAX_ATTEMPTS = 2
 
 
 def run_wslpath(args, in_path, in_distro=None):
-    global path_detection_disabled
     path = ""
 
     if not path_detection_disabled:
@@ -421,7 +414,6 @@ class UserActions:
         actions.key("enter")
 
     def file_manager_current_path():
-        global path_detection_disabled
         if path_detection_disabled:
             logging.warning(
                 'Skipping WSL path detection - try "weasel reset path detection"'

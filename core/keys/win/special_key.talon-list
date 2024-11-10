@@ -1,0 +1,24 @@
+list: user.special_key
+os: windows
+os: linux
+-
+
+end: end
+home: home
+minus: minus
+enter: enter
+page down: pagedown
+page up: pageup
+escape: escape
+cancel: escape
+space: space
+spacebar: space
+tab: tab
+tab key: tab
+insert: insert
+backspace: backspace
+wipe: backspace
+delete: delete
+forward delete: delete
+menu key: menu
+print screen: printscr

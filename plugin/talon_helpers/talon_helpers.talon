@@ -1,4 +1,6 @@
 talon check updates: menu.check_for_updates()
+# the debug window is only available in the talon beta
+talon open debug: menu.open_debug_window()
 talon open log: menu.open_log()
 talon open rebel: menu.open_repl()
 talon home: menu.open_talon_home()
@@ -50,7 +52,12 @@ talon dump context:
     result = user.talon_get_active_application_info()
     clip.set_text(result)
 
+^talon create app context$: user.talon_create_app_context()
+^talon create windows app context$: user.talon_create_app_context("win")
+^talon create linux app context$: user.talon_create_app_context("linux")
+^talon create mac app context$: user.talon_create_app_context("mac")
+
 talon (bug report | report bug):
-    user.open_url("https://github.com/knausj85/knausj_talon/issues")
+    user.open_url("https://github.com/talonhub/community/issues")
 
 ^talon restart$: user.talon_restart()

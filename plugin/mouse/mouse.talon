@@ -1,11 +1,14 @@
 mode: command
 mode: user.dictation_command
 -
-control mouse: user.mouse_toggle_control_mouse()
-zoom mouse: user.mouse_toggle_zoom_mouse()
-camera overlay: user.mouse_toggle_camera_overlay()
-run calibration: user.mouse_calibrate()
+control mouse: tracking.control_toggle()
+control off: user.mouse_sleep()
+zoom mouse: tracking.control_zoom_toggle()
+camera overlay: tracking.control_debug_toggle()
+run calibration: tracking.calibrate()
 here [left] touch:
+    # close zoom if open
+    user.zoom_close()
     mouse_click(0)
     # close the mouse grid if open
     user.grid_close()
@@ -14,11 +17,15 @@ here [left] touch:
     user.mouse_drag_end()
 
 here right touch:
+    # close zoom if open
+    user.zoom_close()
     mouse_click(1)
     # close the mouse grid if open
     user.grid_close()
 
 here middle touch:
+    # close zoom if open
+    user.zoom_close()
     mouse_click(2)
     # close the mouse grid
     user.grid_close()
@@ -31,33 +38,45 @@ here middle touch:
 #shift
 #super = windows key
 here <user.modifiers> touch:
+    # close zoom if open
+    user.zoom_close()
     key("{modifiers}:down")
     mouse_click(0)
     key("{modifiers}:up")
     # close the mouse grid
     user.grid_close()
 here <user.modifiers> right touch:
+    # close zoom if open
+    user.zoom_close()
     key("{modifiers}:down")
     mouse_click(1)
     key("{modifiers}:up")
     # close the mouse grid
     user.grid_close()
 here double touch:
+    # close zoom if open
+    user.zoom_close()
     mouse_click()
     mouse_click()
     # close the mouse grid
     user.grid_close()
 here triple touch:
+    # close zoom if open
+    user.zoom_close()
     mouse_click()
     mouse_click()
     mouse_click()
     # close the mouse grid
     user.grid_close()
 here [left] drag:
+    # close zoom if open
+    user.zoom_close()
     user.mouse_drag(0)
     # close the mouse grid
     user.grid_close()
 here right drag:
+    # close zoom if open
+    user.zoom_close()
     user.mouse_drag(1)
     # close the mouse grid
     user.grid_close()
@@ -114,6 +133,10 @@ copy mouse position: user.copy_mouse_position()
 curse no:
     # Command added 2021-12-13, can remove after 2022-06-01
     app.notify("Please activate the user.mouse_cursor_commands_enable tag to enable this command")
+
+# To scroll with a hiss sound, set mouse_enable_hiss_scroll to true in settings.talon
+mouse hiss up: user.hiss_scroll_up()
+mouse hiss down: user.hiss_scroll_down()
 
 scroll up:
     user.move_cursor_to_gaze_point(0, 40)

@@ -4,7 +4,7 @@ from typing import List, Mapping
 
 from talon import Context, Module, actions, fs
 
-from ..user_settings import get_list_from_csv, get_settings_path
+from ..user_settings import get_settings_path, read_csv_list, track_csv_list
 
 mod = Module()
 ctx = Context()
@@ -13,13 +13,15 @@ mod.list("contact_emails", desc="Maps names to email addresses.")
 mod.list("contact_full_names", desc="Maps names to full names.")
 mod.list("contact_names", desc="Contact first names and full names.")
 
+
 # To export from Gmail, go to https://contacts.google.com/, then click "Frequently contacted", then
 # "Export". Then run `pipx install csvkit` and `csvcut -c 1,31 contacts.csv`.
-email_to_full_name = get_list_from_csv(
-    "contacts.csv",
-    headers=("Name", "Email"),
-)
-full_name_to_email = {v: k for k, v in email_to_full_name.items()}
+@track_csv_list("contacts.csv", headers=("Name", "Email"))
+def on_contacts(values):
+    global email_to_full_name, full_name_to_email
+    email_to_full_name = values
+    full_name_to_email = {v: k for k, v in email_to_full_name.items()}
+
 
 nickname_to_full_name = get_list_from_csv(
     "nicknames.csv",
@@ -36,11 +38,9 @@ vocabulary_path = get_settings_path("additional_words.csv")
 
 def update_vocabulary(ignored_path=None, ignored_flags=None):
     global vocabulary
-    vocabulary = get_list_from_csv(
+    vocabulary = read_csv_list(
         vocabulary_path.name,
         headers=("Word(s)", "Spoken Form (If Different)"),
-        read_only=True,
-        auto_reload=False,
     )
 
 

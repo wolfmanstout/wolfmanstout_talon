@@ -8,7 +8,6 @@ app.name: konsole
 
 @ctx.action_class("user")
 class user_actions:
-
     # tabs-tag functions implementations
     def tab_jump(number):
         actions.key(f"alt-{number}")
@@ -56,7 +55,7 @@ class EditActions:
     def copy():
         actions.key("ctrl-shift-c")
 
-    def find(text: str):
+    def find(text: str = None):
         actions.key("ctrl-shift-f")
         if str:
             actions.insert(text)

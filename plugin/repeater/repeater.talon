@@ -7,4 +7,6 @@ once: skip()
 twice: core.repeat_command(1)
 thrice: core.repeat_command(2)
 ^repeat (that | phrase)$: core.repeat_phrase(1)
-^repeat (that | phrase) <number_small> [times]$: core.repeat_phrase(number_small)
+^
+(repeat (that | phrase) | again) [<number_small> times]$:
+    core.repeat_partial_phrase(number_small or 1)

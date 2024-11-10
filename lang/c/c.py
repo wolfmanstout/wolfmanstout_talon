@@ -1,16 +1,10 @@
 from talon import Context, Module, actions, settings
 
 mod = Module()
-mod.setting(
-    "use_stdint_datatypes ",
-    type=int,
-    default=1,
-    desc="Use the stdint datatype naming in commands by default",
-)
 
 ctx = Context()
 ctx.matches = r"""
-tag: user.c
+code.language: c
 """
 
 ctx.lists["self.c_pointers"] = {
@@ -272,6 +266,9 @@ class UserActions:
     def code_operator_or():
         actions.auto_insert(" || ")
 
+    def code_operator_not():
+        actions.auto_insert("!")
+
     def code_operator_bitwise_and():
         actions.auto_insert(" & ")
 
@@ -289,6 +286,9 @@ class UserActions:
 
     def code_operator_bitwise_exclusive_or_assignment():
         actions.auto_insert(" ^= ")
+
+    def code_operator_bitwise_not():
+        actions.auto_insert("~")
 
     def code_operator_bitwise_left_shift():
         actions.auto_insert(" << ")

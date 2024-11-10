@@ -1,14 +1,14 @@
-from talon import Module, actions, app, speech_system, ui
+from talon import Context, Module, actions, app, speech_system, ui
 
 mod = Module()
+ctx_sleep = Context()
+ctx_awake = Context()
 
 modes = {
     "admin": "enable extra administration commands terminal (docker, etc)",
     "debug": "a way to force debugger commands to be loaded",
-    "gdb": "a way to force gdb commands to be loaded",
     "ida": "a way to force ida commands to be loaded",
     "presentation": "a more strict form of sleep where only a more strict wake up command works",
-    "windbg": "a way to force windbg commands to be loaded",
     "private": "a mode that disables recording",
     "context_insensitive": "a mode that disables context sensitivity",
     "dictation_command": "a mode that enables commands within dictation mode",
@@ -16,6 +16,26 @@ modes = {
 
 for key, value in modes.items():
     mod.mode(key, value)
+
+ctx_sleep.matches = r"""
+mode: sleep
+"""
+
+ctx_awake.matches = r"""
+not mode: sleep
+"""
+
+
+@ctx_sleep.action_class("speech")
+class ActionsSleepMode:
+    def disable():
+        actions.app.notify("Talon is already asleep")
+
+
+@ctx_awake.action_class("speech")
+class ActionsAwakeMode:
+    def enable():
+        actions.app.notify("Talon is already awake")
 
 
 @mod.action_class
@@ -28,11 +48,11 @@ class Actions:
         # app.notify(engine)
         if "dragon" in engine:
             if app.platform == "mac":
-                actions.user.engine_sleep()
+                actions.user.dragon_engine_sleep()
             elif app.platform == "windows":
-                actions.user.engine_wake()
+                actions.user.dragon_engine_wake()
                 # note: this may not do anything for all versions of Dragon. Requires Pro.
-                actions.user.engine_mimic("switch to command mode")
+                actions.user.dragon_engine_command_mode()
 
     def dragon_mode():
         """For windows and Mac with Dragon, disables Talon commands and exits Dragon's command mode"""
@@ -43,11 +63,11 @@ class Actions:
             # app.notify("dragon mode")
             actions.speech.disable()
             if app.platform == "mac":
-                actions.user.engine_wake()
+                actions.user.dragon_engine_wake()
             elif app.platform == "windows":
-                actions.user.engine_wake()
+                actions.user.dragon_engine_wake()
                 # note: this may not do anything for all versions of Dragon. Requires Pro.
-                actions.user.engine_mimic("start normal mode")
+                actions.user.dragon_engine_normal_mode()
 
     def dictation_mode():
         """Enables dictation mode."""
@@ -56,7 +76,7 @@ class Actions:
         actions.mode.enable("dictation")
         actions.mode.enable("user.dictation_command")
         actions.user.code_clear_language_mode()
-        actions.mode.disable("user.gdb")
+        actions.user.gdb_disable()
         actions.user.dictation_format_reset()
         rect = ui.main_screen().rect
         regions = [

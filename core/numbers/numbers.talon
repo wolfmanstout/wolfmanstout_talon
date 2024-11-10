@@ -1,3 +1,1 @@
-not tag: user.mouse_grid_showing
--
-<user.single_digit_string>: "{single_digit_string}"
+numb <user.number_string>: "{number_string}"

@@ -4,15 +4,16 @@ app: vscode
 tag(): user.find_and_replace
 tag(): user.line_commands
 tag(): user.multiple_cursors
-tag(): user.snippets
 tag(): user.splits
 tag(): user.tabs
+tag(): user.command_search
+
 window reload: user.vscode("workbench.action.reloadWindow")
 window close: user.vscode("workbench.action.closeWindow")
 #multiple_cursor.py support end
 
-please [<user.text>]:
-    user.vscode("workbench.action.showCommands")
+go view [<user.text>]:
+    user.vscode("workbench.action.openView")
     insert(user.text or "")
 
 # Sidebar
@@ -53,7 +54,12 @@ settings show folder json: user.vscode("workbench.action.openFolderSettingsFile"
 settings show workspace: user.vscode("workbench.action.openWorkspaceSettings")
 settings show workspace json: user.vscode("workbench.action.openWorkspaceSettingsFile")
 shortcuts show: user.vscode("workbench.action.openGlobalKeybindings")
+shortcuts show json: user.vscode("workbench.action.openGlobalKeybindingsFile")
 snippets show: user.vscode("workbench.action.openSnippets")
+
+# VSCode Snippets
+snip (last | previous): user.vscode("jumpToPrevSnippetPlaceholder")
+snip next: user.vscode("jumpToNextSnippetPlaceholder")
 
 # Display
 centered switch: user.vscode("workbench.action.toggleCenteredLayout")
@@ -140,7 +146,10 @@ go tab (last | preev) | (tab | buff) switch: key(ctrl-tab)
 snip last: user.vscode("jumpToPrevSnippetPlaceholder")
 
 # Bookmarks. Requires Bookmarks plugin
-go marks: user.vscode("workbench.view.extension.bookmarks")
+bar marks: user.vscode("workbench.view.extension.bookmarks")
+go marks:
+    user.deprecate_command("2023-06-06", "go marks", "bar marks")
+    user.vscode("workbench.view.extension.bookmarks")
 toggle mark: user.vscode("bookmarks.toggle")
 go next mark: user.vscode("bookmarks.jumpToNext")
 go last mark: user.vscode("bookmarks.jumpToPrevious")
@@ -216,6 +225,9 @@ debug choose: user.vscode("workbench.action.debug.selectandstart")
 (terminal | shell) scroll down: user.vscode("workbench.action.terminal.scrollDown")
 (terminal | shell) <number_small>: user.vscode_terminal(number_small)
 
+task run [<user.text>]:
+    user.vscode("workbench.action.tasks.runTask")
+    insert(user.text or "")
 #TODO: should this be added to linecommands?
 copy line down: user.vscode("editor.action.copyLinesDownAction")
 copy line up: user.vscode("editor.action.copyLinesUpAction")
@@ -241,6 +253,7 @@ join lines: user.vscode("editor.action.joinLines")
 full screen: user.vscode("workbench.action.toggleFullScreen")
 
 curse undo: user.vscode("cursorUndo")
+curse redo: user.vscode("cursorRedo")
 
 select word: user.vscode("editor.action.addSelectionToNextFindMatch")
 skip word: user.vscode("editor.action.moveSelectionToNextFindMatch")

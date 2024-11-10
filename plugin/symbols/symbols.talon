@@ -1,13 +1,10 @@
-new line: "\\n"
-carriage return: "\\r"
-line feed: "\\r\\n"
 angle that:
     text = edit.selected_text()
     user.paste("<{text}>")
-(square | bracket) that:
+(square | bracket | square bracket) that:
     text = edit.selected_text()
     user.paste("[{text}]")
-brace that:
+(brace | curly bracket) that:
     text = edit.selected_text()
     user.paste("{{{text}}}")
 (parens | args) that:
