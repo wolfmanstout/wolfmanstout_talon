@@ -15,7 +15,8 @@ say <user.prose> {user.post_dictation_keys}:
     user.dictation_insert(prose)
     key(post_dictation_keys)
 {user.prose_formatter} <user.prose>$: user.insert_formatted(prose, prose_formatter)
-{user.prose_formatter} <user.prose> {user.phrase_ender}: user.insert_formatted(prose, prose_formatter)
+{user.prose_formatter} <user.prose> {user.phrase_ender}:
+    user.insert_formatted(prose, prose_formatter)
 {user.prose_formatter} <user.prose> {user.post_dictation_keys}:
     user.insert_formatted(prose, prose_formatter)
     key(post_dictation_keys)

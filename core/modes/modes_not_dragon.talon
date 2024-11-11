@@ -15,7 +15,7 @@ not speech.engine: dragon
 # because it's part of the rule definition, but "hey bob" will be ignored, because
 # we don't do anything with the <phrase> in the body of the command.
 
-^talon wake [<phrase>]$: 
+^talon wake [<phrase>]$:
     speech.enable()
     mode.enable("noise")
 
@@ -31,10 +31,10 @@ not speech.engine: dragon
 #
 # It's a useful and well known command, though, so if you're using any other speech
 # engine, this controls Talon.
-^go to sleep [<phrase>]$: 
+^go to sleep [<phrase>]$:
     speech.disable()
     mode.disable("noise")
-^talon sleep [<phrase>]$: 
+^talon sleep [<phrase>]$:
     speech.disable()
     mode.disable("noise")
 

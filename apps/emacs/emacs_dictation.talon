@@ -20,10 +20,8 @@ go symbol: key(alt-i)
 go mark switch: key(ctrl-c ctrl-x)
 go before [last | preev] <user.any_alphanumeric_key>:
     key("ctrl-c c b {any_alphanumeric_key}")
-go after [next] <user.any_alphanumeric_key>:
-    key("ctrl-c c f {any_alphanumeric_key}")
-go before next <user.any_alphanumeric_key>:
-    key("ctrl-c c s {any_alphanumeric_key}")
+go after [next] <user.any_alphanumeric_key>: key("ctrl-c c f {any_alphanumeric_key}")
+go before next <user.any_alphanumeric_key>: key("ctrl-c c s {any_alphanumeric_key}")
 go after (last | preev) <user.any_alphanumeric_key>:
     key("ctrl-c c e {any_alphanumeric_key}")
 other screen up: key(ctrl-- ctrl-alt-v)

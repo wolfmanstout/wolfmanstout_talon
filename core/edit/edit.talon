@@ -120,7 +120,7 @@ cut word right: user.cut_word_right()
     edit.paste()
     key(enter)
 paste (match | raw): edit.paste_match_style()
-(pace | paste) link: 
+(pace | paste) link:
     user.hyperlink()
     sleep(100ms)
     edit.paste()
