@@ -72,7 +72,6 @@ if hasattr(talon, "test_mode"):
         assert "hi dot see sharp" in result
 
     def test_expands_abbreviations():
-
         result = actions.user.create_spoken_forms("src", None, 0, True)
 
         assert "source" in result

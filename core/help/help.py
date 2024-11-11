@@ -2,7 +2,6 @@ import itertools
 import math
 import re
 from collections import defaultdict
-from functools import cmp_to_key
 from itertools import islice
 from typing import Any, Iterable, Tuple
 
@@ -423,9 +422,9 @@ def refresh_context_command_map(enabled_only=False):
                 local_context_command_map[context_name] = {}
                 for command_alias, val in context.commands.items():
                     if command_alias in registry.commands or not enabled_only:
-                        local_context_command_map[context_name][
-                            str(val.rule.rule)
-                        ] = val.target.code
+                        local_context_command_map[context_name][str(val.rule.rule)] = (
+                            val.target.code
+                        )  # fmt: skip
                 if len(local_context_command_map[context_name]) == 0:
                     local_context_command_map.pop(context_name)
                 else:
@@ -487,7 +486,7 @@ def get_sorted_keys_by_context_specificity(
             if keys:
                 return (display_name, "Context-dependent", 1)
             return (display_name, "Global", 0)
-        except Exception as ex:
+        except Exception:
             return (display_name, "", 0)
 
     grouped_list = [

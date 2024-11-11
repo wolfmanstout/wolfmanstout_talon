@@ -304,7 +304,7 @@ def auto_capitalize(text, state=None):
         "sentence start"
         if charge or sentence_end
         else "after newline" if newline else None
-    )
+    )  # fmt: skip
 
 
 # ---------- DICTATION AUTO FORMATTING ---------- #

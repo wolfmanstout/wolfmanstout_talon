@@ -3,9 +3,9 @@ import logging
 import time
 from copy import copy
 from dataclasses import dataclass
-from typing import Callable, Optional, Sequence
+from typing import Callable, Optional
 
-from talon import Module, events, resource
+from talon import events, resource
 from talon.debug import log_exception
 from talon.experimental.parrot import ParrotDelegate, ParrotFrame, ParrotSystem
 from talon_init import TALON_HOME
@@ -245,7 +245,7 @@ class PatternBuilder:
                     ">probability"
                 ], sounds=sounds: sum(frame.classes[sound] for sound in sounds)
                 >= threshold
-            )
+            )  # fmt: skip
         if ">power" in thresholds:
             detection_calls.append(
                 lambda self, frame, threshold=thresholds[">power"]: frame.power
@@ -277,7 +277,7 @@ class PatternBuilder:
                     "<probability"
                 ], sounds=sounds: sum(frame.classes[sound] for sound in sounds)
                 < threshold
-            )
+            )  # fmt: skip
         if "<power" in thresholds:
             detection_calls.append(
                 lambda self, frame, threshold=thresholds["<power"]: frame.power
