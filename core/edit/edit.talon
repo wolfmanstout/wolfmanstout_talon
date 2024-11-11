@@ -31,8 +31,8 @@ go way left | [go] west:
     edit.line_start()
     edit.line_start()
 go way right | [go] east: edit.line_end()
-go way up: edit.file_start()
-go way down: edit.file_end()
+go way up | [go] north: edit.file_start()
+go way down | [go] south: edit.file_end()
 
 go top: edit.file_start()
 go bottom: edit.file_end()
