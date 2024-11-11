@@ -10,7 +10,6 @@ os: mac
 running list: user.switcher_toggle_running()
 running close: user.switcher_hide_running()
 launch <user.launch_applications>$: user.switcher_launch(launch_applications)
-swap$: key(cmd-tab)
 show desktop$: key(f11)
 show apps$: key(ctrl-up)
 show windows$: key(ctrl-down)

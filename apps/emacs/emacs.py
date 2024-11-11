@@ -24,7 +24,10 @@ app.exe: /^emacs\.exe$/i
 """
 
 ctx = Context()
-ctx.matches = "app: emacs"
+ctx.matches = r"""
+app: emacs
+title: these_commands_are_disabled
+"""
 
 
 def meta(keys):

@@ -1,4 +1,5 @@
 app: emacs
+title: these_commands_are_disabled
 -
 tag(): user.tabs
 tag(): user.splits

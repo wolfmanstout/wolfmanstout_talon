@@ -8,3 +8,4 @@ __pycache__
 .DS_Store
 .bak
 settings_private.talon
+core/vocabulary/vocabulary.talon-list

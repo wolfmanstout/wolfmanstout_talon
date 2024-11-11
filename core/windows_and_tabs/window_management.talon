@@ -3,6 +3,7 @@
 (window | win) last: app.window_previous()
 (window | win) close: app.window_close()
 (window | win) hide: app.window_hide()
+swap$: user.switcher_focus_last()
 
 snap <user.window_snap_position>: user.snap_window(window_snap_position)
 snap next [screen]: user.move_window_next_screen()

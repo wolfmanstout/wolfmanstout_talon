@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from talon import Context, Module
 
 mod = Module()
@@ -115,6 +117,7 @@ punctuation_words = {
     "kama": ",",
     "period": ".",
     "buried": ".",
+    "semicolon": ";",
     "semi colon": ";",
     "colon": ":",
     "corn": ":",

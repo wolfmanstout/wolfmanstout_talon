@@ -4,7 +4,7 @@ settings():
 
     # Uncomment to set the speech timeout. This is the amount of time after you stop
     # speaking until Talon starts processing the spoken audio. Default is 0.3s.
-    # speech.timeout = 0.3
+    speech.timeout = 0.4
 
     # Uncomment to enable dark mode for talon help menus
     # imgui.dark_mode = true
@@ -78,8 +78,6 @@ settings():
     # wish to enable this on a per-application basis.
     user.context_sensitive_dictation = true
 
-    speech.timeout = 0.4
-
     # Choose how to resize windows moved across physical screens (eg. via `snap next`).
     # Default is 'proportional', which preserves window size : screen size ratio.
     # 'size aware' keeps absolute window size the same, except full-height or
@@ -90,7 +88,7 @@ settings():
     # user.listening_timeout_minutes = 3
 
     # Time in seconds to wait for the clipboard to change when trying to get selected text
-    # user.selected_text_timeout = 0.25
+    user.selected_text_timeout = 0.1
 
     user.draft_editor = "Visual Studio Code - Insiders, Visual Studio Code, Code"
 
@@ -120,7 +118,7 @@ settings():
 # Uncomment the below to enable support for saying numbers without a prefix.
 # By default you need to say "numb one" to write "1". If you uncomment this,
 # you can say "one" to write "1".
-# tag(): user.unprefixed_numbers
+tag(): user.unprefixed_numbers
 
 tag(): user.cursorless_experimental_snippets
 

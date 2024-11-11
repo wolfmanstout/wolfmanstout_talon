@@ -1,0 +1,16 @@
+list: user.system_paths
+hostname: Player-One
+-
+user: C:\Users\james
+desktop: C:\Users\james\Desktop
+desk: C:\Users\james\Desktop
+documents: C:\Users\james\Documents
+docks: C:\Users\james\Documents
+downloads: C:\Users\james\Downloads
+music: C:\Users\james\Music
+pictures: C:\Users\james\Pictures
+videos: C:\Users\james\Videos
+talon home: C:\Users\james\AppData\Roaming\talon
+talon recordings: C:\Users\james\AppData\Roaming\talon\recordings
+talon user: C:\Users\james\AppData\Roaming\talon\user
+profile: C:\Users\james

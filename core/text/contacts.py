@@ -2,9 +2,9 @@ from collections import defaultdict
 from itertools import product
 from typing import List, Mapping
 
-from talon import Context, Module, actions, fs
+from talon import Context, Module, actions
 
-from ..user_settings import get_settings_path, read_csv_list, track_csv_list
+from ..user_settings import track_csv_list
 
 mod = Module()
 ctx = Context()
@@ -14,6 +14,12 @@ mod.list("contact_full_names", desc="Maps names to full names.")
 mod.list("contact_names", desc="Contact first names and full names.")
 
 
+email_to_full_name = {}
+full_name_to_email = {}
+nickname_to_full_name = {}
+full_name_to_nicknames = defaultdict(list)
+
+
 # To export from Gmail, go to https://contacts.google.com/, then click "Frequently contacted", then
 # "Export". Then run `pipx install csvkit` and `csvcut -c 1,31 contacts.csv`.
 @track_csv_list("contacts.csv", headers=("Name", "Email"))
@@ -21,36 +27,44 @@ def on_contacts(values):
     global email_to_full_name, full_name_to_email
     email_to_full_name = values
     full_name_to_email = {v: k for k, v in email_to_full_name.items()}
+    reload_contacts()
 
 
-nickname_to_full_name = get_list_from_csv(
-    "nicknames.csv",
-    headers=("Full Name", "Nickname"),
-)
-full_name_to_nicknames = defaultdict(list)
-for nickname, full_name in nickname_to_full_name.items():
-    full_name_to_nicknames[full_name].append(nickname)
-
-# Manually reload the CSV if it changes. resource.open() breaks if called by
-# multiple files.
-vocabulary_path = get_settings_path("additional_words.csv")
+@track_csv_list("nicknames.csv", headers=("Full Name", "Nickname"))
+def on_nicknames(values):
+    global nickname_to_full_name, full_name_to_nicknames
+    nickname_to_full_name = values
+    full_name_to_nicknames = defaultdict(list)
+    for nickname, full_name in nickname_to_full_name.items():
+        full_name_to_nicknames[full_name].append(nickname)
+    reload_contacts()
 
 
-def update_vocabulary(ignored_path=None, ignored_flags=None):
-    global vocabulary
-    vocabulary = read_csv_list(
-        vocabulary_path.name,
-        headers=("Word(s)", "Spoken Form (If Different)"),
-    )
+# TODO Fix this to work with new .talon-list
+
+# # Manually reload the CSV if it changes. resource.open() breaks if called by
+# # multiple files.
+# vocabulary_path = get_settings_path("additional_words.csv")
 
 
-update_vocabulary()
-fs.watch(str(vocabulary_path), update_vocabulary)
+# def update_vocabulary(ignored_path=None, ignored_flags=None):
+#     global vocabulary
+#     with open(vocabulary_path, "r") as f:
+#         vocabulary = read_csv_list(
+#             f,
+#             headers=("Word(s)", "Spoken Form (If Different)"),
+#         )
+
+
+# update_vocabulary()
+# fs.watch(str(vocabulary_path), update_vocabulary)
+
+# spoken_forms = defaultdict(list)
+# for spoken_form, written_form in vocabulary.items():
+#     if spoken_form != written_form:
+#         spoken_forms[written_form].append(spoken_form)
 
 spoken_forms = defaultdict(list)
-for spoken_form, written_form in vocabulary.items():
-    if spoken_form != written_form:
-        spoken_forms[written_form].append(spoken_form)
 
 
 def create_name_to_email_dict():
@@ -101,9 +115,12 @@ def add_spoken_forms(d: Mapping[str, str]):
     }
 
 
-ctx.lists["user.contact_emails"] = add_spoken_forms(create_name_to_email_dict())
-ctx.lists["user.contact_full_names"] = add_spoken_forms(create_name_to_full_name_dict())
-ctx.lists["user.contact_names"] = add_spoken_forms(create_contact_names())
+def reload_contacts():
+    ctx.lists["user.contact_emails"] = add_spoken_forms(create_name_to_email_dict())
+    ctx.lists["user.contact_full_names"] = add_spoken_forms(
+        create_name_to_full_name_dict()
+    )
+    ctx.lists["user.contact_names"] = add_spoken_forms(create_contact_names())
 
 
 # We extend str so this can be used with no changes to the <user.prose> implementation.

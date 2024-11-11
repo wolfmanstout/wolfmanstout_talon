@@ -12,7 +12,6 @@ zoom reset: edit.zoom_reset()
 
 # Searching
 find [it]: edit.find()
-
 next one: edit.find_next()
 
 # Navigation
@@ -31,7 +30,7 @@ go line end | tail: edit.line_end()
 go way left | [go] west:
     edit.line_start()
     edit.line_start()
-go way right: edit.line_end()
+go way right | [go] east: edit.line_end()
 go way up: edit.file_start()
 go way down: edit.file_end()
 
@@ -43,8 +42,8 @@ go page down: edit.page_down()
 
 # Selecting
 
-select left | lefts: edit.extend_left()
-select right | rights: edit.extend_right()
+select left: edit.extend_left()
+select right: edit.extend_right()
 select up: edit.extend_line_up()
 select down: edit.extend_line_down()
 
@@ -71,7 +70,7 @@ clear word left:
     edit.extend_word_left()
     edit.delete()
 
-clear word right | afters delete:
+clear word right:
     edit.extend_word_right()
     edit.delete()
 
