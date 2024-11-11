@@ -9,3 +9,4 @@ __pycache__
 .bak
 settings_private.talon
 core/vocabulary/vocabulary.talon-list
+node_modules/
