@@ -3,7 +3,7 @@ import os
 import re
 from typing import Sequence, Union
 
-from talon import Context, Module, actions
+from talon import Context, Module, actions, registry
 from talon.grammar import Phrase
 
 from ..user_settings import append_to_csv, track_csv_list
@@ -281,7 +281,7 @@ class Actions:
     def check_vocabulary_for_selection():
         """Checks if the currently selected text is in the vocabulary."""
         text = actions.edit.selected_text().strip()
-        for spoken, written in vocabulary.items():
+        for spoken, written in registry.lists["user.vocabulary"][0].items():
             if text == written:
                 actions.app.notify(f'"{text}" is spoken as "{spoken}"')
                 break
