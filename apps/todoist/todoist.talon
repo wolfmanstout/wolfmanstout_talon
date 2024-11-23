@@ -26,9 +26,9 @@ project open | go project: key(g p)
 task select: key(x)
 task done: key(e)
 task edit: key(E)
-please [<user.text>]$:
+please [<user.prose>]$:
     key(ctrl-k)
-    insert(user.text or "")
+    insert(user.prose or "")
 task new: key(q)
 task add [bottom] | add task [bottom]: key(a)
 task add top | add task top: key(A)

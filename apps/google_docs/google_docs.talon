@@ -1,11 +1,11 @@
 app: google_docs
 -
-please [<user.text>]$:
+please [<user.prose>]$:
     key(alt-/)
-    insert(user.text or "")
+    insert(prose or "")
 
-please <user.text> enter$:
+please <user.prose> enter$:
     key(alt-/)
-    insert(user.text)
+    insert(prose)
     sleep(500ms)
     key(enter)
