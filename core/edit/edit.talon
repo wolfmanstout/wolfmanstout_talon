@@ -5,6 +5,9 @@ mode: user.dictation_command
 # eg: "select line", "clear all"
 <user.edit_action> <user.edit_modifier>: user.edit_command(edit_action, edit_modifier)
 
+before: edit.word_left()
+after: edit.word_right()
+
 # Zoom
 zoom in: edit.zoom_in()
 zoom out: edit.zoom_out()
