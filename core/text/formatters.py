@@ -430,7 +430,7 @@ def format_text(m) -> str:
 
 
 @mod.capture(
-    rule="<self.code_formatters> <user.text> (<user.text> | <user.formatter_immune>)*"
+    rule="<self.code_formatters> (<user.text> | <user.formatter_immune>) (<user.text> | <user.formatter_immune>)*"
 )
 def format_code(m) -> str:
     """Formats code and returns a string"""
