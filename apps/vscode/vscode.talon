@@ -26,6 +26,7 @@ bar source: user.vscode("workbench.view.scm")
 bar (test | testing): user.vscode("workbench.view.testing.focus")
 bar chat: user.vscode("workbench.panel.chat.view.copilot.focus")
 bar (hide | show | switch): user.vscode("workbench.action.toggleSidebarVisibility")
+bar right [hide | show | switch]: user.vscode("workbench.action.toggleAuxiliaryBar")
 
 # Symbol search
 symbol hunt:
