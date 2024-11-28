@@ -20,22 +20,6 @@ class Formatter(ABC):
         pass
 
 
-class ChainedFormatter(Formatter):
-    def __init__(self, id: str, formatters: list[Formatter]):
-        super().__init__(id)
-        self.formatters = formatters
-
-    def format(self, text: str) -> str:
-        for formatter in self.formatters:
-            text = formatter.format(text)
-        return text
-
-    def unformat(self, text: str) -> str:
-        for formatter in reversed(self.formatters):
-            text = formatter.unformat(text)
-        return text
-
-
 class CustomFormatter(Formatter):
     def __init__(
         self,
@@ -246,20 +230,8 @@ formatter_list = [
     CodeFormatter("PRIVATE_CAMEL_CASE", "", lower, capitalize),
     CodeFormatter("PUBLIC_CAMEL_CASE", "", capitalize, capitalize),
     CodeFormatter("SNAKE_CASE", "_", lower, lower),
-    ChainedFormatter(
-        "PRE_SNAKE_CASE",
-        [
-            CodeFormatter("SNAKE_CASE", "_", lower, lower),
-            CustomFormatter("LEADING_UNDERSCORE", lambda text: f"_{text}"),
-        ],
-    ),
-    ChainedFormatter(
-        "POST_SNAKE_CASE",
-        [
-            CodeFormatter("SNAKE_CASE", "_", lower, lower),
-            CustomFormatter("TRAILING_UNDERSCORE", lambda text: f"{text}_"),
-        ],
-    ),
+    CustomFormatter("LEADING_UNDERSCORE", lambda text: f"_{text}"),
+    CustomFormatter("TRAILING_UNDERSCORE", lambda text: f"{text}_"),
     CodeFormatter("DASH_SEPARATED", "-", lower, lower),
     CodeFormatter("DOT_SEPARATED", ".", lower, lower),
     CodeFormatter("SLASH_SEPARATED", "/", lower, lower),
@@ -293,8 +265,8 @@ code_formatter_names = {
     "compound": "NO_SPACES",
     "snake": "SNAKE_CASE",
     "score": "SNAKE_CASE",
-    "pre score": "PRE_SNAKE_CASE",
-    "post score": "POST_SNAKE_CASE",
+    "pre score": "LEADING_UNDERSCORE,SNAKE_CASE",
+    "post score": "TRAILING_UNDERSCORE,SNAKE_CASE",
     "string": "SINGLE_QUOTED_STRING",
     "constant": "ALL_CAPS,SNAKE_CASE",
 }
