@@ -84,6 +84,26 @@ class Actions:
     def duplicate_selection():
         """Duplicate the selected object."""
 
+    def google_docs_title():
+        """Set style to title"""
+        actions.key("alt-/")
+        actions.insert("apply title")
+        actions.sleep("500ms")
+        actions.key("enter")
+
+    def google_docs_subtitle():
+        """Set style to subtitle"""
+        actions.key("alt-/")
+        actions.insert("apply subtitle")
+        actions.sleep("500ms")
+        actions.key("enter")
+
+    def google_docs_heading(level: int):
+        """Set style to heading"""
+
+    def google_docs_normal_text():
+        """Set style to normal text"""
+
 
 @mac_ctx.action_class("self")
 class MacActions:
@@ -130,6 +150,12 @@ class MacActions:
     def duplicate_selection():
         actions.key("cmd-d")
 
+    def google_docs_heading(level: int):
+        actions.key(f"cmd-alt-{level}")
+
+    def google_docs_normal_text():
+        actions.key("cmd-alt-0")
+
 
 @win_ctx.action_class("self")
 class WinActions:
@@ -175,3 +201,9 @@ class WinActions:
 
     def duplicate_selection():
         actions.key("ctrl-d")
+
+    def google_docs_heading(level: int):
+        actions.key(f"ctrl-alt-{level}")
+
+    def google_docs_normal_text():
+        actions.key("ctrl-alt-0")
