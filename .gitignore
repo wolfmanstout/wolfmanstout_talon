@@ -11,3 +11,4 @@ settings_private.talon
 core/vocabulary/vocabulary.talon-list
 node_modules/
 core/system_paths-jwstout*
+.generated_docs/
