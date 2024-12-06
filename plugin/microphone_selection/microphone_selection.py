@@ -1,4 +1,4 @@
-from talon import Module, actions, app, imgui
+from talon import Module, actions, app, imgui, settings
 from talon.lib import cubeb
 
 ctx = cubeb.Context()
@@ -81,7 +81,9 @@ class Actions:
         else:
             if not last_microphone:
                 # Find the first preferred microphone in the device list
-                for preferred_microphone in preferred_microphones.get().split(","):
+                for preferred_microphone in settings.get(
+                    "user.preferred_microphones"
+                ).split(","):
                     preferred_microphone = preferred_microphone.strip()
                     for device in microphone_device_list:
                         if preferred_microphone.lower() in device.lower():

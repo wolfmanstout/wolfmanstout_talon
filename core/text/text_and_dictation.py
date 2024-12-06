@@ -449,7 +449,7 @@ class Actions:
                 need_left = not omit_space_before(text) or (
                     auto_cap and text != auto_capitalize(text, "sentence start")[0]
                 )
-                if setting_peek_right_after_insertion.get():
+                if settings.get("user.peek_right_after_insertion"):
                     need_right = False
                     needs_check_after = not omit_space_after(text)
                 else:
