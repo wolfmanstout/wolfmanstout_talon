@@ -15,6 +15,8 @@ git commit [<user.text>]:
 git commit undo: user.vscode("git.undoCommit")
 git commit amend: user.vscode("git.commitStagedAmend")
 git diff | diff open: user.vscode("git.openChange")
+git diff unstaged: user.vscode("git.viewChanges")
+git diff staged: user.vscode("git.viewStagedChanges")
 git fetch: user.vscode("git.fetch")
 git fetch all: user.vscode("git.fetchAll")
 git ignore: user.vscode("git.ignore")
