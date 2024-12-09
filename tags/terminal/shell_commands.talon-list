@@ -1,0 +1,136 @@
+list: user.shell_commands
+-
+soft link: ln -s
+sym link: ln -s
+list: ls
+list long: ls -l
+make dear: mkdir
+ps a UX: ps aux
+ps aux
+pipe: |
+CH mod: chmod
+TK diff: tkdiff
+MV: mv
+CP: cp
+RM: rm
+CD: cd
+LS: ls
+PS: ps
+pseudo: sudo
+apt get: apt-get
+echo
+grep
+ssh
+diff
+cat
+man
+less
+curl
+files to prompt: files-to-prompt
+u v: uv
+u v x: uvx
+
+# pre-commit
+pre commit: pre-commit
+pre commit install: pre-commit install
+pre commit run: pre-commit run
+pre commit run all: pre-commit run --all-files
+
+# Fig
+fig: hg
+fig XL: hg xl
+fig sync: hg sync
+fig checkout: hg checkout
+fig checkout P four head: hg checkout p4head
+fig add: hg add
+fig commit: hg commit -e
+fig diff: hg diff
+fig diff stat: hg diff --stat
+fig diff no binary: hg diff --no-binary
+fig P diff: hg pdiff
+fig P diff stat: hg pdiff --stat
+fig P diff no binary: hg pdiff --no-binary
+fig amend: hg amend
+fig mail: hg mail -m
+fig upload: hg uploadchain
+fig submit: hg submit
+fig status: hg status
+fig fix: hg fix
+fig lint: hg lint
+fig evolve: hg evolve
+fig preev: hg prev
+fig next: hg next
+fig shelve: hg shelve
+fig unshelve: hg unshelve
+
+# Git
+git
+git branch
+git checkout
+git checkout new: git checkout -b
+git cherry pick: git cherry-pick
+git clone
+git commit: git commit -am
+git diff
+git fetch
+git log
+git merge
+git pull
+git push
+git rebase
+git reset
+git reset hard head: git reset --hard HEAD
+git revert
+git stash pop
+git stash
+git status
+
+# NPM
+npm
+npm install
+npm C I: npm ci
+npm run
+
+# LLM
+llm
+llm prompt
+llm chat
+llm keys
+llm keys list
+llm keys path
+llm keys get
+llm keys set
+llm logs
+llm logs path
+llm logs status
+llm logs on
+llm logs off
+llm logs list
+llm models
+llm models list
+llm models default
+llm templates
+llm templates list
+llm templates show
+llm templates edit
+llm templates path
+llm aliases
+llm aliases list
+llm aliases set
+llm aliases remove
+llm aliases path
+llm plugins
+llm install
+llm uninstall
+llm embed
+llm embed multi: llm embed-multi
+llm similar
+llm embed models: llm embed-models
+llm embed models list: llm embed-models list
+llm embed models default: llm embed-models default
+llm collections
+llm collections path
+llm collections list
+llm collections delete
+llm openai
+llm openai models

@@ -3,6 +3,7 @@ from talon import Module
 mod = Module()
 
 mod.list("uv_subcommands", desc="Subcommands of 'uv' Python utility")
+mod.list("shell_commands", desc="Commands to use in a shell")
 
 
 @mod.action_class
