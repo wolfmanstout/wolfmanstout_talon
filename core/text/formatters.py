@@ -232,6 +232,7 @@ formatter_list = [
     CodeFormatter("SNAKE_CASE", "_", lower, lower),
     CustomFormatter("LEADING_UNDERSCORE", lambda text: f"_{text}"),
     CustomFormatter("TRAILING_UNDERSCORE", lambda text: f"{text}_"),
+    CustomFormatter("LEADING_DASHES", lambda text: f"--{text}"),
     CodeFormatter("DASH_SEPARATED", "-", lower, lower),
     CodeFormatter("DOT_SEPARATED", ".", lower, lower),
     CodeFormatter("SLASH_SEPARATED", "/", lower, lower),
@@ -251,7 +252,7 @@ code_formatter_names = {
     "spaces": "ALL_LOWERCASE",
     "camel": "PRIVATE_CAMEL_CASE",
     "dotted": "DOT_SEPARATED",
-    "dub string": "DOUBLE_QUOTED_STRING",
+    "string": "DOUBLE_QUOTED_STRING",
     "dunder": "DOUBLE_UNDERSCORE",
     "hammer": "PUBLIC_CAMEL_CASE",
     "studley": "PUBLIC_CAMEL_CASE",
@@ -267,8 +268,9 @@ code_formatter_names = {
     "score": "SNAKE_CASE",
     "pre score": "LEADING_UNDERSCORE,SNAKE_CASE",
     "post score": "TRAILING_UNDERSCORE,SNAKE_CASE",
-    "string": "SINGLE_QUOTED_STRING",
+    "single string": "SINGLE_QUOTED_STRING",
     "constant": "ALL_CAPS,SNAKE_CASE",
+    "flag": "LEADING_DASHES,DASH_SEPARATED",
 }
 prose_formatter_names = {
     "speak": "NOOP",
