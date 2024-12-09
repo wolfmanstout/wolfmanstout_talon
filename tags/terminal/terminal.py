@@ -2,6 +2,8 @@ from talon import Module
 
 mod = Module()
 
+mod.list("uv_subcommands", desc="Subcommands of 'uv' Python utility")
+
 
 @mod.action_class
 class Actions:

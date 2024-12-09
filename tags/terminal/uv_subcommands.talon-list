@@ -1,0 +1,47 @@
+list: user.uv_subcommands
+-
+run
+init
+add
+remove
+sync
+lock
+export
+tree
+tool
+tool run
+tool install
+tool upgrade
+tool list
+tool uninstall
+tool update shell: tool update-shell
+tool dir
+python
+python list
+python install
+python find
+python pin
+python dir
+python uninstall
+pip
+pip compile
+pip sync
+pip install
+pip uninstall
+pip freeze
+pip list
+pip show
+pip tree
+pip check
+venv
+build
+publish
+cache
+cache clean
+cache prune
+cache dir
+self
+self update
+version
+generate shell completion: generate-shell-completion
+help
