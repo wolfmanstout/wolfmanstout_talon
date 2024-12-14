@@ -66,6 +66,9 @@ fig unshelve: hg unshelve
 
 # Git
 git
+main
+master
+git add
 git branch
 git checkout
 git checkout new: git checkout -b
@@ -74,17 +77,28 @@ git clone
 git commit: git commit -am
 git diff
 git fetch
+git init
 git log
+git m v: git mv
 git merge
 git pull
 git push
+git r m: git rm
 git rebase
+git remote
+git remote add
+git remote get url: git remote get-url
+git remote remove
+git remote rename
+git remote set url: git remote set-url
 git reset
 git reset hard head: git reset --hard HEAD
 git revert
-git stash pop
 git stash
+git stash pop
 git status
+git switch
+git tag
 
 # NPM
 npm
