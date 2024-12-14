@@ -29,6 +29,7 @@ curl
 files to prompt: files-to-prompt
 u v: uv
 u v x: uvx
+code
 
 # pre-commit
 pre commit: pre-commit
