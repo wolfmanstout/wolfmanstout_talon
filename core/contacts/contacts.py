@@ -1,126 +1,196 @@
-from collections import defaultdict
-from itertools import product
-from typing import List, Mapping
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List
 
-from talon import Context, Module, actions
+from talon import Context, Module, actions, resource
 
 from ..user_settings import track_csv_list
 
 mod = Module()
 ctx = Context()
 
+mod.list("contact_names", desc="Contact first names, full names, and nicknames.")
 mod.list("contact_emails", desc="Maps names to email addresses.")
 mod.list("contact_full_names", desc="Maps names to full names.")
-mod.list("contact_names", desc="Contact first names and full names.")
 
 
-email_to_full_name = {}
-full_name_to_email = {}
-nickname_to_full_name = {}
-full_name_to_nicknames = defaultdict(list)
+@dataclass
+class Contact:
+    email: str
+    full_name: str
+    nicknames: List[str]
+    pronunciations: Dict[str, str]
+
+    @classmethod
+    def from_json(cls, contact):
+        email = contact.get("email")
+        if not email:
+            print(f"Error: contact missing email: {contact}")
+            return None
+
+        # Handle full name with potential pronunciation
+        full_name_raw = contact.get("full_name", "")
+        pronunciations = {}
+        if ":" in full_name_raw:
+            pronunciation, full_name = [x.strip() for x in full_name_raw.split(":", 1)]
+            pron_parts = pronunciation.split()
+            name_parts = full_name.split()
+            if len(pron_parts) == len(name_parts):
+                for pron, name in zip(pron_parts, name_parts):
+                    if name in pronunciations and pronunciations[name] != pron:
+                        print(
+                            f"Warning: multiple different pronunciations found for "
+                            f"'{name}' in {full_name_raw}"
+                        )
+                    pronunciations[name] = pron
+            else:
+                print(
+                    f"Warning: pronunciation parts don't match name parts for "
+                    f"{full_name_raw}"
+                )
+        else:
+            full_name = full_name_raw
+
+        # Handle nicknames with potential pronunciations
+        nicknames = []
+        for nickname_raw in contact.get("nicknames", []):
+            if ":" in nickname_raw:
+                pronunciation, nickname = [
+                    x.strip() for x in nickname_raw.split(":", 1)
+                ]
+                if (
+                    nickname in pronunciations
+                    and pronunciations[nickname] != pronunciation
+                ):
+                    print(
+                        f"Warning: multiple different pronunciations found for "
+                        f"'{nickname}' in contact {email}"
+                    )
+                pronunciations[nickname] = pronunciation
+                nicknames.append(nickname)
+            else:
+                nicknames.append(nickname_raw)
+
+        return Contact(
+            email=email,
+            full_name=full_name,
+            nicknames=nicknames,
+            pronunciations=pronunciations,
+        )
 
 
-# To export from Gmail, go to https://contacts.google.com/, then click "Frequently contacted", then
-# "Export". Then run `pipx install csvkit` and `csvcut -c 1,31 contacts.csv`.
+csv_contacts: List[Contact] = []
+json_contacts: List[Contact] = []
+
+
 @track_csv_list("contacts.csv", headers=("Name", "Email"))
-def on_contacts(values):
-    global email_to_full_name, full_name_to_email
-    email_to_full_name = values
-    full_name_to_email = {v: k for k, v in email_to_full_name.items()}
+def on_contacts_csv(values):
+    global csv_contacts
+    csv_contacts = [
+        Contact(email=email, full_name=full_name, nicknames=[], pronunciations={})
+        for email, full_name in values.items()
+    ]
     reload_contacts()
 
 
-@track_csv_list("nicknames.csv", headers=("Full Name", "Nickname"))
-def on_nicknames(values):
-    global nickname_to_full_name, full_name_to_nicknames
-    nickname_to_full_name = values
-    full_name_to_nicknames = defaultdict(list)
-    for nickname, full_name in nickname_to_full_name.items():
-        full_name_to_nicknames[full_name].append(nickname)
+contacts_json = Path(__file__).parent / "contacts.json"
+if not contacts_json.exists():
+    contacts_json.write_text("[]")
+
+
+@resource.watch("contacts.json")
+def on_contacts_json(f):
+    global json_contacts
+    try:
+        contacts = json.load(f)
+    except Exception as e:
+        print(f"Error parsing contacts.json: {e}")
+        return
+
+    json_contacts = []
+    for contact in contacts:
+        try:
+            parsed_contact = Contact.from_json(contact)
+            if parsed_contact:
+                json_contacts.append(parsed_contact)
+        except Exception as e:
+            print(f"Error parsing contact: {contact}\n{e}")
     reload_contacts()
 
 
-# TODO Fix this to work with new .talon-list
+def create_pronunciation_to_name_map(contact):
+    result = {}
+    if contact.full_name:
+        # Add pronunciation mapping for full name
+        pron_parts = [
+            contact.pronunciations.get(name, name) for name in contact.full_name.split()
+        ]
+        result[" ".join(pron_parts)] = contact.full_name
 
-# # Manually reload the CSV if it changes. resource.open() breaks if called by
-# # multiple files.
-# vocabulary_path = get_settings_path("additional_words.csv")
-
-
-# def update_vocabulary(ignored_path=None, ignored_flags=None):
-#     global vocabulary
-#     with open(vocabulary_path, "r") as f:
-#         vocabulary = read_csv_list(
-#             f,
-#             headers=("Word(s)", "Spoken Form (If Different)"),
-#         )
-
-
-# update_vocabulary()
-# fs.watch(str(vocabulary_path), update_vocabulary)
-
-# spoken_forms = defaultdict(list)
-# for spoken_form, written_form in vocabulary.items():
-#     if spoken_form != written_form:
-#         spoken_forms[written_form].append(spoken_form)
-
-spoken_forms = defaultdict(list)
+        # Add pronunciation mapping for first name only
+        first_name = contact.full_name.split()[0]
+        result[contact.pronunciations.get(first_name, first_name)] = first_name
+    for nickname in contact.nicknames:
+        result[contact.pronunciations.get(nickname, nickname)] = nickname
+    return result
 
 
-def create_name_to_email_dict():
+def create_name_to_email_dict(contacts):
     return {
-        name: email
-        for full_name, email in full_name_to_email.items()
-        for name in full_name.split(" ")
-        + [full_name]
-        + full_name_to_nicknames[full_name]
-        if name
+        name: contact.email
+        for contact in contacts
+        for name in create_pronunciation_to_name_map(contact).keys()
     }
 
 
-def create_name_to_full_name_dict():
+def create_name_to_full_name_dict(contacts):
     return {
-        name: full_name
-        for full_name in full_name_to_email
-        for name in full_name.split(" ")
-        + [full_name]
-        + full_name_to_nicknames[full_name]
-        if name
+        name: contact.full_name
+        for contact in contacts
+        for name in create_pronunciation_to_name_map(contact).keys()
+        if contact.full_name
     }
 
 
-def create_contact_names():
+def create_contact_names(contacts):
     return {
-        name: name
-        for full_name in full_name_to_email
-        for name in [full_name.split(" ")[0], full_name]
-        + full_name_to_nicknames[full_name]
-        if name
-    }
-
-
-def get_spoken_forms(name: str) -> List[str]:
-    name_parts = name.split(" ")
-    split_names = list(
-        product(*[spoken_forms[name_part] + [name_part] for name_part in name_parts])
-    )
-    return [" ".join(name) for name in split_names]
-
-
-def add_spoken_forms(d: Mapping[str, str]):
-    return {
-        spoken_form: value
-        for name, value in d.items()
-        for spoken_form in get_spoken_forms(name)
+        pronunciation: name
+        for contact in contacts
+        for (pronunciation, name) in create_pronunciation_to_name_map(contact).items()
     }
 
 
 def reload_contacts():
-    ctx.lists["user.contact_emails"] = add_spoken_forms(create_name_to_email_dict())
-    ctx.lists["user.contact_full_names"] = add_spoken_forms(
-        create_name_to_full_name_dict()
+    # Merge the CSV and JSON contacts
+    csv_by_email = {contact.email: contact for contact in csv_contacts}
+    json_by_email = {contact.email: contact for contact in json_contacts}
+    all_emails = set(csv_by_email.keys()) | set(json_by_email.keys())
+    merged_contacts = []
+    for email in all_emails:
+        csv_contact = csv_by_email.get(email)
+        json_contact = json_by_email.get(email)
+
+        if csv_contact and json_contact:
+            # Prefer JSON data but use CSV name if JSON name is empty
+            full_name = json_contact.full_name or csv_contact.full_name
+            merged_contacts.append(
+                Contact(
+                    email=email,
+                    full_name=full_name,
+                    nicknames=json_contact.nicknames,
+                    pronunciations=json_contact.pronunciations,
+                )
+            )
+        else:
+            # Use whichever contact exists
+            merged_contacts.append(json_contact or csv_contact)
+
+    ctx.lists["user.contact_names"] = create_contact_names(merged_contacts)
+    ctx.lists["user.contact_emails"] = create_name_to_email_dict(merged_contacts)
+    ctx.lists["user.contact_full_names"] = create_name_to_full_name_dict(
+        merged_contacts
     )
-    ctx.lists["user.contact_names"] = add_spoken_forms(create_contact_names())
 
 
 # We extend str so this can be used with no changes to the <user.prose> implementation.
