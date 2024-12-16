@@ -135,31 +135,6 @@ def create_pronunciation_to_name_map(contact):
     return result
 
 
-def create_name_to_email_dict(contacts):
-    return {
-        name: contact.email
-        for contact in contacts
-        for name in create_pronunciation_to_name_map(contact)
-    }
-
-
-def create_name_to_full_name_dict(contacts):
-    return {
-        name: contact.full_name
-        for contact in contacts
-        for name in create_pronunciation_to_name_map(contact)
-        if contact.full_name
-    }
-
-
-def create_contact_names(contacts):
-    return {
-        pronunciation: name
-        for contact in contacts
-        for (pronunciation, name) in create_pronunciation_to_name_map(contact).items()
-    }
-
-
 def reload_contacts():
     # Merge the CSV and JSON contacts
     csv_by_email = {contact.email: contact for contact in csv_contacts}
@@ -185,11 +160,20 @@ def reload_contacts():
             # Use whichever contact exists
             merged_contacts.append(json_contact or csv_contact)
 
-    ctx.lists["user.contact_names"] = create_contact_names(merged_contacts)
-    ctx.lists["user.contact_emails"] = create_name_to_email_dict(merged_contacts)
-    ctx.lists["user.contact_full_names"] = create_name_to_full_name_dict(
-        merged_contacts
-    )
+    contact_names = {}
+    contact_emails = {}
+    contact_full_names = {}
+    for contact in merged_contacts:
+        pronunciation_map = create_pronunciation_to_name_map(contact)
+        for pronunciation, name in pronunciation_map.items():
+            contact_names[pronunciation] = name
+            contact_emails[pronunciation] = contact.email
+            if contact.full_name:
+                contact_full_names[pronunciation] = contact.full_name
+
+    ctx.lists["user.contact_names"] = contact_names
+    ctx.lists["user.contact_emails"] = contact_emails
+    ctx.lists["user.contact_full_names"] = contact_full_names
 
 
 # We extend str so this can be used with no changes to the <user.prose> implementation.
