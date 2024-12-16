@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -25,7 +26,7 @@ class Contact:
     def from_json(cls, contact):
         email = contact.get("email")
         if not email:
-            print(f"Error: contact missing email: {contact}")
+            logging.error(f"Skipping contact missing email: {contact}")
             return None
 
         # Handle full name with potential pronunciation
@@ -38,15 +39,14 @@ class Contact:
             if len(pron_parts) == len(name_parts):
                 for pron, name in zip(pron_parts, name_parts):
                     if name in pronunciations and pronunciations[name] != pron:
-                        print(
-                            f"Warning: multiple different pronunciations found for "
-                            f"'{name}' in {full_name_raw}"
+                        logging.warning(
+                            f"Multiple different pronunciations found for '{name}' in "
+                            f"{full_name_raw}"
                         )
                     pronunciations[name] = pron
             else:
-                print(
-                    f"Warning: pronunciation parts don't match name parts for "
-                    f"{full_name_raw}"
+                logging.error(
+                    f"Pronunciation parts don't match name parts for {full_name_raw}"
                 )
         else:
             full_name = full_name_raw
@@ -62,9 +62,9 @@ class Contact:
                     nickname in pronunciations
                     and pronunciations[nickname] != pronunciation
                 ):
-                    print(
-                        f"Warning: multiple different pronunciations found for "
-                        f"'{nickname}' in contact {email}"
+                    logging.warning(
+                        f"Multiple different pronunciations found for '{nickname}' in "
+                        f"contact {email}"
                     )
                 pronunciations[nickname] = pronunciation
                 nicknames.append(nickname)
@@ -103,8 +103,8 @@ def on_contacts_json(f):
     global json_contacts
     try:
         contacts = json.load(f)
-    except Exception as e:
-        print(f"Error parsing contacts.json: {e}")
+    except Exception:
+        logging.exception("Error parsing contacts.json")
         return
 
     json_contacts = []
@@ -113,8 +113,8 @@ def on_contacts_json(f):
             parsed_contact = Contact.from_json(contact)
             if parsed_contact:
                 json_contacts.append(parsed_contact)
-        except Exception as e:
-            print(f"Error parsing contact: {contact}\n{e}")
+        except Exception:
+            logging.exception(f"Error parsing contact: {contact}")
     reload_contacts()
 
 
