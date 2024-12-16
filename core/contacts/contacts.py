@@ -86,10 +86,14 @@ json_contacts: list[Contact] = []
 @track_csv_list("contacts.csv", headers=("Name", "Email"))
 def on_contacts_csv(values):
     global csv_contacts
-    csv_contacts = [
-        Contact(email=email, full_name=full_name, nicknames=[], pronunciations={})
-        for email, full_name in values.items()
-    ]
+    csv_contacts = []
+    for email, full_name in values.items():
+        if not email:
+            logging.error(f"Skipping contact missing email: {full_name}")
+            continue
+        csv_contacts.append(
+            Contact(email=email, full_name=full_name, nicknames=[], pronunciations={})
+        )
     reload_contacts()
 
 
@@ -136,12 +140,11 @@ def create_pronunciation_to_name_map(contact):
 
 
 def reload_contacts():
-    # Merge the CSV and JSON contacts
     csv_by_email = {contact.email: contact for contact in csv_contacts}
     json_by_email = {contact.email: contact for contact in json_contacts}
-    all_emails = set(csv_by_email.keys()) | set(json_by_email.keys())
+    # Merge the CSV and JSON contacts. Maintain order of contacts with JSON first.
     merged_contacts = []
-    for email in all_emails:
+    for email in json_by_email | csv_by_email:
         csv_contact = csv_by_email.get(email)
         json_contact = json_by_email.get(email)
 
@@ -163,7 +166,8 @@ def reload_contacts():
     contact_names = {}
     contact_emails = {}
     contact_full_names = {}
-    for contact in merged_contacts:
+    # Iterate in reverse so that the first contact with a name is used.
+    for contact in reversed(merged_contacts):
         pronunciation_map = create_pronunciation_to_name_map(contact)
         for pronunciation, name in pronunciation_map.items():
             contact_names[pronunciation] = name
@@ -176,121 +180,101 @@ def reload_contacts():
     ctx.lists["user.contact_full_names"] = contact_full_names
 
 
-# We extend str so this can be used with no changes to the <user.prose> implementation.
-class TimestampedString(str):
-    def __new__(cls, string: str, start: float, end: float):
-        return super().__new__(cls, string)
+def first_name_from_full_name(full_name: str):
+    return full_name.split(" ")[0]
 
-    def __init__(self, string: str, start: float, end: float):
-        super().__init__()
-        self.start = start
-        self.end = end
+
+def last_name_from_full_name(full_name: str):
+    return full_name.split(" ")[-1]
+
+
+def username_from_email(email: str):
+    return email.split("@")[0]
+
+
+def make_name_possessive(name: str):
+    return f"{name}'s"
 
 
 @mod.capture(
     rule="{user.contact_names} name",
 )
-def prose_name(m) -> TimestampedString:
-    return TimestampedString(m.contact_names, m[0].start, m[0].end)
+def prose_name(m) -> str:
+    return m.contact_names
 
 
 @mod.capture(
     rule="{user.contact_names} names",
 )
-def prose_name_possessive(m) -> TimestampedString:
-    if hasattr(m, "contact_name_possessives"):
-        return TimestampedString(m.contact_name_possessives, m[0].start, m[0].end)
-    else:
-        return TimestampedString(
-            actions.user.make_name_possessive(m.contact_names), m[0].start, m[0].end
-        )
+def prose_name_possessive(m) -> str:
+    return actions.user.make_name_possessive(m.contact_names)
 
 
 @mod.capture(
     rule="{user.contact_emails} email [address]",
 )
-def prose_email(m) -> TimestampedString:
-    return TimestampedString(m.contact_emails, m[0].start, m[0].end)
+def prose_email(m) -> str:
+    return m.contact_emails
 
 
 @mod.capture(
     rule="{user.contact_emails} (username | L dap)",
 )
-def prose_username(m) -> TimestampedString:
-    return TimestampedString(
-        actions.user.username_from_email(m.contact_emails), m[0].start, m[0].end
-    )
+def prose_username(m) -> str:
+    return actions.user.username_from_email(m.contact_emails)
 
 
 @mod.capture(
     rule="{user.contact_full_names} full name",
 )
-def prose_full_name(m) -> TimestampedString:
-    return TimestampedString(m.contact_full_names, m[0].start, m[0].end)
+def prose_full_name(m) -> str:
+    return m.contact_full_names
 
 
 @mod.capture(
     rule="{user.contact_full_names} full names",
 )
-def prose_full_name_possessive(m) -> TimestampedString:
-    return TimestampedString(
-        actions.user.make_name_possessive(m.contact_full_names), m[0].start, m[0].end
-    )
+def prose_full_name_possessive(m) -> str:
+    return actions.user.make_name_possessive(m.contact_full_names)
 
 
 @mod.capture(
     rule="{user.contact_full_names} first name",
 )
-def prose_first_name(m) -> TimestampedString:
-    return TimestampedString(
-        actions.user.first_name_from_full_name(m.contact_full_names),
-        m[0].start,
-        m[0].end,
-    )
+def prose_first_name(m) -> str:
+    return actions.user.first_name_from_full_name(m.contact_full_names)
 
 
 @mod.capture(
     rule="{user.contact_full_names} first names",
 )
-def prose_first_name_possessive(m) -> TimestampedString:
-    return TimestampedString(
-        actions.user.make_name_possessive(
-            actions.user.first_name_from_full_name(m.contact_full_names)
-        ),
-        m[0].start,
-        m[0].end,
+def prose_first_name_possessive(m) -> str:
+    return actions.user.make_name_possessive(
+        actions.user.first_name_from_full_name(m.contact_full_names)
     )
 
 
 @mod.capture(
     rule="{user.contact_full_names} last name",
 )
-def prose_last_name(m) -> TimestampedString:
-    return TimestampedString(
-        actions.user.last_name_from_full_name(m.contact_full_names),
-        m[0].start,
-        m[0].end,
-    )
+def prose_last_name(m) -> str:
+    return actions.user.last_name_from_full_name(m.contact_full_names)
 
 
 @mod.capture(
     rule="{user.contact_full_names} last names",
 )
-def prose_last_name_possessive(m) -> TimestampedString:
-    return TimestampedString(
-        actions.user.make_name_possessive(
-            actions.user.last_name_from_full_name(m.contact_full_names)
-        ),
-        m[0].start,
-        m[0].end,
+def prose_last_name_possessive(m) -> str:
+    return actions.user.make_name_possessive(
+        actions.user.last_name_from_full_name(m.contact_full_names)
     )
 
 
 @mod.capture(
     rule="(hi | high) {user.contact_names} [name]",
 )
-def prose_contact_snippet(m) -> TimestampedString:
-    return TimestampedString(f"hi {m.contact_names}", m[0].start, m[-1].end)
+def prose_contact_snippet(m) -> str:
+    return f"hi {m.contact_names}"
 
 
 @mod.capture(
@@ -308,24 +292,5 @@ def prose_contact_snippet(m) -> TimestampedString:
         "| <user.prose_contact_snippet>"
     ),
 )
-def prose_contact(m) -> TimestampedString:
+def prose_contact(m) -> str:
     return m[0]
-
-
-@mod.action_class
-class Actions:
-    def first_name_from_full_name(full_name: str):
-        """Returns the first name from the full name."""
-        return full_name.split(" ")[0]
-
-    def last_name_from_full_name(full_name: str):
-        """Returns the last name from the full name."""
-        return full_name.split(" ")[-1]
-
-    def username_from_email(email: str):
-        """Returns the username from the email address."""
-        return email.split("@")[0]
-
-    def make_name_possessive(name: str):
-        """Returns the possessive version of the name."""
-        return f"{name}'s"

@@ -30,6 +30,8 @@ To refer to this contact, you could say:
 - Jonathan Doh name -> Jonathan Doe
 - Jon last name -> Doe
 - Jon full name -> Jonathan Doe
+- Jon names -> Jon's
+- Jon full names -> Jonathan Doe's
 
 The CSV format provides only email and full name functionality:
 
@@ -48,3 +50,6 @@ contacted", then "Export". Then run:
 ```bash
 cat contacts.csv | python -c "import csv; import sys; w=csv.writer(sys.stdout); [w.writerow([row['First Name'] + ' ' + row['Last Name'], row['E-mail 1 - Value']]) for row in csv.DictReader(sys.stdin)]"
 ```
+
+In case of name conflicts (e.g. two people named John), the first instance will
+be preferred, with all JSON contacts taking precedence over CSV.
