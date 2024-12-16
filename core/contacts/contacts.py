@@ -1,7 +1,6 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
 
 from talon import Context, Module, actions, resource
 
@@ -19,8 +18,8 @@ mod.list("contact_full_names", desc="Maps names to full names.")
 class Contact:
     email: str
     full_name: str
-    nicknames: List[str]
-    pronunciations: Dict[str, str]
+    nicknames: list[str]
+    pronunciations: dict[str, str]
 
     @classmethod
     def from_json(cls, contact):
@@ -80,8 +79,8 @@ class Contact:
         )
 
 
-csv_contacts: List[Contact] = []
-json_contacts: List[Contact] = []
+csv_contacts: list[Contact] = []
+json_contacts: list[Contact] = []
 
 
 @track_csv_list("contacts.csv", headers=("Name", "Email"))
@@ -140,7 +139,7 @@ def create_name_to_email_dict(contacts):
     return {
         name: contact.email
         for contact in contacts
-        for name in create_pronunciation_to_name_map(contact).keys()
+        for name in create_pronunciation_to_name_map(contact)
     }
 
 
@@ -148,7 +147,7 @@ def create_name_to_full_name_dict(contacts):
     return {
         name: contact.full_name
         for contact in contacts
-        for name in create_pronunciation_to_name_map(contact).keys()
+        for name in create_pronunciation_to_name_map(contact)
         if contact.full_name
     }
 
