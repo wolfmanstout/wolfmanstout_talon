@@ -2,8 +2,8 @@
 
 This directory provides a versatile `<user.prose_contact>` capture that can be
 used to insert names and email addresses using a suffix. The contact list may be
-provided through `contacts.csv` in the settings directory, `contacts.json` in
-this directory, or both.
+provided through `contacts.json` in this directory, `contacts.csv` in the
+settings directory, or both.
 
 Here is an example contacts.json:
 
@@ -13,8 +13,7 @@ Here is an example contacts.json:
         "email": "john.doe@example.com",
         "full_name": "Jonathan Doh: Jonathan Doe",
         "nicknames": ["Jon", "Jah Nee: Jonny"]
-    },
-    ...
+    }
 ]
 ```
 
