@@ -39,14 +39,12 @@ John Doe,jon.doe@example.com
 Jane Doe,jane.doe@example.com
 ```
 
-The advantage of the CSV format is that it is easily exported. For example, to
-export from Gmail, go to https://contacts.google.com/, then click "Frequently
+The advantage of the CSV format is that it is easily exported. If both the CSV
+and JSON are present, they will be merged based on email addresses. This makes
+it easy to use an exported CSV and maintain nicknames in the JSON. For example,
+to export from Gmail, go to https://contacts.google.com/, then click "Frequently
 contacted", then "Export". Then run:
 
 ```bash
 cat contacts.csv | python -c "import csv; import sys; w=csv.writer(sys.stdout); [w.writerow([row['First Name'] + ' ' + row['Last Name'], row['E-mail 1 - Value']]) for row in csv.DictReader(sys.stdin)]"
 ```
-
-If both the CSV and JSON are present, they will be merged based on email
-addresses. This makes it easy to use an exported CSV and maintain nicknames in
-the JSON.
