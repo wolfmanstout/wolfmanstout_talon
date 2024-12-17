@@ -18,7 +18,10 @@ Here is an example contacts.json:
 ```
 
 Note that for either full_name or nicknames, pronunciation can be provided via
-the standard Talon list format of "[pronunciation]: [name]".
+the standard Talon list format of "[pronunciation]: [name]". Pronunciation for
+the first name is automatically extracted from pronunciation for the full name,
+if there are the same number of name parts in each. Pronunciation can be
+overridden for the first name by adding a nickname with matching written form.
 
 To refer to this contact, you could say:
 
@@ -51,4 +54,9 @@ cat contacts.csv | python -c "import csv; import sys; w=csv.writer(sys.stdout); 
 ```
 
 In case of name conflicts (e.g. two people named John), the first instance will
-be preferred, with all JSON contacts taking precedence over CSV.
+be preferred, with all JSON contacts taking precedence over CSV. If you wish to
+refer to both, use the pronunciation to differentiate, using a nickname to
+override the first name pronunciation if desired. For example, you might add
+"John S: John" and "John D: John" as nicknames to the two different Johns. This
+is also an effective way to handle name homophones such as John and Jon, which
+would otherwise be resolved arbitrarily by the speech engine.

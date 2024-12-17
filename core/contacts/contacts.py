@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from talon import Context, Module, actions, resource
+from talon import Context, Module, resource
 
 from ..user_settings import track_csv_list
 
@@ -34,19 +34,29 @@ class Contact:
         pronunciations = {}
         if ":" in full_name_raw:
             pronunciation, full_name = [x.strip() for x in full_name_raw.split(":", 1)]
+            if (
+                full_name in pronunciations
+                and pronunciations[full_name] != pronunciation
+            ):
+                logging.info(
+                    f"Multiple pronunciations found for '{full_name}'; using '{pronunciation}'"
+                )
+            pronunciations[full_name] = pronunciation
+
+            # Add pronunciation for each component of the name.
             pron_parts = pronunciation.split()
             name_parts = full_name.split()
             if len(pron_parts) == len(name_parts):
                 for pron, name in zip(pron_parts, name_parts):
                     if name in pronunciations and pronunciations[name] != pron:
-                        logging.warning(
+                        logging.info(
                             f"Multiple different pronunciations found for '{name}' in "
-                            f"{full_name_raw}"
+                            f"{full_name_raw}; using '{pron}'"
                         )
                     pronunciations[name] = pron
             else:
-                logging.error(
-                    f"Pronunciation parts don't match name parts for {full_name_raw}"
+                logging.info(
+                    f"Pronunciation parts don't match name parts for '{full_name_raw}; skipping them.'"
                 )
         else:
             full_name = full_name_raw
@@ -62,9 +72,9 @@ class Contact:
                     nickname in pronunciations
                     and pronunciations[nickname] != pronunciation
                 ):
-                    logging.warning(
+                    logging.info(
                         f"Multiple different pronunciations found for '{nickname}' in "
-                        f"contact {email}"
+                        f"contact {email}; using '{pronunciation}'"
                     )
                 pronunciations[nickname] = pronunciation
                 nicknames.append(nickname)
@@ -125,12 +135,9 @@ def on_contacts_json(f):
 def create_pronunciation_to_name_map(contact):
     result = {}
     if contact.full_name:
-        # Add pronunciation mapping for full name
-        pron_parts = [
-            contact.pronunciations.get(name, name) for name in contact.full_name.split()
-        ]
-        result[" ".join(pron_parts)] = contact.full_name
-
+        result[contact.pronunciations.get(contact.full_name, contact.full_name)] = (
+            contact.full_name
+        )
         # Add pronunciation mapping for first name only
         first_name = contact.full_name.split()[0]
         result[contact.pronunciations.get(first_name, first_name)] = first_name
@@ -207,7 +214,7 @@ def prose_name(m) -> str:
     rule="{user.contact_names} names",
 )
 def prose_name_possessive(m) -> str:
-    return actions.user.make_name_possessive(m.contact_names)
+    return make_name_possessive(m.contact_names)
 
 
 @mod.capture(
@@ -221,7 +228,7 @@ def prose_email(m) -> str:
     rule="{user.contact_emails} (username | L dap)",
 )
 def prose_username(m) -> str:
-    return actions.user.username_from_email(m.contact_emails)
+    return username_from_email(m.contact_emails)
 
 
 @mod.capture(
@@ -235,39 +242,35 @@ def prose_full_name(m) -> str:
     rule="{user.contact_full_names} full names",
 )
 def prose_full_name_possessive(m) -> str:
-    return actions.user.make_name_possessive(m.contact_full_names)
+    return make_name_possessive(m.contact_full_names)
 
 
 @mod.capture(
     rule="{user.contact_full_names} first name",
 )
 def prose_first_name(m) -> str:
-    return actions.user.first_name_from_full_name(m.contact_full_names)
+    return first_name_from_full_name(m.contact_full_names)
 
 
 @mod.capture(
     rule="{user.contact_full_names} first names",
 )
 def prose_first_name_possessive(m) -> str:
-    return actions.user.make_name_possessive(
-        actions.user.first_name_from_full_name(m.contact_full_names)
-    )
+    return make_name_possessive(first_name_from_full_name(m.contact_full_names))
 
 
 @mod.capture(
     rule="{user.contact_full_names} last name",
 )
 def prose_last_name(m) -> str:
-    return actions.user.last_name_from_full_name(m.contact_full_names)
+    return last_name_from_full_name(m.contact_full_names)
 
 
 @mod.capture(
     rule="{user.contact_full_names} last names",
 )
 def prose_last_name_possessive(m) -> str:
-    return actions.user.make_name_possessive(
-        actions.user.last_name_from_full_name(m.contact_full_names)
-    )
+    return make_name_possessive(last_name_from_full_name(m.contact_full_names))
 
 
 @mod.capture(
