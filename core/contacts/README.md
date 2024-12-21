@@ -9,11 +9,11 @@ Here is an example contacts.json:
 
 ```json
 [
-    {
-        "email": "john.doe@example.com",
-        "full_name": "Jonathan Doh: Jonathan Doe",
-        "nicknames": ["Jon", "Jah Nee: Jonny"]
-    }
+  {
+    "email": "john.doe@example.com",
+    "full_name": "Jonathan Doh: Jonathan Doe",
+    "nicknames": ["Jon", "Jah Nee: Jonny"]
+  }
 ]
 ```
 
