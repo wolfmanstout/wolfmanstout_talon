@@ -30,6 +30,7 @@ files to prompt: files-to-prompt
 u v: uv
 u v x: uvx
 code
+repo guide: repo-guide
 
 # pre-commit
 pre commit: pre-commit
