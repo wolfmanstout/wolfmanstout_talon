@@ -20,7 +20,7 @@ def known_windows(m) -> ui.Window:
 
 home_ctx = Context()
 home_ctx.matches = r"""
-hostname: Player-One
+os: windows
 """
 
 home_ctx.lists["self.docked_apps"] = {
@@ -43,36 +43,6 @@ home_ctx.lists["self.known_window_names"] = {
     "weasel emacs": "- Emacs editor (Ubuntu)",
     "linux emacs": "- Emacs editor (Ubuntu)",
     "dos": "system32\\cmd.exe",
-}
-
-work_windows_ctx = Context()
-work_windows_ctx.matches = r"""
-os: windows
-hostname: /jwstout/
-"""
-
-work_windows_ctx.lists["self.docked_apps"] = {
-    "explorer": "1",
-    "home chrome": "2",
-    "home browser": "2",
-    "home emacs": "3",
-    "emacs": "3",
-    "work chrome": "4",
-    "work browser": "4",
-    "chrome": "4",
-    "browser": "4",
-    "code": "5",
-}
-
-work_windows_ctx.lists["self.known_window_names"] = {
-    "rebel": "Talon - REPL",
-    "dos": "system32\\cmd.exe",
-    "terminal": " - Terminal::Xpra-Launcher.exe",
-    "shell": " - Terminal::Xpra-Launcher.exe",
-    "work terminal": " - Terminal::Xpra-Launcher.exe",
-    "work shell": " - Terminal::Xpra-Launcher.exe",
-    "work emacs": " - Emacs editor::Xpra-Launcher.exe",
-    "studio": " - Android Studio::Xpra-Launcher.exe",
 }
 
 work_mac_ctx = Context()
