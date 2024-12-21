@@ -1,0 +1,16 @@
+list: user.system_paths
+hostname: James-HP
+-
+user: C:\Users\James
+desktop: C:\Users\James\Desktop
+desk: C:\Users\James\Desktop
+documents: C:\Users\James\Documents
+docks: C:\Users\James\Documents
+downloads: C:\Users\James\Downloads
+music: C:\Users\James\Music
+pictures: C:\Users\James\Pictures
+videos: C:\Users\James\Videos
+talon home: C:\Users\James\AppData\Roaming\talon
+talon recordings: C:\Users\James\AppData\Roaming\talon\recordings
+talon user: C:\Users\James\AppData\Roaming\talon\user
+profile: C:\Users\James
