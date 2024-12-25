@@ -93,7 +93,7 @@ csv_contacts: list[Contact] = []
 json_contacts: list[Contact] = []
 
 
-@track_csv_list("contacts.csv", headers=("Name", "Email"))
+@track_csv_list("contacts.csv", headers=("Name", "Email"), default={})
 def on_contacts_csv(values):
     global csv_contacts
     csv_contacts = []
