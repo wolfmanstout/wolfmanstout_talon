@@ -16,7 +16,9 @@ jobs:
           # If unset, the directory will be named wolfmanstout_talon, confusing repo-guide.
           path: "community"
       - run: git remote add wolfmanstout https://github.com/wolfmanstout/wolfmanstout_talon.git
+        working-directory: "community"
       - uses: wolfmanstout/deploy-repo-guide@v1
         with:
           gemini-key: ${{ secrets.LLM_GEMINI_KEY }}
+          directory: "community"
           remote-name: "wolfmanstout"
