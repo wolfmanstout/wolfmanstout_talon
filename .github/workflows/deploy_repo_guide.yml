@@ -22,3 +22,4 @@ jobs:
           gemini-key: ${{ secrets.LLM_GEMINI_KEY }}
           directory: "community"
           remote-name: "wolfmanstout"
+          token-budget: 10000000  # 10 million
