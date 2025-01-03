@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: 'talonhub/community'
+          repository: "talonhub/community"
       - uses: wolfmanstout/deploy-repo-guide@v1
         with:
           gemini-key: ${{ secrets.LLM_GEMINI_KEY }}
