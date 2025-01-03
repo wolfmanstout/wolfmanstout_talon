@@ -13,7 +13,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: "talonhub/community"
-      - run: git remote add wolfmanstout https://github.com/wolfmanstout/wolfmanstout_talon.git
+          # If unset, the directory will be named wolfmanstout_talon, confusing repo-guide.
+          path: "community"
+      - run: |
+          cd community
+          git remote add wolfmanstout https://github.com/wolfmanstout/wolfmanstout_talon.git
       - uses: wolfmanstout/deploy-repo-guide@v1
         with:
           gemini-key: ${{ secrets.LLM_GEMINI_KEY }}
