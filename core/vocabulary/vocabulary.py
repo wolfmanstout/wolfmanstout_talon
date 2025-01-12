@@ -208,7 +208,7 @@ def _add_selection_to_file(
 
     if file_name.endswith(".csv"):
         append_to_csv(file_name, new_entries)
-    elif file_name == "vocabulary.talon-list":
+    elif file_name == "vocabulary_private.talon-list":
         append_to_vocabulary(new_entries)
 
     if added_some_phrases:
@@ -240,7 +240,7 @@ class Actions:
         """Returns the path for the active vocabulary file"""
         vocabulary_directory = os.path.dirname(os.path.realpath(__file__))
         vocabulary_file_path = os.path.join(
-            vocabulary_directory, "vocabulary.talon-list"
+            vocabulary_directory, "vocabulary_private.talon-list"
         )
         return vocabulary_file_path
 
@@ -251,7 +251,7 @@ class Actions:
         _add_selection_to_file(
             phrase,
             type,
-            "vocabulary.talon-list",
+            "vocabulary_private.talon-list",
             registry.lists["user.vocabulary"][0],
             False,
         )
