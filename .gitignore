@@ -8,7 +8,7 @@ __pycache__
 .DS_Store
 .bak
 settings_private.talon
-core/vocabulary/vocabulary.talon-list
+core/vocabulary/vocabulary_private.talon-list
 node_modules/
 core/system_paths-jwstout*
 core/contacts/contacts.json
