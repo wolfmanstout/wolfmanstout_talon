@@ -196,24 +196,15 @@ def _add_selection_to_file(
     entries = _create_vocabulary_entries(spoken_form, written_form, type)
     added_some_phrases = False
 
-    # until we add support for parsing or otherwise getting the active
-    # vocabulary.talon-list, skip the logic for checking for duplicates etc
-    if file_contents:
-        # clear the new entries dictionary
-        new_entries = {}
-        for spoken_form, written_form in entries.items():
-            if skip_identical_replacement and spoken_form == written_form:
-                actions.app.notify(f'Skipping identical replacement: "{spoken_form}"')
-            elif spoken_form in file_contents:
-                actions.app.notify(
-                    f'Spoken form "{spoken_form}" is already in {file_name}'
-                )
-            else:
-                new_entries[spoken_form] = written_form
-                added_some_phrases = True
-    else:
-        new_entries = entries
-        added_some_phrases = True
+    new_entries = {}
+    for spoken_form, written_form in entries.items():
+        if skip_identical_replacement and spoken_form == written_form:
+            actions.app.notify(f'Skipping identical replacement: "{spoken_form}"')
+        elif spoken_form in file_contents:
+            actions.app.notify(f'Spoken form "{spoken_form}" is already in {file_name}')
+        else:
+            new_entries[spoken_form] = written_form
+            added_some_phrases = True
 
     if file_name.endswith(".csv"):
         append_to_csv(file_name, new_entries)
@@ -261,7 +252,7 @@ class Actions:
             phrase,
             type,
             "vocabulary.talon-list",
-            None,
+            registry.lists["user.vocabulary"][0],
             False,
         )
 
