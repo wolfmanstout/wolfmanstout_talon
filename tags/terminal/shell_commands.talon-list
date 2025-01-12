@@ -94,6 +94,7 @@ git remote rename
 git remote set url: git remote set-url
 git reset
 git reset hard head: git reset --hard HEAD
+git restore
 git revert
 git stash
 git stash pop
