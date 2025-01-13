@@ -100,6 +100,8 @@ git stash
 git stash pop
 git status
 git switch
+git switch create: git switch -c
+git switch new: git switch -c
 git tag
 
 # NPM
