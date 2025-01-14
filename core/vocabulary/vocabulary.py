@@ -230,6 +230,7 @@ def append_to_vocabulary(rows: dict[str, str]):
             if key == value:
                 file.write(f"{key}\n")
             else:
+                value = repr(value)
                 file.write(f"{key}: {value}\n")
 
 
