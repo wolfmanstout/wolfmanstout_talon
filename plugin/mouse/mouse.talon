@@ -8,7 +8,7 @@ camera overlay: tracking.control_debug_toggle()
 run calibration: tracking.calibrate()
 here [left] touch:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     mouse_click(0)
     # close the mouse grid if open
     user.grid_close()
@@ -18,14 +18,14 @@ here [left] touch:
 
 here right touch:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     mouse_click(1)
     # close the mouse grid if open
     user.grid_close()
 
 here middle touch:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     mouse_click(2)
     # close the mouse grid
     user.grid_close()
@@ -39,7 +39,7 @@ here middle touch:
 #super = windows key
 here <user.modifiers> touch:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     key("{modifiers}:down")
     mouse_click(0)
     key("{modifiers}:up")
@@ -47,7 +47,7 @@ here <user.modifiers> touch:
     user.grid_close()
 here <user.modifiers> right touch:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     key("{modifiers}:down")
     mouse_click(1)
     key("{modifiers}:up")
@@ -55,14 +55,14 @@ here <user.modifiers> right touch:
     user.grid_close()
 here double touch:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     mouse_click()
     mouse_click()
     # close the mouse grid
     user.grid_close()
 here triple touch:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     mouse_click()
     mouse_click()
     mouse_click()
@@ -70,13 +70,13 @@ here triple touch:
     user.grid_close()
 here [left] drag:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     user.mouse_drag(0)
     # close the mouse grid
     user.grid_close()
 here right drag:
     # close zoom if open
-    user.zoom_close()
+    tracking.zoom_cancel()
     user.mouse_drag(1)
     # close the mouse grid
     user.grid_close()

@@ -36,30 +36,6 @@ mod.list(
 )
 
 ctx = Context()
-# Maps spoken forms to DictationFormat method names (see DictationFormat below).
-ctx.lists["user.prose_modifiers"] = {
-    "cap": "cap",
-    "no cap": "no_cap",
-    "no caps": "no_cap",  # "no caps" variant for Dragon
-    "no space": "no_space",
-}
-ctx.lists["user.prose_snippets"] = {
-    "spacebar": " ",
-    "new line": "\n",
-    "new paragraph": "\n\n",
-    # Common misrecognitions.
-    "common newline": ",\n",
-    "common new paragraph": ",\n\n",
-    # Curly quotes are used to obtain proper spacing for left and right quotes, but will later be straightened.
-    "open quote": "“",
-    "open quad": "“",
-    "close quote": "”",
-    "close quad": "”",
-    "apostrophe S": "'s",
-    "smiley": ":-)",
-    "winky": ";-)",
-    "frowny": ":-(",
-}
 ctx.lists["user.prose_number_punctuation"] = {
     "dot": ".",
     "point": ".",
