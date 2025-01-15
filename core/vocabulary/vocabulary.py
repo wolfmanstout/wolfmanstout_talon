@@ -271,9 +271,15 @@ class Actions:
     def check_vocabulary_for_selection():
         """Checks if the currently selected text is in the vocabulary."""
         text = actions.edit.selected_text().strip()
-        for spoken, written in registry.lists["user.vocabulary"][0].items():
-            if text == written:
-                actions.app.notify(f'"{text}" is spoken as "{spoken}"')
-                break
+        spoken_forms = [
+            spoken
+            for spoken, written in registry.lists["user.vocabulary"][0].items()
+            if text == written
+        ]
+        if spoken_forms:
+            if len(spoken_forms) == 1:
+                actions.app.notify(f'"{text}" is spoken as "{spoken_forms[0]}"')
+            else:
+                actions.app.notify(f'"{text}" is spoken as any of {spoken_forms}')
         else:
             actions.app.notify(f'"{text}" is not in the vocabulary')
