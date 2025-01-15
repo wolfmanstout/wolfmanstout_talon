@@ -149,7 +149,7 @@ class TitleFormatter(Formatter):
 
 class CapitalizeFormatter(Formatter):
     def format(self, text: str) -> str:
-        return re.sub(r"^\S+", lambda m: capitalize_first(m.group()), text)
+        return re.sub(r"^\s*\S+", lambda m: capitalize_first(m.group()), text)
 
     def unformat(self, text: str) -> str:
         return unformat_upper(text)
@@ -159,8 +159,13 @@ class SentenceFormatter(Formatter):
     def format(self, text: str) -> str:
         """Capitalize first word if it's already all lower case"""
         words = [x for x in re.split(r"(\s+)", text) if x]
-        if words and words[0].islower():
-            words[0] = words[0].capitalize()
+        for i in range(len(words)):
+            word = words[i]
+            if word.isspace():
+                continue
+            if word.islower():
+                words[i] = word.capitalize()
+            break
         return "".join(words)
 
     def unformat(self, text: str) -> str:
@@ -168,7 +173,9 @@ class SentenceFormatter(Formatter):
 
 
 def capitalize_first(text: str) -> str:
-    return text[:1].upper() + text[1:]
+    stripped = text.lstrip()
+    prefix = text[: len(text) - len(stripped)]
+    return prefix + stripped[:1].upper() + stripped[1:]
 
 
 def capitalize(text: str) -> str:
@@ -243,57 +250,8 @@ formatter_list = [
 
 formatters_dict = {f.id: f for f in formatter_list}
 
-
-# Mapping from spoken phrases to formatter names
-code_formatter_names = {
-    "all caps": "ALL_CAPS",
-    "upper": "ALL_CAPS",
-    "all down": "ALL_LOWERCASE",
-    "spaces": "ALL_LOWERCASE",
-    "camel": "PRIVATE_CAMEL_CASE",
-    "dotted": "DOT_SEPARATED",
-    "string": "DOUBLE_QUOTED_STRING",
-    "dunder": "DOUBLE_UNDERSCORE",
-    "hammer": "PUBLIC_CAMEL_CASE",
-    "studley": "PUBLIC_CAMEL_CASE",
-    "kebab": "DASH_SEPARATED",
-    "dashes": "DASH_SEPARATED",
-    "packed": "DOUBLE_COLON_SEPARATED",
-    "padded": "SPACE_SURROUNDED_STRING",
-    "slasher": "ALL_SLASHES",
-    "conga": "SLASH_SEPARATED",
-    "smash": "NO_SPACES",
-    "compound": "NO_SPACES",
-    "snake": "SNAKE_CASE",
-    "score": "SNAKE_CASE",
-    "pre score": "LEADING_UNDERSCORE,SNAKE_CASE",
-    "post score": "TRAILING_UNDERSCORE,SNAKE_CASE",
-    "single string": "SINGLE_QUOTED_STRING",
-    "constant": "ALL_CAPS,SNAKE_CASE",
-    "flag": "LEADING_DASHES,DASH_SEPARATED",
-}
-prose_formatter_names = {
-    "speak": "NOOP",
-    "sentence": "CAPITALIZE_FIRST_WORD",
-    "title": "CAPITALIZE_ALL_WORDS",
-}
-reformatter_names = {
-    "cap": "CAPITALIZE",
-    "list": "COMMA_SEPARATED",
-    "unformat": "REMOVE_FORMATTING",
-}
-word_formatter_names = {
-    "word": "ALL_LOWERCASE",
-    "trot": "TRAILING_SPACE,ALL_LOWERCASE",
-    "proud": "CAPITALIZE_FIRST_WORD",
-    "leap": "TRAILING_SPACE,CAPITALIZE_FIRST_WORD",
-}
-
-
-all_phrase_formatters = code_formatter_names | prose_formatter_names | reformatter_names
-
 mod = Module()
-mod.list("formatters", desc="list of all formatters (code and prose)")
+mod.list("reformatter", desc="list of all reformatters")
 mod.list("code_formatter", desc="list of formatters typically applied to code")
 mod.list(
     "prose_formatter", desc="list of prose formatters (words to start dictating prose)"
@@ -303,13 +261,6 @@ mod.list(
     "post_dictation_keys",
     desc="keys that can be pressed after dictation commands",
 )
-
-ctx = Context()
-ctx.lists["self.formatters"] = all_phrase_formatters
-ctx.lists["self.code_formatter"] = code_formatter_names
-ctx.lists["self.prose_formatter"] = prose_formatter_names
-ctx.lists["user.word_formatter"] = word_formatter_names
-
 
 # The last phrase spoken, without & with formatting. Used for reformatting.
 last_phrase = ""
@@ -370,10 +321,12 @@ def shrink_to_string_inside(text: str) -> tuple[str, str, str]:
     return text, "", ""
 
 
-@mod.capture(rule="{self.formatters}+")
+@mod.capture(
+    rule="({user.code_formatter} | {user.prose_formatter} | {user.reformatter})+"
+)
 def formatters(m) -> str:
     "Returns a comma-separated string of formatters e.g. 'SNAKE,DUBSTRING'"
-    return ",".join(m.formatters_list)
+    return ",".join(list(m))
 
 
 @mod.capture(rule="{self.code_formatter}+")
@@ -408,7 +361,40 @@ def format_text(m) -> str:
 )
 def format_code(m) -> str:
     """Formats code and returns a string"""
-    return format_text(m)
+    return format_phrase(m.text, m.code_formatters)
+
+
+mod.list("symbol_snippet", desc="A snippet of symbols to insert as-is.")
+ctx = Context()
+ctx.lists["self.symbol_snippet"] = {
+    "double dash": "--",
+    "triple quote": "'''",
+    "back tick thrice": "```",
+    "dot twice": "..",
+    "ellipsis": "...",
+    "dot thrice": "...",
+    "comma and": ", ",
+    "arrow": "->",
+    "fat arrow": "=>",
+    "equals twice": "==",
+    "plus equals": "+=",
+    "minus equals": "-=",
+    "not equals": "!=",
+    "greater equals": ">=",
+    "less equals": "<=",
+    "pipe twice": "||",
+    "amper twice": "&&",
+    "empty quotes": '""',
+    "empty string": '""',
+    "empty escaped quotes": '\\"\\"',
+    "empty escaped string": '\\"\\"',
+    "empty parens": "()",
+    "empty brackets": "[]",
+    "empty braces": "{}",
+    "empty angles": "<>",
+    "empty single quotes": "''",
+    "empty back ticks": "``",
+}
 
 
 mod.list("symbol_snippet", desc="A snippet of symbols to insert as-is.")
@@ -456,9 +442,10 @@ class ImmuneString:
     rule="(<user.symbol_key> | {self.symbol_snippet} | <user.letter> | <number>)"
 )
 def formatter_immune(m) -> ImmuneString:
-    """Text that can be interspersed into a formatter, e.g. characters.
+    """Symbols and numbers that can be interspersed into a prose formatter
+    (i.e., not dictated immediately after the name of the formatter)
 
-    It will be inserted directly, without being formatted.
+    They will be inserted directly, without being formatted.
 
     """
     if hasattr(m, "number"):
@@ -466,6 +453,30 @@ def formatter_immune(m) -> ImmuneString:
     else:
         value = m[0]
     return ImmuneString(str(value))
+
+
+def get_formatters_and_prose_formatters(
+    include_reformatters: bool,
+) -> tuple[dict[str, str], dict[str, str]]:
+    """Returns dictionary of non-word formatters and a dictionary of all prose formatters"""
+    formatters = {}
+    prose_formatters = {}
+    formatters.update(
+        actions.user.talon_get_active_registry_list("user.code_formatter")
+    )
+    formatters.update(
+        actions.user.talon_get_active_registry_list("user.prose_formatter")
+    )
+
+    if include_reformatters:
+        formatters.update(
+            actions.user.talon_get_active_registry_list("user.reformatter")
+        )
+
+    prose_formatters.update(
+        actions.user.talon_get_active_registry_list("user.prose_formatter")
+    )
+    return formatters, prose_formatters
 
 
 @mod.action_class
@@ -517,8 +528,13 @@ class Actions:
     def get_formatters_words() -> dict:
         """Returns words currently used as formatters, and a demonstration string using those formatters"""
         formatters_help_demo = {}
-        for phrase in sorted(all_phrase_formatters):
-            name = all_phrase_formatters[phrase]
+        formatters, prose_formatters = get_formatters_and_prose_formatters(
+            include_reformatters=False
+        )
+        prose_formatter_names = prose_formatters.keys()
+
+        for phrase in sorted(formatters):
+            name = formatters[phrase]
             demo = format_text_without_adding_to_history("one two three", name)
             if phrase in prose_formatter_names:
                 phrase += " *"
@@ -528,8 +544,12 @@ class Actions:
     def get_reformatters_words() -> dict:
         """Returns words currently used as re-formatters, and a demonstration string using those re-formatters"""
         formatters_help_demo = {}
-        for phrase in sorted(all_phrase_formatters):
-            name = all_phrase_formatters[phrase]
+        formatters, prose_formatters = get_formatters_and_prose_formatters(
+            include_reformatters=True
+        )
+        prose_formatter_names = prose_formatters.keys()
+        for phrase in sorted(formatters):
+            name = formatters[phrase]
             demo = format_text_without_adding_to_history("one_two_three", name, True)
             if phrase in prose_formatter_names:
                 phrase += " *"

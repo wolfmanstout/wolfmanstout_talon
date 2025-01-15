@@ -185,6 +185,12 @@ class Settings:
     """
 
 
+class Registry:
+    """
+    Implements something like Talon's registry
+    """
+
+
 class Resource:
     """
     Implements something like the talon resource system
@@ -213,6 +219,7 @@ speech_system = SpeechSystem()
 ui = UI()
 settings = Settings()
 resource = Resource()
+registry = Registry()
 
 # Indicate to test files that they should load since we're running in test mode
 test_mode = True

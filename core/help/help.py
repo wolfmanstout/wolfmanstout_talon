@@ -545,7 +545,7 @@ def draw_list_commands(gui: imgui.GUI):
     global total_page_count
     global selected_context_page
 
-    talon_list = registry.lists[selected_list][-1]
+    talon_list = actions.user.talon_get_active_registry_list(selected_list)
     # numpages = math.ceil(len(talon_list) / SIZE)
 
     pages_list = []

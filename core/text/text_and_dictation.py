@@ -6,6 +6,8 @@ from typing import Callable, Optional
 
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
 
+from ..numbers.numbers import get_spoken_form_under_one_hundred
+
 mod = Module()
 
 mod.setting(
@@ -25,6 +27,14 @@ mod.list("prose_modifiers", desc="Modifiers that can be used within prose")
 mod.list("prose_snippets", desc="Snippets that can be used within prose")
 mod.list("phrase_ender", "List of commands that can be used to end a phrase")
 mod.list("prose_number_punctuation", desc="Punctuation that can be used in a number")
+mod.list("hours_twelve", desc="Names for hours up to 12")
+mod.list("hours", desc="Names for hours up to 24")
+mod.list("minutes", desc="Names for minutes, 01 up to 59")
+mod.list(
+    "currency",
+    desc="Currency types (e.g., dollars, euros) that can be used within prose",
+)
+
 ctx = Context()
 # Maps spoken forms to DictationFormat method names (see DictationFormat below).
 ctx.lists["user.prose_modifiers"] = {
@@ -58,6 +68,25 @@ ctx.lists["user.prose_number_punctuation"] = {
     "percent": "%",
 }
 
+ctx.lists["user.hours_twelve"] = get_spoken_form_under_one_hundred(
+    1,
+    12,
+    include_oh_variant_for_single_digits=True,
+    include_default_variant_for_single_digits=True,
+)
+ctx.lists["user.hours"] = get_spoken_form_under_one_hundred(
+    1,
+    23,
+    include_oh_variant_for_single_digits=True,
+    include_default_variant_for_single_digits=True,
+)
+ctx.lists["user.minutes"] = get_spoken_form_under_one_hundred(
+    1,
+    59,
+    include_oh_variant_for_single_digits=True,
+    include_default_variant_for_single_digits=False,
+)
+
 
 @mod.capture(rule="{user.prose_modifiers}")
 def prose_modifier(m) -> Callable:
@@ -72,6 +101,31 @@ def prose_letter(m) -> str:
 @mod.capture(rule="<user.number_string> (dot | point) <digit_string>")
 def prose_number_with_dot(m) -> str:
     return m.number_string + "." + m.digit_string
+
+
+@mod.capture(rule="am|pm")
+def time_am_pm(m) -> str:
+    return str(m)
+
+
+# this matches eg "twelve thirty-four" -> 12:34 and "twelve hundred" -> 12:00. hmmmmm.
+@mod.capture(
+    rule="{user.hours} ({user.minutes} | o'clock | hundred hours) [<user.time_am_pm>]"
+)
+def prose_time_hours_minutes(m) -> str:
+    t = m.hours + ":"
+    if hasattr(m, "minutes"):
+        t += m.minutes
+    else:
+        t += "00"
+    if hasattr(m, "time_am_pm"):
+        t += m.time_am_pm
+    return t
+
+
+@mod.capture(rule="{user.hours_twelve} <user.time_am_pm>")
+def prose_time_hours_am_pm(m) -> str:
+    return m.hours_twelve + m.time_am_pm
 
 
 @mod.capture(
@@ -89,7 +143,14 @@ def prose_money(m) -> str:
     return f"${m.prose_number}"
 
 
-@mod.capture(rule="({user.vocabulary} | <user.prose_contact> | <word>)")
+@mod.capture(rule="<user.prose_time_hours_minutes> | <user.prose_time_hours_am_pm>")
+def prose_time(m) -> str:
+    return str(m)
+
+
+@mod.capture(
+    rule="({user.vocabulary} | <user.abbreviation> | <user.prose_contact> | <word>)"
+)
 def word(m) -> str:
     """A single word, including user-defined vocabulary."""
     item = m[0]
@@ -113,11 +174,13 @@ def text(m) -> str:
         "{user.vocabulary} "
         "| {user.punctuation} "
         "| {user.prose_snippets} "
+        "| <user.prose_time> "
+        "| <user.abbreviation> "
         "| <phrase> "
         "| <user.prose_number> "
         "| <user.prose_money> "
         "| <user.prose_letter> "
-        "| <user.prose_contact>"
+        "| <user.prose_contact> "
         "| <user.prose_modifier>"
         ")+"
     )
@@ -134,10 +197,12 @@ def prose(m) -> str:
         "{user.vocabulary} "
         "| {user.punctuation} "
         "| {user.prose_snippets} "
+        "| <user.prose_time> "
+        "| <user.abbreviation> "
         "| <phrase> "
         "| <user.prose_number> "
         "| <user.prose_money> "
-        "| <user.prose_letter>"
+        "| <user.prose_letter> "
         "| <user.prose_contact>"
         ")+"
     )
