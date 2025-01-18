@@ -12,8 +12,3 @@ select that: user.select_last_phrase()
 
 # Escape, type things that would otherwise be commands
 type <user.text>: user.dictation_insert(user.text)
-
-command <phrase>$:
-    user.command_mode()
-    user.parse_phrase(phrase or "")
-    user.dictation_mode()
