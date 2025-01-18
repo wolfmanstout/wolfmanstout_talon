@@ -3,7 +3,7 @@ import os
 import re
 from typing import Sequence, Union
 
-from talon import Context, Module, actions, registry
+from talon import Context, Module, actions
 from talon.grammar import Phrase
 
 from ..user_settings import append_to_csv, track_csv_list
@@ -254,7 +254,7 @@ class Actions:
             phrase,
             type,
             "vocabulary_private.talon-list",
-            registry.lists["user.vocabulary"][0],
+            actions.user.talon_get_active_registry_list("user.vocabulary"),
             False,
         )
 
@@ -275,7 +275,9 @@ class Actions:
         text = actions.edit.selected_text().strip()
         spoken_forms = [
             spoken
-            for spoken, written in registry.lists["user.vocabulary"][0].items()
+            for spoken, written in actions.user.talon_get_active_registry_list(
+                "user.vocabulary"
+            ).items()
             if text == written
         ]
         if spoken_forms:
