@@ -361,7 +361,7 @@ def format_text(m) -> str:
 )
 def format_code(m) -> str:
     """Formats code and returns a string"""
-    return format_phrase(m.text, m.code_formatters)
+    return format_text(m)
 
 
 mod.list("symbol_snippet", desc="A snippet of symbols to insert as-is.")
