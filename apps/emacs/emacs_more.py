@@ -16,56 +16,7 @@ ctx.tags = [
     "user.find_and_replace",
     "user.line_commands",
     "user.splits",
-    "user.snippets",
 ]
-
-ctx.lists["user.snippets"] = {
-    "beginend": "beginend",
-    "car": "car",
-    "catch": "catch",
-    "doc": "doc",
-    "field declaration": "field_declaration",
-    "field definition": "field_definition",
-    "field initialize": "field_initialize",
-    "finally": "finally",
-    "class": "class",
-    "const ref": "const_ref",
-    "const pointer": "const_pointer",
-    "def": "function",
-    "each": "each",
-    "else": "else",
-    "entry": "entry",
-    "error": "error",
-    "eval": "eval",
-    "fatal": "fatal",
-    "for": "for",
-    "fun declaration": "fun_declaration",
-    "function": "function",
-    "if": "if",
-    "info": "info",
-    "inverse if": "inverse_if",
-    "key": "key",
-    "lambda": "lambda",
-    "list": "list",
-    "map": "map",
-    "method": "method",
-    "namespace": "namespace",
-    "new": "new",
-    "override": "override",
-    "ref": "ref",
-    "set": "set",
-    "shared pointer": "shared_pointer",
-    "test": "test",
-    "ternary": "ternary",
-    "text": "text",
-    "to do": "todo",
-    "try": "try",
-    "unique pointer": "unique_pointer",
-    "var": "vardef",
-    "vector": "vector",
-    "warning": "warning",
-    "while": "while",
-}
 
 
 @ctx.action_class("edit")
@@ -197,21 +148,6 @@ class UserActions:
         actions.key("ctrl-x 3")
 
     # splits.py support end
-
-    # snippet.py support begin
-    def snippet_search(text: str):
-        actions.key("ctrl-c & ctrl-s")
-        actions.insert(text)
-
-    def snippet_insert(text: str):
-        actions.key("ctrl-c & ctrl-s")
-        actions.insert(text)
-        actions.key("enter")
-
-    def snippet_create():
-        actions.key("ctrl-c & ctrl-n")
-
-    # snippet.py support end
 
     # dictation.py support start
 
