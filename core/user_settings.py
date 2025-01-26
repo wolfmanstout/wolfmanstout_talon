@@ -108,3 +108,25 @@ def append_to_csv(filename: str, rows: dict[str, str]):
             writer.writerow([])
         for key, value in rows.items():
             writer.writerow([key] if key == value else [value, key])
+
+
+WatchCallbackType = Callable[[IO], None]
+WatchDecoratorType = Callable[[WatchCallbackType], WatchCallbackType]
+
+
+def track_file(
+    filename: str,
+    default: str = "",
+) -> WatchDecoratorType:
+    path = SETTINGS_DIR / filename
+    if not path.is_file():
+        path.write_text(default)
+
+    def decorator(fn: WatchCallbackType) -> WatchCallbackType:
+        @resource.watch(path)
+        def on_update(f):
+            fn(f)
+
+        return on_update
+
+    return decorator

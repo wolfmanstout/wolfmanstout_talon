@@ -1,11 +1,10 @@
 import json
 import logging
 from dataclasses import dataclass
-from pathlib import Path
 
-from talon import Context, Module, resource
+from talon import Context, Module
 
-from ..user_settings import track_csv_list
+from ..user_settings import track_csv_list, track_file
 
 mod = Module()
 ctx = Context()
@@ -107,12 +106,7 @@ def on_contacts_csv(values):
     reload_contacts()
 
 
-contacts_json = Path(__file__).parent / "contacts.json"
-if not contacts_json.exists():
-    contacts_json.write_text("[]")
-
-
-@resource.watch("contacts.json")
+@track_file("contacts.json", default="[]")
 def on_contacts_json(f):
     global json_contacts
     try:
