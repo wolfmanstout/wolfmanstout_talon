@@ -1,5 +1,7 @@
 from talon import Context, Module, actions
 
+from ....talon_gaze_ocr.timestamped_captures import TextRange
+
 mod = Module()
 mod.apps.google_docs = r"""
 tag: browser
@@ -103,6 +105,15 @@ class Actions:
 
     def google_docs_normal_text():
         """Set style to normal text"""
+
+    def google_docs_comment_on_text(ocr_modifier: str, text_range: TextRange):
+        """Adds comment to onscreen text."""
+        actions.user.select_text_and_do(
+            text_range=text_range,
+            for_deletion=False,
+            ocr_modifier=ocr_modifier,
+            action=lambda: actions.user.add_comment(),
+        )
 
 
 @mac_ctx.action_class("self")
