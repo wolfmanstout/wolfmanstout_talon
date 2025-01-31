@@ -28,5 +28,5 @@ format heading four: user.google_docs_heading(4)
 format heading five: user.google_docs_heading(5)
 format heading six: user.google_docs_heading(6)
 format normal: user.google_docs_normal_text()
-comment [{user.ocr_modifiers}] [seen | scene] <user.prose_range>$:
+comment [{user.ocr_modifiers}] (seen | scene) <user.prose_range>$:
     user.google_docs_comment_on_text(ocr_modifiers or "", prose_range)
