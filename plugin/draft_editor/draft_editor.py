@@ -108,12 +108,13 @@ class Actions:
         actions.sleep("200ms")
         actions.user.vscode("workbench.files.action.compareNewUntitledTextFiles")
         actions.user.vscode("diffEditor.switchSide")
+        actions.sleep("200ms")
         if old:
             actions.user.paste(old)
         elif selected_text != "":
             actions.user.paste(selected_text)
         actions.user.vscode("diffEditor.switchSide")
-        actions.sleep("1000ms")
+        actions.sleep("200ms")
         if new:
             actions.user.paste(new)
         elif selected_text:
