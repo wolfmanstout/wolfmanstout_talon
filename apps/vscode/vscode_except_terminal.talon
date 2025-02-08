@@ -4,7 +4,7 @@ not win.title: /focus:\[Terminal\]/
 # Git / Github (not using verb-noun-adjective pattern, mirroring terminal commands.)
 git branch: user.vscode("git.branchFrom")
 git branch this: user.vscode("git.branch")
-git checkout [<user.text>]:
+git (checkout | switch) [<user.text>]:
     user.vscode("git.checkout")
     sleep(50ms)
     insert(text or "")
