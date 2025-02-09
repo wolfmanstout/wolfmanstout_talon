@@ -2,29 +2,52 @@ tag: user.code_operators_math
 -
 
 # math operators
-op (minus | subtract): user.code_operator_subtraction()
-op (plus | add): user.code_operator_addition()
-op (times | multiply): user.code_operator_multiplication()
-op divide: user.code_operator_division()
-op mod: user.code_operator_modulo()
-(op (power | exponent) | to the power [of]): user.code_operator_exponent()
+op subtract:
+    user.deprecate_command("2025-01-19", "op subtract", "op minus")
+    user.code_operator("MATH_SUBTRACT")
+
+op add:
+    user.deprecate_command("2025-01-19", "op add", "op plus")
+    user.code_operator("MATH_ADD")
+
+op multiply:
+    user.deprecate_command("2025-01-19", "op multiply", "op times")
+    user.code_operator("MATH_MULTIPLY")
+
+op (exponent | to the power [of]):
+    user.deprecate_command("2025-01-19", "op (exponent | to the power [of])", "op power")
+    user.code_operator("MATH_EXPONENT")
 
 # comparison operators
-(op | is) equal: user.code_operator_equal()
-(op | is) not equal: user.code_operator_not_equal()
-(op | is) (greater | more): user.code_operator_greater_than()
-(op | is) (less | below) [than]: user.code_operator_less_than()
-(op | is) greater [than] or equal: user.code_operator_greater_than_or_equal_to()
-(op | is) less [than] or equal: user.code_operator_less_than_or_equal_to()
+is more:
+    user.deprecate_command("2025-01-19", "is more", "is greater")
+    user.code_operator("MATH_GREATER_THAN")
+
+is below [than]:
+    user.deprecate_command("2025-01-19", "is below [than]", "is less")
+    user.code_operator("MATH_LESS_THAN")
+
+is greater than or equal:
+    user.deprecate_command("2025-01-19", "is greater than or equal", "is greater or equal")
+    user.code_operator("MATH_GREATER_THAN_OR_EQUAL")
+
+is less than or equal:
+    user.deprecate_command("2025-01-19", "is less than or equal", "is less or equal")
+    user.code_operator("MATH_LESS_THAN_OR_EQUAL")
 
 # logical operators
-(op | logical) and: user.code_operator_and()
-(op | logical) or: user.code_operator_or()
-(op | logical) not: user.code_operator_not()
+logical and:
+    user.deprecate_command("2025-01-19", "logical and", "op and")
+    user.code_operator("MATH_AND")
 
-# set operators
-(op | is) in: user.code_operator_in()
-(op | is) not in: user.code_operator_not_in()
+logical or:
+    user.deprecate_command("2025-01-19", "logical or", "op or")
+    user.code_operator("MATH_OR")
 
-# TODO: This operator should either be abstracted into a function or removed.
-(op | pad) colon: " : "
+logical not:
+    user.deprecate_command("2025-01-19", "logical not", "op not")
+    user.code_operator("MATH_NOT")
+
+op colon:
+    user.deprecate_command("2025-01-19", "op colon", "pad colon")
+    insert(" : ")
