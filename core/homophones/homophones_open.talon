@@ -1,3 +1,5 @@
+mode: command
+mode: user.dictation_command
 tag: user.homophones_open
 -
 
