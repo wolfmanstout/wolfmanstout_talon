@@ -105,7 +105,7 @@ settings():
     user.preferred_microphones = "Samson, TableMike"
 
     user.model_endpoint = "llm"
-    user.openai_model = "claude-3.5-sonnet"
+    user.openai_model = "claude-3.7-sonnet"
     user.model_system_prompt = "You are an assistant helping an office worker to be more productive. Output just the response to the request and no additional content. Do not generate any additional formatting such as wrapping with quotes or markdown such as backticks for programming languages unless it is explicitly requested. If the user requests code generation, output just code and not additional natural language explanation."
 
     user.talon_hud_allows_capture = false
