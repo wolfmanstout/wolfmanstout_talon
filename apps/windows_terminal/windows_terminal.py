@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from talon import Context, Module, actions, ui
 
@@ -6,6 +7,12 @@ ctx = Context()
 mod = Module()
 ctx.matches = r"""
 app: windows_terminal
+"""
+
+wsl_ctx = Context()
+wsl_ctx.matches = r"""
+app: windows_terminal
+title: / - Terminal/
 """
 
 user_path = os.path.expanduser("~")
@@ -175,3 +182,70 @@ class UserActions:
 
     def tab_final():
         actions.key("ctrl-alt-9")
+
+
+@wsl_ctx.action_class("user")
+class WslUserActions:
+    def dictation_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
+        if not (left or right):
+            return None, None
+        before, after = None, None
+        # Inserting a character ensures we select something even if we're at
+        # document start; some editors 'helpfully' copy the current line if we
+        # edit.copy() while nothing is selected. We use "." instead of " "
+        # because Gmail Chat merges adjacent whitespace in the clipboard.
+        actions.insert(".")
+        if left:
+            actions.key("ctrl-shift-m")
+            actions.edit.left()
+            # In principle the previous word should suffice, but some applications
+            # have a funny concept of what the previous word is (for example, they
+            # may only take the "`" at the end of "`foo`"). To be double sure we
+            # take three words left. I also tried taking a line up + a word left, but
+            # edit.extend_up() = key(shift-up) doesn't work consistently in the
+            # Slack webapp (sometimes escapes the text box).
+            actions.edit.extend_word_left()
+            actions.edit.extend_word_left()
+            actions.edit.extend_word_left()
+            selected_text = actions.edit.selected_text()
+            if selected_text and selected_text[-1] == ".":
+                before = selected_text[:-1]
+            elif (
+                selected_text and selected_text[-2:] == ".\n"
+            ):  # Observed in Google Docs after a bullet.
+                before = selected_text[:-2]
+            else:
+                logging.warning(
+                    f"Selected text did not contain newly-added period: {selected_text}"
+                )
+                before = selected_text
+        if not right:
+            actions.key("backspace")  # remove the space
+        else:
+            actions.key("ctrl-shift-m")
+            actions.edit.left()  # go left before space
+            # We want to select at least two characters to the right, plus the space
+            # we inserted, because no_space_before needs two characters in the worst
+            # case -- for example, inserting before "' hello" we don't want to add
+            # space, while inserted before "'hello" we do.
+            #
+            # We use 3x extend_word_right() because it's fewer keypresses (lower
+            # latency) than 3x extend_right(). Other options all seem to have
+            # problems. For instance, extend_line_end() might not select all the way
+            # to the next newline if text has been wrapped across multiple lines;
+            # extend_line_down() sometimes escapes the current text box (eg. in a
+            # browser address bar). 1x extend_word_right() _usually_ works, but on
+            # Windows in Firefox it doesn't always select enough characters.
+            actions.edit.extend_word_right()
+            actions.edit.extend_word_right()
+            actions.edit.extend_word_right()
+            selection = actions.edit.selected_text()
+            if selection:
+                after = selection[1:]
+            else:
+                # Observed on Mac in Gmail.
+                print("Unable to get selected text.")
+                after = ""
+            actions.edit.left()
+            actions.key("delete")  # remove space
+        return before, after
