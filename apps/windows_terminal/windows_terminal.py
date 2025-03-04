@@ -9,12 +9,6 @@ ctx.matches = r"""
 app: windows_terminal
 """
 
-wsl_ctx = Context()
-wsl_ctx.matches = r"""
-app: windows_terminal
-title: / - Terminal/
-"""
-
 user_path = os.path.expanduser("~")
 directories_to_remap = {}
 directories_to_exclude = {}
@@ -183,9 +177,6 @@ class UserActions:
     def tab_final():
         actions.key("ctrl-alt-9")
 
-
-@wsl_ctx.action_class("user")
-class WslUserActions:
     def dictation_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
         if not (left or right):
             return None, None
@@ -195,6 +186,7 @@ class WslUserActions:
         # edit.copy() while nothing is selected. We use "." instead of " "
         # because Gmail Chat merges adjacent whitespace in the clipboard.
         actions.insert(".")
+        actions.sleep("50ms")
         if left:
             actions.key("ctrl-shift-m")
             actions.edit.left()

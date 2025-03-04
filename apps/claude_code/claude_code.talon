@@ -1,5 +1,6 @@
 app: windows_terminal
-title: claude - Terminal
+win.title: claude - Terminal
+win.title: /✳/
 -
 settings():
     # Selection does not work properly here.
