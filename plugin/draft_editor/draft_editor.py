@@ -106,15 +106,15 @@ class Actions:
         actions.user.switcher_focus_app(editor_app)
         # Wait additional time for talon context to update.
         actions.sleep("200ms")
-        actions.user.vscode("workbench.files.action.compareNewUntitledTextFiles")
-        actions.user.vscode("diffEditor.switchSide")
-        actions.sleep("200ms")
+        actions.user.vscode_and_wait(
+            "workbench.files.action.compareNewUntitledTextFiles"
+        )
+        actions.user.vscode_and_wait("diffEditor.switchSide")
         if old:
             actions.user.paste(old)
         elif selected_text != "":
             actions.user.paste(selected_text)
-        actions.user.vscode("diffEditor.switchSide")
-        actions.sleep("200ms")
+        actions.user.vscode_and_wait("diffEditor.switchSide")
         if new:
             actions.user.paste(new)
         elif selected_text:
