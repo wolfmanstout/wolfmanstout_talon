@@ -9,6 +9,7 @@ cap that: user.dictation_reformat_cap()
 # Corrections
 scratch that: user.clear_last_phrase()
 select that: user.select_last_phrase()
+before that: user.before_last_phrase()
 
 # Escape, type things that would otherwise be commands
 type <user.text>: user.dictation_insert(user.text)
