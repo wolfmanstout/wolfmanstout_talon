@@ -73,7 +73,7 @@ new (scripts | script) site:
     key(enter)
 amazon site:
     browser.focus_address()
-    insert("smile.amazon.com")
+    insert("amazon.com")
     key(enter)
 meet site:
     browser.focus_address()
