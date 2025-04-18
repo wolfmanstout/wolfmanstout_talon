@@ -7,6 +7,7 @@ end: end
 home: home
 minus: minus
 enter: enter
+slap: enter
 page down: pagedown
 page up: pageup
 escape: escape
