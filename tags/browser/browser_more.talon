@@ -2,6 +2,7 @@ tag: browser
 -
 link: key(ctrl-,)
 link tab | tab [new] link: key(ctrl-.)
+tab move window: key(ctrl-;)
 (link | links) background [tab]: key(alt-f)
 tab move left: key(ctrl-shift-pageup)
 tab move right: key(ctrl-shift-pagedown)
@@ -82,8 +83,6 @@ meet site:
 insert text box: key(alt-i t)
 match next: user.browser_match_next()
 match (last | preev): user.browser_match_previous()
-bookmark open: key(ctrl-;)
-tab [new] bookmark: key(ctrl-')
 frame next: key(ctrl-[)
 # webdriver test: 'test_driver'()
 # go search: ClickElementAction('q')
