@@ -6,6 +6,7 @@ end: end
 home: home
 minus: minus
 return: return
+slap: return
 enter: keypad_enter
 page down: pagedown
 page up: pageup
