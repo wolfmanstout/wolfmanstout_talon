@@ -99,7 +99,7 @@ file delete:
     sleep(150ms)
 file open folder: user.vscode("revealFileInOS")
 file reveal: user.vscode("workbench.files.action.showActiveFileInExplorer")
-save ugly: user.vscode("workbench.action.files.saveWithoutFormatting")
+[file] save ugly: user.vscode("workbench.action.files.saveWithoutFormatting")
 buff (open | hunt) | tab hunt:
     user.vscode("workbench.action.showAllEditorsByMostRecentlyUsed")
     key(down)
