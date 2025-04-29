@@ -11,4 +11,8 @@ now do [<phrase>] prose:
     user.parse_phrase(phrase or "")
     user.dictation_mode()
 
-paste auto: user.dictation_insert(clip.text())
+(pace | paste) auto: user.dictation_insert(clip.text())
+(pace | paste) auto (quoted | string): 
+    user.dictation_insert('“')
+    user.dictation_insert(clip.text())
+    user.dictation_insert('”')
