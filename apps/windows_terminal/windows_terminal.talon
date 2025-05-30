@@ -1,5 +1,9 @@
 app: windows_terminal
 -
+settings():
+    # Pastes are trimmed of whitespace, so we disable this.
+    user.paste_to_insert_threshold = -1
+
 # makes the commands in terminal.talon available
 tag(): terminal
 
