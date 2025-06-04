@@ -65,11 +65,6 @@ paste (match | raw): edit.paste_match_style()
     user.hyperlink()
     sleep(100ms)
     edit.paste()
-(pace | paste) (quoted | string):
-    insert('"')
-    edit.paste()
-    sleep(100ms)
-    insert('"')
 
 # Duplication
 clone that: edit.selection_clone()
