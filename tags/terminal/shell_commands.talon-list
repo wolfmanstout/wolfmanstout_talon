@@ -153,3 +153,49 @@ llm collections list
 llm collections delete
 llm openai
 llm openai models
+
+# adb
+adb
+adb devices
+adb help
+adb version
+adb connect
+adb disconnect
+adb pair
+adb forward
+adb reverse
+adb mdns check: adb mdns-check
+adb mdns services: adb mdns-services
+adb push
+adb pull
+adb sync
+adb shell
+adb emu
+adb install
+adb install multiple: adb install-multiple
+adb install multi package: adb install-multi-package
+adb uninstall
+adb bug report: adb bugreport
+adb jdwp
+adb logcat
+adb disable verity: adb disable-verity
+adb enable verity: adb enable-verity
+adb keygen
+adb wait for state: adb wait-for-state
+adb get state: adb get-state
+adb get serial no: adb get-serialno
+adb get dev path: adb get-devpath
+adb remount
+adb reboot
+adb sideload
+adb root
+adb unroot
+adb usb
+adb tcpip
+adb start server: adb start-server
+adb kill server: adb kill-server
+adb reconnect
+adb reconnect device: adb reconnect-device
+adb reconnect offline: adb reconnect-offline
+adb attach
+adb detach

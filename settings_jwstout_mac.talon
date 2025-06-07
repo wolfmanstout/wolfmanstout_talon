@@ -6,5 +6,4 @@ settings():
     user.model_llm_path = "/Users/jwstout/.local/bin/llm"
     user.model_markitdown_path = "/Users/jwstout/.local/bin/markitdown"
     user.model_default = "gemini-flash-no-thinking"
-    # "gemini-2.5-pro-preview-03-25"
     # user.ocr_logging_dir = "/Users/jwstout/.talon/ocr"
