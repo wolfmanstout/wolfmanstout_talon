@@ -1,6 +1,7 @@
 import logging
 import os
 import platform
+import re
 import subprocess
 from typing import Optional
 
@@ -154,6 +155,16 @@ def clean_html(html: str) -> Optional[str]:
     try:
         strip_tags_path: str = settings.get("user.strip_tags_path")  # type: ignore
 
+        # First, convert paragraph boundaries to <br> tags to preserve line breaks
+        # Replace </p><p> and </p>\s*<p> with <br><br>
+        html_with_breaks = re.sub(
+            r"</p>\s*<p[^>]*>", "<br><br>", html, flags=re.IGNORECASE
+        )
+        # Replace opening and closing p tags
+        html_with_breaks = re.sub(
+            r"</?p[^>]*>", "", html_with_breaks, flags=re.IGNORECASE
+        )
+
         # Define allowed tags and tag categories
         allowed_tags = [
             "hs",  # All heading levels (h1, h2, etc.)
@@ -167,6 +178,7 @@ def clean_html(html: str) -> Optional[str]:
             "strike",
             "del",  # Strikethrough
             "u",  # Underline
+            "br",  # Line breaks
         ]
 
         # Build command arguments
@@ -176,7 +188,7 @@ def clean_html(html: str) -> Optional[str]:
 
         cleaned_html = subprocess.check_output(
             cmd_args,
-            input=html,
+            input=html_with_breaks,
             encoding=text_encoding,
             stderr=subprocess.PIPE,
             creationflags=(
