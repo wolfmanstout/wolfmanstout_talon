@@ -19,3 +19,4 @@ __pycache__
 core/vocabulary/vocabulary_private.talon-list
 node_modules/
 core/system_paths-jwstout*
+.claude/settings.local.json
