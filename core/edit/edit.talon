@@ -60,11 +60,14 @@ cut that: edit.cut()
 (pace | paste) enter:
     edit.paste()
     key(enter)
-paste (match | raw): edit.paste_match_style()
+(pace | paste) (match | raw): edit.paste_match_style()
 (pace | paste) link:
     user.hyperlink()
     sleep(100ms)
     edit.paste()
+(pace | paste) html: user.paste_html()
+(pace | paste) markdown: user.paste_markdown()
+(pace | paste) clean: user.paste_clean()
 
 # Duplication
 clone that: edit.selection_clone()
