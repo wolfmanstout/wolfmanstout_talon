@@ -12,7 +12,7 @@ now do [<phrase>] prose:
     user.dictation_mode()
 
 (pace | paste) auto: user.dictation_insert(clip.text())
-(quoted | string) (pace | paste) auto: 
-    user.dictation_insert('“')
+(quoted | string) (pace | paste) auto:
+    user.dictation_insert("“")
     user.dictation_insert(clip.text())
-    user.dictation_insert('”')
+    user.dictation_insert("”")
