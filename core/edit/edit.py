@@ -278,7 +278,8 @@ class Actions:
             clip.set_text(text)
             actions.edit.paste()
             # sleep here so that clip.revert doesn't revert the clipboard too soon
-            actions.sleep("150ms")
+            # 150 ms wasn't enough for gemini.google.com.
+            actions.sleep("300ms")
 
     def paste_html():
         """Paste HTML content from clipboard"""
