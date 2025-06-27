@@ -15,7 +15,10 @@ speech.engine: dragon
 ^drowse [<phrase>]$:
     speech.disable()
     mode.disable("noise")
-^talon wake [<phrase>]$:
+^talon sleep [<phrase>]$:
+    speech.disable()
+    mode.disable("noise")
+^talon wake$:
     speech.enable()
     mode.enable("noise")
 
