@@ -1,6 +1,11 @@
+import importlib
+
 from talon import Context, Module, actions
 
-from ....talon_gaze_ocr.timestamped_captures import TextRange
+timestamped_captures = importlib.import_module(
+    "user.talon-gaze-ocr.timestamped_captures"
+)
+TextRange = timestamped_captures.TextRange
 
 mod = Module()
 mod.apps.google_docs = r"""
