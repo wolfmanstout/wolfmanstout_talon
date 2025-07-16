@@ -155,29 +155,20 @@ def clean_html(html: str) -> Optional[str]:
     try:
         strip_tags_path: str = settings.get("user.strip_tags_path")  # type: ignore
 
-        # First, convert paragraph boundaries to <br> tags to preserve line breaks
-        # Replace </p><p> and </p>\s*<p> with <br><br>
+        # First, convert paragraph and heading boundaries to <br> tags to preserve line breaks
+        # Replace </p><p>, </h[1-6]><h[1-6]>, etc. with <br><br>
         html_with_breaks = re.sub(
-            r"</p>\s*<p[^>]*>", "<br><br>", html, flags=re.IGNORECASE
+            r"</(p|h[1-6])>\s*<(p|h[1-6])[^>]*>", "<br><br>", html, flags=re.IGNORECASE
         )
-        # Replace opening and closing p tags
+        # Replace opening and closing p and heading tags
         html_with_breaks = re.sub(
-            r"</?p[^>]*>", "", html_with_breaks, flags=re.IGNORECASE
+            r"</?(p|h[1-6])[^>]*>", "", html_with_breaks, flags=re.IGNORECASE
         )
 
         # Define allowed tags and tag categories
         allowed_tags = [
-            "hs",  # All heading levels (h1, h2, etc.)
             "lists",  # List tags (ul, ol, li)
             "a",  # Links
-            "b",
-            "strong",  # Bold
-            "i",
-            "em",  # Italics
-            "s",
-            "strike",
-            "del",  # Strikethrough
-            "u",  # Underline
             "br",  # Line breaks
         ]
 
