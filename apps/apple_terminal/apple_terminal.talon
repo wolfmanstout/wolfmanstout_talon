@@ -1,5 +1,9 @@
 app: apple_terminal
 -
+settings():
+    # Selection does not work properly here.
+    user.context_sensitive_dictation = false
+
 # makes the commands in terminal.talon available
 tag(): terminal
 
