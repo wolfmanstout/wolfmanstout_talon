@@ -68,6 +68,12 @@ label hiring:
     insert("hiring")
     sleep(500ms)
     key(enter)
+label pa for air:
+    key(+ l)
+    sleep(500ms)
+    insert("P4AIR")
+    sleep(500ms)
+    key(enter)
 label: key(+ l)
 this select: key(+ x)
 # <n> select: {['plus, x, plus, j']}n
