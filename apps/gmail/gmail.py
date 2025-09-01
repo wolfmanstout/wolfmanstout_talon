@@ -9,6 +9,10 @@ title: /<mail.google.com>/
 title: /<inbox.google.com>/
 title: / - Chat/
 """
+mod.apps.gmail = r"""
+tag: browser
+browser.host: mail.google.com
+"""
 
 ctx = Context()
 ctx.matches = r"""
