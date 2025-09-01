@@ -143,7 +143,7 @@ go recent [<user.text>]:
 go (edit | change): user.vscode("workbench.action.navigateToLastEditLocation")
 # workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup causes the menu
 # to stay up.
-go tab (last | preev) | (tab | buff) switch: key(ctrl-tab)
+go tab (last | preev) | tab back: key(ctrl-tab)
 [snip] next: user.vscode_and_wait("jumpToNextSnippetPlaceholder")
 snip last: user.vscode("jumpToPrevSnippetPlaceholder")
 

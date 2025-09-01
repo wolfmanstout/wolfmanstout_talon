@@ -1,8 +1,9 @@
 tag: browser
 -
+tag(): user.rango_explicit_clicking
+
 link: key(ctrl-,)
 link tab | tab [new] link: key(ctrl-.)
-tab move window: key(ctrl-;)
 (link | links) background [tab]: key(alt-f)
 tab move left: key(ctrl-shift-pageup)
 tab move right: key(ctrl-shift-pagedown)
