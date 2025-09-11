@@ -29,57 +29,9 @@ code search:
     browser.focus_address()
     insert("cs")
     key(tab)
-calendar site:
+{user.website} site:
     browser.focus_address()
-    insert("calendar.google.com")
-    key(enter)
-critique site:
-    browser.focus_address()
-    insert("cr/")
-    key(enter)
-buganizer site:
-    browser.focus_address()
-    insert("b/")
-    key(enter)
-drive site:
-    browser.focus_address()
-    insert("drive.google.com")
-    key(enter)
-docs site:
-    browser.focus_address()
-    insert("docs.google.com")
-    key(enter)
-slides site:
-    browser.focus_address()
-    insert("slides.google.com")
-    key(enter)
-sheets site:
-    browser.focus_address()
-    insert("sheets.google.com")
-    key(enter)
-new (docs | doc) site:
-    browser.focus_address()
-    insert("doc.new")
-    key(enter)
-new (slides | slide) site:
-    browser.focus_address()
-    insert("slides.new")
-    key(enter)
-new (sheets | sheet) site:
-    browser.focus_address()
-    insert("sheet.new")
-    key(enter)
-new (scripts | script) site:
-    browser.focus_address()
-    insert("script.new")
-    key(enter)
-amazon site:
-    browser.focus_address()
-    insert("amazon.com")
-    key(enter)
-meet site:
-    browser.focus_address()
-    insert("meet.google.com")
+    insert(website)
     key(enter)
 insert text box: key(alt-i t)
 match next: user.browser_match_next()
