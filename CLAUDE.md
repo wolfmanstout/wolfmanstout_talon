@@ -110,3 +110,7 @@ When adding new functionality:
 - Implement shared functionality as tags when applicable
 - Test across platforms when possible
 - Update relevant `.talon-list` files for new vocabulary
+
+## Talon documentation
+
+@~/dotfiles/claude/talon.md
