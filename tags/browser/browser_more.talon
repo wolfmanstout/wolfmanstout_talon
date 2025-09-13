@@ -13,55 +13,27 @@ workspace close: key(alt-w)
 workspace new: key(alt-n)
 workspace [tab] save: key(alt-shift-d)
 (caret | carrot) browsing: key(f7)
-code search (voice access | VA):
-    browser.focus_address()
-    insert("csva")
-    key(tab)
-code search car:
-    browser.focus_address()
-    insert("csc")
-    key(tab)
-code search simulator:
-    browser.focus_address()
-    insert("css")
-    key(tab)
-code search:
-    browser.focus_address()
-    insert("cs")
-    key(tab)
-{user.website} site:
-    browser.focus_address()
-    insert(website)
-    key(enter)
 insert text box: key(alt-i t)
 match next: user.browser_match_next()
 match (last | preev): user.browser_match_previous()
 frame next: key(ctrl-[)
-# webdriver test: 'test_driver'()
-# go search: ClickElementAction('q')
+{user.website} site:
+    browser.focus_address()
+    insert(website)
+    key(enter)
 search <user.prose>$:
     browser.focus_search()
     insert(prose)
-    sleep(15ms)
     key(enter)
-history search <user.prose>$:
-    browser.focus_search()
-    insert("history")
+{user.browser_search_engine} search:
+    browser.focus_address()
+    insert(browser_search_engine)
+    key(tab)
+{user.browser_search_engine} search <user.prose>$:
+    browser.focus_address()
+    insert(browser_search_engine)
     key(tab)
     insert(prose)
     key(enter)
-history search:
-    browser.focus_search()
-    insert("history")
-    key(tab)
-moma search <user.prose>$:
-    browser.focus_search()
-    insert("moma")
-    key(tab)
-    insert(prose)
-    key(enter)
-moma search:
-    browser.focus_search()
-    insert("moma")
-    key(tab)
-# <text> (touch|click) [left]: ClickTextOrButtonAction('%(text)s', dynamic)
+{user.search_engine} search <user.prose>$:
+    user.browser_search_with_search_engine(search_engine, prose)

@@ -1,6 +1,11 @@
+from urllib.parse import quote_plus
+
 from talon import Context, Module, actions
 
 mod = Module()
+mod.list(
+    "browser_search_engine", desc="A browser built-in search engine accessible via tab"
+)
 
 
 @mod.action_class
@@ -10,6 +15,13 @@ class Actions:
 
     def browser_match_previous():
         """Go to previous match."""
+
+    def browser_search_with_search_engine(search_template: str, search_text: str):
+        """Search using a search engine by constructing and entering the URL in the address bar"""
+        url = search_template.replace("%s", quote_plus(search_text))
+        actions.browser.focus_address()
+        actions.insert(url)
+        actions.key("enter")
 
 
 mac_ctx = Context()
