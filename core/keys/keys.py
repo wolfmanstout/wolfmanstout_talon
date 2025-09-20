@@ -136,6 +136,7 @@ punctuation_words = {
     "ampersand": "&",
     "hyphen": "-",
     "high and": "-",
+    "minus sign": "-",
     "under score": "_",
     # Currencies
     "dollar sign": "$",
