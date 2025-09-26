@@ -2,31 +2,10 @@ mode: command
 mode: user.dictation_command
 app: google_docs
 -
-select column: user.select_column()
-select row: user.select_row()
-row up: user.move_row_up()
-row down: user.move_row_down()
-column left: user.move_column_left()
-column right: user.move_column_right()
 (add comment | comment this): user.add_comment()
+comment [{user.ocr_modifiers}] (seen | scene) <user.prose_range>$:
+    user.google_docs_comment_on_text(ocr_modifiers or "", prose_range)
 (last | preev) comment: user.previous_comment()
 next comment: user.next_comment()
 enter comment: user.enter_comment()
-(new | insert) row above: user.insert_row_above()
-(new | insert) row [below]: user.insert_row_below()
-dupe row: user.duplicate_row()
-delete row: user.delete_row()
-# (click|touch) present: ClickElementAction("//*[@aria-label='Start presentation (Ctrl+F5)']")
 file rename: user.rename_document()
-dupe this: user.duplicate_selection()
-format title: user.google_docs_title()
-format subtitle: user.google_docs_subtitle()
-format heading one: user.google_docs_heading(1)
-format heading two: user.google_docs_heading(2)
-format heading three: user.google_docs_heading(3)
-format heading four: user.google_docs_heading(4)
-format heading five: user.google_docs_heading(5)
-format heading six: user.google_docs_heading(6)
-format normal: user.google_docs_normal_text()
-comment [{user.ocr_modifiers}] (seen | scene) <user.prose_range>$:
-    user.google_docs_comment_on_text(ocr_modifiers or "", prose_range)
