@@ -1,5 +1,5 @@
 app: windows_terminal
-win.title: claude - Terminal
+win.title: /claude .*- Terminal/
 win.title: /✳/
 -
 settings():
