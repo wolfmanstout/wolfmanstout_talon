@@ -189,7 +189,6 @@ class UserActions:
         actions.sleep("50ms")
         if left:
             actions.key("ctrl-shift-m")
-            actions.edit.left()
             # In principle the previous word should suffice, but some applications
             # have a funny concept of what the previous word is (for example, they
             # may only take the "`" at the end of "`foo`"). To be double sure we
