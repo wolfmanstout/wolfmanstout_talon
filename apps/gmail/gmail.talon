@@ -2,6 +2,8 @@ app: gmail
 -
 settings():
     user.peek_right_after_insertion = 1
+    # Gmail sometimes swallows lone newlines, so don't force paste for them
+    user.paste_to_insert_newlines = false
 
 tag(): user.emoji
 open: key(+ o)

@@ -12,14 +12,26 @@ Zero means always paste; -1 means never paste.
 """,
 )
 
+mod.setting(
+    "paste_to_insert_newlines",
+    type=bool,
+    default=True,
+    desc="""Always paste text containing newlines to avoid editor handling of enter key.
+This prevents unwanted form submission or other enter key behaviors.
+""",
+)
+
 
 @ctx.action_class("main")
 class MainActions:
     def insert(text: str):
         threshold: int = settings.get("user.paste_to_insert_threshold")  # type: ignore
-        # If paste_to_insert is available, always paste newlines to avoid editor
+        paste_newlines: bool = settings.get("user.paste_to_insert_newlines")  # type: ignore
+        # If paste_to_insert is available, paste newlines to avoid editor
         # handling of enter key (which could submit a form, for example).
-        if 0 <= threshold and (threshold < len(text) or "\n" in text):
+        if 0 <= threshold and (
+            threshold < len(text) or (paste_newlines and "\n" in text)
+        ):
             actions.user.paste(text)
             return
         actions.next(text)
