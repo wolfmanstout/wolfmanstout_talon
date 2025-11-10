@@ -100,6 +100,7 @@ settings():
     # Time in seconds to wait for the clipboard to change when trying to get selected text
     user.selected_text_timeout = 0.1
 
+    # Set the preferred editor for draft mode. Comma-separated list of app names.
     user.draft_editor = "Visual Studio Code - Insiders, Visual Studio Code, Code"
 
     user.preferred_microphones = "Samson, TableMike"
