@@ -3,6 +3,7 @@ import os
 import platform
 import re
 import subprocess
+from html.parser import HTMLParser
 from typing import Optional
 
 from talon import Context, Module, actions, clip, settings
@@ -22,13 +23,6 @@ mod.setting(
     type=str,
     default="markdownify",
     desc="Path to the markdownify CLI executable for HTML to markdown conversion",
-)
-
-mod.setting(
-    "strip_tags_path",
-    type=str,
-    default="strip-tags",
-    desc="Path to the strip-tags CLI executable for HTML cleanup",
 )
 
 END_OF_WORD_SYMBOLS = ".!?;:—_/\\|@#$%^&*()[]{}<>=+-~`"
@@ -144,17 +138,12 @@ def convert_html_to_markdown(html: str) -> Optional[str]:
 
 
 def clean_html(html: str) -> Optional[str]:
-    """Clean HTML using strip-tags CLI with allowlist for links, lists, and headings"""
-    # Configure output encoding
-    process_env = os.environ.copy()
-    if platform.system() == "Windows":
-        process_env["PYTHONUTF8"] = "1"  # For Python 3.7+ to enable UTF-8 mode
-    # On other platforms, UTF-8 is also the common/expected encoding.
-    text_encoding = "utf-8"
+    """Clean HTML by removing unwanted tags while preserving links, lists, and line breaks.
 
+    HTML entities are preserved as-is to prevent text like "This is a &lt;test&gt;"
+    from being decoded to "<test>" which would then be interpreted as an HTML tag.
+    """
     try:
-        strip_tags_path: str = settings.get("user.strip_tags_path")  # type: ignore
-
         # First, convert paragraph and heading boundaries to <br> tags to preserve line breaks
         # Replace </p><p>, </h[1-6]><h[1-6]>, etc. with <br><br>
         html_with_breaks = re.sub(
@@ -165,33 +154,58 @@ def clean_html(html: str) -> Optional[str]:
             r"</?(p|h[1-6])[^>]*>", "", html_with_breaks, flags=re.IGNORECASE
         )
 
-        # Define allowed tags and tag categories
-        allowed_tags = [
-            "lists",  # List tags (ul, ol, li)
-            "a",  # Links
-            "br",  # Line breaks
-        ]
+        # Use HTML parser to properly handle edge cases while preserving entities
+        class StripTagsPreserveEntities(HTMLParser):
+            """Strip HTML tags except allowed ones, preserving HTML entities"""
 
-        # Build command arguments
-        cmd_args = [strip_tags_path]
-        for tag in allowed_tags:
-            cmd_args.extend(["-t", tag])
+            def __init__(self, allowed_tags):
+                super().__init__(convert_charrefs=False)
+                self.allowed_tags = set(tag.lower() for tag in allowed_tags)
+                # Tags whose content should be completely ignored
+                self.ignore_content_tags = {"script", "style", "noscript"}
+                self.result = []
+                self.ignore_depth = 0  # Track if we're inside an ignored tag
 
-        cleaned_html = subprocess.check_output(
-            cmd_args,
-            input=html_with_breaks,
-            encoding=text_encoding,
-            stderr=subprocess.PIPE,
-            creationflags=(
-                subprocess.CREATE_NO_WINDOW if platform.system() == "Windows" else 0  # type: ignore
-            ),
-            env=process_env if platform.system() == "Windows" else None,
-        ).strip()
-        return cleaned_html
-    except subprocess.CalledProcessError as e:
-        error_msg = e.stderr.strip() if e.stderr else str(e)
-        logging.error(f"Error cleaning HTML: {error_msg}")
-        return None
+            def handle_starttag(self, tag, attrs):
+                tag_lower = tag.lower()
+                if tag_lower in self.ignore_content_tags:
+                    self.ignore_depth += 1
+                elif self.ignore_depth == 0 and tag_lower in self.allowed_tags:
+                    attr_str = "".join(f' {k}="{v}"' for k, v in attrs) if attrs else ""
+                    self.result.append(f"<{tag}{attr_str}>")
+
+            def handle_endtag(self, tag):
+                tag_lower = tag.lower()
+                if tag_lower in self.ignore_content_tags:
+                    self.ignore_depth = max(0, self.ignore_depth - 1)
+                elif self.ignore_depth == 0 and tag_lower in self.allowed_tags:
+                    self.result.append(f"</{tag}>")
+
+            def handle_data(self, data):
+                if self.ignore_depth == 0:
+                    self.result.append(data)
+
+            def handle_entityref(self, name):
+                # Preserve entity references like &lt; &gt; &amp;
+                if self.ignore_depth == 0:
+                    self.result.append(f"&{name};")
+
+            def handle_charref(self, name):
+                # Preserve character references like &#60;
+                if self.ignore_depth == 0:
+                    self.result.append(f"&#{name};")
+
+            def get_result(self):
+                return "".join(self.result)
+
+        # Define allowed tags to preserve
+        allowed_tags = {"a", "ul", "ol", "li", "br"}
+
+        parser = StripTagsPreserveEntities(allowed_tags)
+        parser.feed(html_with_breaks)
+        cleaned_html = parser.get_result()
+
+        return cleaned_html.strip()
     except Exception as e:
         logging.error(f"Error cleaning HTML: {str(e)}")
         return None
