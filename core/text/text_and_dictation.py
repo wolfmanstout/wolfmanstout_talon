@@ -591,5 +591,7 @@ class Actions:
                 print("Unable to get selected text.")
                 after = ""
             actions.edit.left()
+            # Needed to avoid clobbering text in some apps (e.g. Gemini).
+            actions.sleep("50ms")
             actions.key("delete")  # remove space
         return before, after
