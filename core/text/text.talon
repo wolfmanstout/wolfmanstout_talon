@@ -25,7 +25,7 @@ say <user.prose> {user.post_dictation_keys}:
 <user.format_code>+ {user.post_dictation_keys}:
     user.insert_many(format_code_list)
     key(post_dictation_keys)
-<user.formatters> that: user.formatters_reformat_selection(user.formatters)
+<user.formatters> (that | this): user.formatters_reformat_selection(user.formatters)
 {user.word_formatter} <user.word>: user.insert_formatted(word, word_formatter)
 <user.formatters> (pace | paste): user.insert_formatted(clip.text(), formatters)
 {user.symbol_snippet}: "{symbol_snippet}"

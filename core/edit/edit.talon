@@ -48,12 +48,12 @@ indent [more]: edit.indent_more()
 (indent less | out dent | dedent): edit.indent_less()
 
 # Copy
-copy that:
+copy (that | this):
     edit.copy()
     sleep(100ms)
 
 # Cut
-cut that: edit.cut()
+cut (that | this): edit.cut()
 
 # Paste
 (pace | paste) that: edit.paste()
@@ -70,7 +70,7 @@ cut that: edit.cut()
 (pace | paste) clean: user.paste_clean()
 
 # Duplication
-clone that: edit.selection_clone()
+clone (that | this): edit.selection_clone()
 clone line: edit.line_clone()
 
 # Insert new line

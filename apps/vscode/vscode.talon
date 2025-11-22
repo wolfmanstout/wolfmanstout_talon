@@ -119,14 +119,10 @@ imports fix: user.vscode("editor.action.organizeImports")
 problem next: user.vscode("editor.action.marker.next")
 problem last: user.vscode("editor.action.marker.prev")
 problem fix: user.vscode("problems.action.showQuickFixes")
-rename that: user.vscode("editor.action.rename")
-refactor that: user.vscode("editor.action.refactor")
 whitespace trim: user.vscode("editor.action.trimTrailingWhitespace")
 language switch: user.vscode("workbench.action.editor.changeLanguageMode")
 mode {user.language_id}:
     user.vscode_with_plugin("commands.setEditorLanguage", language_id)
-refactor rename: user.vscode("editor.action.rename")
-refactor this: user.vscode("editor.action.refactor")
 
 #code navigation
 (go declaration | follow): user.vscode("editor.action.revealDefinition")
@@ -162,8 +158,6 @@ close tabs way right: user.vscode("workbench.action.closeEditorsToTheRight")
 close tabs way left: user.vscode("workbench.action.closeEditorsToTheLeft")
 
 # Folding
-fold that: user.vscode("editor.fold")
-unfold that: user.vscode("editor.unfold")
 fold those: user.vscode("editor.foldAllMarkerRegions")
 unfold those: user.vscode("editor.unfoldRecursively")
 fold all: user.vscode("editor.foldAll")
