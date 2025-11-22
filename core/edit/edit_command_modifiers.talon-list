@@ -5,9 +5,13 @@ paragraph: paragraph
 line: line
 line start: lineStart
 way left: lineStart
+west: lineStart
 line end: lineEnd
 way right: lineEnd
+east: lineEnd
 file start: fileStart
 way up: fileStart
+north: fileStart
 file end: fileEnd
 way down: fileEnd
+south: fileEnd
