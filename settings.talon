@@ -113,6 +113,8 @@ settings():
 
     user.model_llm_plugins = "llm-echo,llm-templates-fabric,llm-fragments-github,llm-docs,llm-anthropic,llm-gemini,llm-fragments-markitdown,llm-templates-github"
 
+    user.ocr_use_window_at_api = true
+
 # Uncomment to enable the curse yes/curse no commands (show/hide mouse cursor).
 # See issue #688 for more detail: https://github.com/talonhub/community/issues/688
 # tag(): user.mouse_cursor_commands_enable
