@@ -153,11 +153,11 @@ scroll up half:
 scroll down:
     user.move_cursor_to_gaze_point(0, -40)
     sleep(50ms)
-    user.mouse_scroll_down()
+    user.scroll_down_with_visualization()
 scroll down half:
     user.move_cursor_to_gaze_point(0, -40)
     sleep(50ms)
-    user.mouse_scroll_down(0.5)
+    user.scroll_down_with_visualization(0.5)
 scroll left:
     user.move_cursor_to_gaze_point(40, 0)
     sleep(50ms)
