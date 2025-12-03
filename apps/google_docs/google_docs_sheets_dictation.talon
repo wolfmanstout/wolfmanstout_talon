@@ -3,6 +3,9 @@ mode: user.dictation_command
 app: google_docs
 browser.path: /^\/spreadsheets/
 -
+settings():
+    key_wait = 10
+
 select column: user.select_column()
 select row: user.select_row()
 row up: user.move_row_up()
