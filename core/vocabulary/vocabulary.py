@@ -240,9 +240,12 @@ class Actions:
     # this is implemented as an action so it may be overridden in other contexts
     def get_vocabulary_file_path():
         """Returns the path for the active vocabulary file"""
-        vocabulary_directory = os.path.dirname(os.path.realpath(__file__))
+        user_directory = actions.path.talon_user()
         vocabulary_file_path = os.path.join(
-            vocabulary_directory, "vocabulary_private.talon-list"
+            user_directory,
+            "wolfmanstout_talon",
+            "private",
+            "vocabulary_private.talon-list",
         )
         return vocabulary_file_path
 

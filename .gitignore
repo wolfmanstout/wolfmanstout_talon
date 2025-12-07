@@ -16,7 +16,6 @@ __pycache__
 .\#*
 # Vim (from https://github.com/github/gitignore/blob/main/Global/Vim.gitignore)
 [._]*.swp
-core/vocabulary/vocabulary_private.talon-list
 node_modules/
 core/system_paths-jwstout*
 .claude/settings.local.json
