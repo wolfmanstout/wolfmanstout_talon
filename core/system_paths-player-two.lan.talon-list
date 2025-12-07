@@ -1,0 +1,16 @@
+list: user.system_paths
+hostname: player-two.lan
+-
+user: /Users/jwstout
+desktop: /Users/jwstout/Desktop
+desk: /Users/jwstout/Desktop
+documents: /Users/jwstout/Documents
+docks: /Users/jwstout/Documents
+downloads: /Users/jwstout/Downloads
+music: /Users/jwstout/Music
+pictures: /Users/jwstout/Pictures
+videos: /Users/jwstout/Videos
+talon home: /Users/jwstout/.talon
+talon recordings: /Users/jwstout/.talon/recordings
+talon user: /Users/jwstout/.talon/user
+home: /Users/jwstout
