@@ -4,6 +4,7 @@ mod = Module()
 mod.apps.gnome_terminal_remote = r"""
 title: / - Terminal/
 and not app: windows_terminal
+and not app: iterm2
 """
 
 ctx = Context()

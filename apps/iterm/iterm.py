@@ -79,3 +79,12 @@ class UserActions:
     def terminal_clear_screen():
         """Clear screen"""
         actions.key("ctrl-l")
+
+
+@ctx.action_class("app")
+class UserActions:
+    def tab_next():
+        actions.key("cmd-right")
+
+    def tab_previous():
+        actions.key("cmd-left")
