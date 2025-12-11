@@ -199,3 +199,55 @@ adb reconnect device: adb reconnect-device
 adb reconnect offline: adb reconnect-offline
 adb attach
 adb detach
+
+# Homebrew
+brew
+brew install
+brew uninstall
+brew update
+brew upgrade
+brew search
+brew info
+brew list
+brew doctor
+brew cleanup
+brew services
+brew services list
+brew services start
+brew services stop
+brew services restart
+brew services run
+brew services info
+brew tap
+brew tap info: brew tap-info
+brew untap
+brew deps
+brew leaves
+brew outdated
+brew pin
+brew unpin
+brew link
+brew unlink
+brew reinstall
+brew fetch
+brew home
+brew config
+brew casks
+brew formulae
+brew autoremove
+brew bundle
+brew bundle install
+brew bundle dump
+brew bundle cleanup
+brew bundle list
+brew bundle check
+brew edit
+brew cat
+brew log
+brew uses
+brew missing
+brew postinstall
+brew cache: brew --cache
+brew cellar: brew --cellar
+brew prefix: brew --prefix
+brew version: brew --version
