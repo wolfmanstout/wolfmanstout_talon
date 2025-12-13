@@ -4,7 +4,8 @@ app: google_docs
 browser.path: /^\/spreadsheets/
 -
 settings():
-    key_wait = 10
+    # TODO: Adjust this to the minimal value that works in Google Sheets on Windows.
+    # key_wait = 10
 
 select column: user.select_column()
 select row: user.select_row()
