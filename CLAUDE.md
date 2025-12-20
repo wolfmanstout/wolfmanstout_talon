@@ -113,4 +113,4 @@ When adding new functionality:
 
 ## Talon documentation
 
-@~/dotfiles/claude/talon.md
+@~/.claude/talon.md
