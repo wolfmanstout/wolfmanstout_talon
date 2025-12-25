@@ -8,7 +8,7 @@ settings():
 tag(): terminal
 
 # use readline keybindings for various editing commands
-tag(): user.readline
+# tag(): user.readline
 
 # activates the implementation of the commands/functions in terminal.talon
 tag(): user.generic_unix_shell
