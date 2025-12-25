@@ -15,16 +15,6 @@ pytest                    # Run test suite
 pytest test/specific_test.py  # Run specific test
 ```
 
-**Integration Testing**:
-
-- Push changes to local Talon user directory with `sync_talon_repo`.
-- Wait a couple seconds for Talon to load the changes.
-- Use `tail /mnt/c/Users/james/AppData/Roaming/talon/talon.log` to view recent logs (adding flags as needed to view more logs).
-- Changed files will show up in logs as `DEBUG [~] c:\path\to\file`, with possible `WARNING` or `ERROR` lines shown afterwards.
-- The user will need to manually test any changed functionality.
-
-**Committing**: Always run `sync_talon_repo` after committing or pushing.
-
 **Code Quality:**
 
 ```bash
