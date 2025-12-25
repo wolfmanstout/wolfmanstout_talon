@@ -14,3 +14,9 @@ tag(): user.git
 tag(): user.kubectl
 tag(): user.tabs
 # tag(): user.readline
+
+screen up: key(shift-pageup)
+screen down: key(shift-pagedown)
+last | preev: key(ctrl-r)
+next: key(ctrl-s)
+cancel: key(ctrl-g)
