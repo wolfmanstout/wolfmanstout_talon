@@ -145,11 +145,11 @@ mouse hiss down: user.hiss_scroll_down()
 scroll up:
     user.move_cursor_to_gaze_point(0, 40)
     sleep(50ms)
-    user.mouse_scroll_up()
+    user.scroll_up_with_visualization()
 scroll up half:
     user.move_cursor_to_gaze_point(0, 40)
     sleep(50ms)
-    user.mouse_scroll_up(0.5)
+    user.scroll_up_with_visualization(0.5)
 scroll down:
     user.move_cursor_to_gaze_point(0, -40)
     sleep(50ms)
