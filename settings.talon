@@ -139,4 +139,4 @@ tag(): user.cursorless_experimental_snippets
 
 tag(): user.emoji
 
-tag(): user.chromium_smooth_scrolling_disabled
+tag(): user.browser_smooth_scrolling_disabled
