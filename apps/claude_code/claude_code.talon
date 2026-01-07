@@ -1,4 +1,5 @@
 app: windows_terminal
+app: iterm2
 win.title: /claude .*- Terminal/
 win.title: /✳/
 -

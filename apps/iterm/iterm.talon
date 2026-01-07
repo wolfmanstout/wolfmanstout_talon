@@ -2,9 +2,7 @@ os: mac
 app: iterm2
 -
 settings():
-    # Selection does not work properly here by default.
-    # TODO Explore built-in support for this.
-    user.context_sensitive_dictation = false
+    user.accessibility_dictation = 1
 
 tag(): terminal
 # todo: filemanager support
