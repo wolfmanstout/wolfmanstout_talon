@@ -15,6 +15,15 @@ directories_to_remap = {}
 directories_to_exclude = {}
 
 
+@ctx.action_class("app")
+class app_actions:
+    def tab_previous():
+        actions.key("cmd-alt-left")
+
+    def tab_next():
+        actions.key("cmd-alt-right")
+
+
 @ctx.action_class("user")
 class UserActions:
     # def file_manager_current_path():
