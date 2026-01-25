@@ -335,33 +335,48 @@ def code_formatters(m) -> str:
     return ",".join(m.code_formatter_list)
 
 
-@mod.capture(
-    # HACK: Use a * instead of + to get the desired parse when multiple formatters are chained,
-    # e.g. "score test padded plus".
-    rule="<self.formatters> (<user.text> | <user.formatter_immune>) (<user.text> | <user.formatter_immune>)*"
-)
+@mod.capture(rule="<self.format_prose_text> | <self.format_code>")
 def format_text(m) -> str:
-    """Formats text and returns a string"""
-    out = ""
-    formatters = m[0]
-    for i, chunk in enumerate(m[1:]):
+    """Formats text - uses prose rules for prose formatters, code rules for code formatters."""
+    return m[0]
+
+
+@mod.capture(rule="{self.prose_formatter}+ <user.prose>")
+def format_prose_text(m) -> str:
+    """Formats prose text using prose formatters (preserves spoken words like 'one')."""
+    formatters = ",".join(m.prose_formatter_list)
+    return format_phrase(m.prose, formatters)
+
+
+def _collect_format_chunks(m, start_index: int) -> str:
+    """Collect chunks into a single string for code formatters.
+
+    No spaces are added between chunks - immune strings concatenate directly
+    with adjacent text, and CodeFormatter handles word delimiting.
+    """
+    parts = []
+    for chunk in m[start_index:]:
         if isinstance(chunk, ImmuneString):
-            # If the first item is an immune string, then format it.
-            if i == 0:
-                out += format_phrase(chunk.string, formatters)
-            else:
-                out += chunk.string
+            parts.append(chunk.string)
+        elif isinstance(chunk, str):
+            parts.append(chunk)
         else:
-            out += format_phrase(chunk, formatters)
-    return out
+            parts.append(
+                " ".join(
+                    actions.dictate.replace_words(actions.dictate.parse_words(chunk))
+                )
+            )
+    return "".join(parts)
 
 
 @mod.capture(
     rule="<self.code_formatters> (<user.text> | <user.formatter_immune>) (<user.text> | <user.formatter_immune>)*"
 )
 def format_code(m) -> str:
-    """Formats code and returns a string"""
-    return format_text(m)
+    """Formats code text (applies formatter once to concatenated result)."""
+    formatters = ",".join(m.code_formatters_list)
+    text = _collect_format_chunks(m, len(m.code_formatters_list))
+    return format_phrase(text, formatters)
 
 
 mod.list("symbol_snippet", desc="A snippet of symbols to insert as-is.")
