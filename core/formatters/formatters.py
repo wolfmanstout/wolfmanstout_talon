@@ -68,8 +68,6 @@ class CodeFormatter(Formatter):
         format_first: Callable[[str], str],
         format_rest: Callable[[str], str],
     ):
-        # Strip anything that is not alpha-num, whitespace, dot or comma
-        text = re.sub(r"[^\w\d\s.,]+", "", text)
         # Split on anything that is not alpha-num
         words = re.split(r"([^\w\d]+)", text)
         groups = []
@@ -82,15 +80,12 @@ class CodeFormatter(Formatter):
             # Word is number
             if word.isnumeric():
                 first = True
-            # Word is symbol
+            # Word is symbol - preserve as-is
             elif not word.isalnum():
                 groups.append(delimiter.join(group))
-                word = word.strip()
-                if word != ".":
-                    word += " "
-                first = True
                 groups.append(word)
                 group = []
+                first = True
                 continue
             elif first:
                 first = False
@@ -348,35 +343,19 @@ def format_prose_text(m) -> str:
     return format_phrase(m.prose, formatters)
 
 
-def _collect_format_chunks(m, start_index: int) -> str:
-    """Collect chunks into a single string for code formatters.
-
-    No spaces are added between chunks - immune strings concatenate directly
-    with adjacent text, and CodeFormatter handles word delimiting.
-    """
-    parts = []
-    for chunk in m[start_index:]:
-        if isinstance(chunk, ImmuneString):
-            parts.append(chunk.string)
-        elif isinstance(chunk, str):
-            parts.append(chunk)
-        else:
-            parts.append(
-                " ".join(
-                    actions.dictate.replace_words(actions.dictate.parse_words(chunk))
-                )
-            )
-    return "".join(parts)
-
-
 @mod.capture(
     rule="<self.code_formatters> (<user.text> | <user.formatter_immune>) (<user.text> | <user.formatter_immune>)*"
 )
 def format_code(m) -> str:
-    """Formats code text (applies formatter once to concatenated result)."""
+    """Formats code text: clumps all chunks together, then formats once."""
     formatters = ",".join(m.code_formatters_list)
-    text = _collect_format_chunks(m, len(m.code_formatters_list))
-    return format_phrase(text, formatters)
+    parts = []
+    for chunk in m[len(m.code_formatters_list) :]:
+        if isinstance(chunk, ImmuneString):
+            parts.append(chunk.string)
+        else:
+            parts.append(str(chunk))
+    return format_phrase("".join(parts), formatters)
 
 
 mod.list("symbol_snippet", desc="A snippet of symbols to insert as-is.")
