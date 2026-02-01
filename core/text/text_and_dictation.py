@@ -313,8 +313,6 @@ def auto_capitalize(text, state=None):
 
     - None: Don't capitalize initial word.
     - "sentence start": Capitalize initial word.
-    - "after newline": Don't capitalize initial word, but we're after a newline.
-      Used for double-newline detection.
 
     Returns (capitalized text, updated state).
     """
@@ -322,12 +320,10 @@ def auto_capitalize(text, state=None):
     # Imagine a metaphorical "capitalization charge" travelling through the
     # string left-to-right.
     charge = state == "sentence start"
-    newline = state == "after newline"
     sentence_end = False
     for c in text:
-        # Sentence endings followed by space & double newlines create a charge.
-        # Star also creates a charge to support Emacs Org-mode.
-        if (sentence_end and c in " \n\t") or (newline and c in "\n*"):
+        # Sentence endings followed by space create a charge.
+        if sentence_end and c in " \n\t":
             charge = True
         # Alphanumeric characters and commas/colons absorb charge & try to
         # capitalize (for numbers & punctuation this does nothing, which is what
@@ -337,15 +333,14 @@ def auto_capitalize(text, state=None):
             c = c.capitalize()
         # Otherwise the charge just passes through.
         output += c
-        newline = c == "\n"
         sentence_end = (
-            c in ".!?" or output.endswith("TODO")
+            c in ".!?\n" or output.endswith("TODO")
         ) and not no_cap_after.search(output)
-    return output, (
-        "sentence start"
-        if charge or sentence_end
-        else "after newline" if newline else None
-    )  # fmt: skip
+        # A newline is both a sentence ending and whitespace, so create
+        # the charge immediately.
+        if c == "\n" and sentence_end:
+            charge = True
+    return output, ("sentence start" if charge or sentence_end else None)
 
 
 # ---------- DICTATION AUTO FORMATTING ---------- #
