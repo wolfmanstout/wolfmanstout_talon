@@ -15,9 +15,11 @@ speech.engine: dragon
 ^drowse [<phrase>]$:
     speech.disable()
     mode.disable("noise")
+    mode.disable("user.dictation_command")
 ^talon sleep [<phrase>]$:
     speech.disable()
     mode.disable("noise")
+    mode.disable("user.dictation_command")
 ^talon wake$:
     speech.enable()
     mode.enable("noise")
@@ -30,4 +32,5 @@ speech.engine: dragon
     user.mouse_sleep()
     speech.disable()
     mode.disable("noise")
+    mode.disable("user.dictation_command")
     user.dragon_engine_sleep()
