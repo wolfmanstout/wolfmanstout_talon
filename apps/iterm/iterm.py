@@ -18,10 +18,10 @@ directories_to_exclude = {}
 @ctx.action_class("app")
 class app_actions:
     def tab_previous():
-        actions.key("cmd-alt-left")
+        actions.key("cmd-shift-[")
 
     def tab_next():
-        actions.key("cmd-alt-right")
+        actions.key("cmd-shift-]")
 
 
 @ctx.action_class("user")
