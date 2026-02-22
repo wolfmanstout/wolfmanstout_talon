@@ -319,6 +319,7 @@ class Actions:
     def delete_all():
         """Delete all text in the current document"""
         actions.edit.select_all()
+        actions.sleep("50ms")  # small delay to ensure selection has taken effect
         actions.edit.delete()
 
     def words_left(n: int):
