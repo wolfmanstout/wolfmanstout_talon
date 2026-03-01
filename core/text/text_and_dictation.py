@@ -1,15 +1,57 @@
 # Descended from https://github.com/dwiel/talon_community/blob/master/misc/dictation.py
+import json
 import logging
 import re
 import time
 from collections.abc import Callable
-from typing import Optional
+import unicodedata
+import urllib.error
+from dataclasses import dataclass
+from typing import Literal, Optional, TypeGuard
+
+import requests
 
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
 
 from ..numbers.numbers import get_spoken_form_under_one_hundred
 
 mod = Module()
+
+DictationAiCleanupBackend = Literal["ollama", "mlx"]
+
+
+@dataclass
+class DictationAiCleanupPerf:
+    backend: DictationAiCleanupBackend
+    wall_ms: float
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    prefill_ms: Optional[float] = None
+    decode_ms: Optional[float] = None
+    total_ms: Optional[float] = None
+    load_ms: Optional[float] = None
+    cached_prompt_tokens: Optional[int] = None
+    prefill_tps: Optional[float] = None
+    decode_tps: Optional[float] = None
+    peak_memory_gb: Optional[float] = None
+
+    @staticmethod
+    def _tokens_per_second(
+        token_count: Optional[int], duration_ms: Optional[float]
+    ) -> Optional[float]:
+        if token_count is None or duration_ms is None or duration_ms <= 0:
+            return None
+        return token_count / (duration_ms / 1000.0)
+
+    def prefill_tokens_per_second(self) -> Optional[float]:
+        return self.prefill_tps or self._tokens_per_second(
+            self.prompt_tokens, self.prefill_ms
+        )
+
+    def decode_tokens_per_second(self) -> Optional[float]:
+        return self.decode_tps or self._tokens_per_second(
+            self.completion_tokens, self.decode_ms
+        )
 
 mod.setting(
     "context_sensitive_dictation",
@@ -28,6 +70,36 @@ mod.setting(
     type=bool,
     default=False,
     desc="If true, normalize model-added utterance capitalization and trailing punctuation before dictation formatting.",
+)
+mod.setting(
+    "dictation_ai_cleanup",
+    type=bool,
+    default=False,
+    desc="If true, send each dictation utterance to an LLM and rewrite only when corrections are found.",
+)
+mod.setting(
+    "dictation_ai_cleanup_model",
+    type=str,
+    default="gemma4:26b-mlx",
+    desc="Model used for dictation cleanup.",
+)
+mod.setting(
+    "dictation_ai_cleanup_backend",
+    type=str,
+    default="ollama",
+    desc="LLM backend used for dictation cleanup. Supported values: 'ollama' and 'mlx'.",
+)
+mod.setting(
+    "dictation_ai_cleanup_port",
+    type=int,
+    default=0,
+    desc="Port for dictation cleanup backends. Set to 0 to use the backend default (11434 for Ollama, 8080 for mlx).",
+)
+mod.setting(
+    "dictation_ai_cleanup_timeout_s",
+    type=int,
+    default=30,
+    desc="Timeout for dictation cleanup requests, in seconds.",
 )
 setting_peek_right_after_insertion = mod.setting(
     "peek_right_after_insertion",
@@ -501,16 +573,301 @@ ui.register("win_focus", lambda win: dictation_formatter.reset())
 # TODO: Use a stack
 phrase_timestamp = None
 context_check_phrase_timestamp = None
+utterance_chunks: list[tuple[str, str]] = []
+utterance_prior_context = ""
+utterance_had_dictation = False
 
 
 def on_pre_phrase(d):
     global phrase_timestamp
+    global utterance_chunks, utterance_prior_context, utterance_had_dictation
     phrase_timestamp = time.time()
+    utterance_chunks = []
+    utterance_prior_context = ""
+    utterance_had_dictation = False
 
 
 def on_post_phrase(d):
-    global phrase_timestamp
+    global phrase_timestamp, utterance_chunks, utterance_prior_context
+    global utterance_had_dictation
+    chunks = utterance_chunks
+    prior_context = utterance_prior_context
+    had_dictation = utterance_had_dictation
     phrase_timestamp = None
+    utterance_chunks = []
+    utterance_prior_context = ""
+    utterance_had_dictation = False
+    if not had_dictation or not chunks or not settings.get("user.dictation_ai_cleanup"):
+        return
+    utterance_before_text = "".join(before for before, _ in chunks)
+    utterance_after_text = "".join(after for _, after in reversed(chunks))
+    backend = settings.get("user.dictation_ai_cleanup_backend")
+    if not _is_dictation_ai_cleanup_backend(backend):
+        logging.debug("Dictation AI cleanup skipped: unsupported backend %r", backend)
+        return
+    model = settings.get("user.dictation_ai_cleanup_model")
+    port = settings.get("user.dictation_ai_cleanup_port")
+    if backend == "ollama":
+        resolved_port = port if port > 0 else 11434
+        url = f"http://127.0.0.1:{resolved_port}/api/generate"
+    else:
+        resolved_port = port if port > 0 else 8080
+        url = f"http://127.0.0.1:{resolved_port}/chat/completions"
+    timeout = settings.get("user.dictation_ai_cleanup_timeout_s")
+    corrected_before = _run_ai_cleanup(
+        prior_context, utterance_before_text, model, url, timeout, backend
+    )
+    if not corrected_before:
+        return
+    _apply_ai_cleanup_rewrite(
+        prior_context, chunks, corrected_before, utterance_after_text
+    )
+
+
+def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
+    return (
+        "Speech may write a word instead of a comma.\n"
+        "C is previous text for context only. Fix U only; never output C.\n"
+        "Comma words in U: comment, come and, comma, come in, common.\n"
+        "STEP 1: If U contains none of those exact words/phrases, return exactly NOCHANGE.\n"
+        "STEP 2: If U contains one, replace it with ', ' only when it is punctuation: "
+        "a list separator or a comma between clauses. Do not replace normal word use.\n"
+        "Replace every punctuation use. If no replacement is needed, return exactly NOCHANGE. "
+        "Otherwise return only corrected U.\n\n"
+        "Examples:\n"
+        "'apples comment oranges comment bananas' -> 'apples, oranges, bananas'\n"
+        "'I like cats comment dogs and birds' -> 'I like cats, dogs and birds'\n"
+        "'first come and second come and third' -> 'first, second, third'\n"
+        "'I'm not sure come and can you help' -> 'I'm not sure, can you help'\n"
+        "C='I'm running late' U='common I need to reschedule' -> ', I need to reschedule'\n"
+        "C='I'm available now' U='come and I can help' -> ', I can help'\n"
+        "'No don't fix the stale comment, fix the code so that it aligns with that comment' -> NOCHANGE\n"
+        "'come and see this' -> NOCHANGE\n"
+        "'come and get it' -> NOCHANGE\n"
+        "'this is a common problem' -> NOCHANGE\n"
+        "'viewport frame purple if it is a cached frame' -> NOCHANGE\n"
+        "'Also create clod' -> NOCHANGE\n"
+        f"\nC:\n{prior_context}\n"
+        f"U:\n{utterance_text}\n"
+    )
+
+
+def _normalize_ai_cleanup_response(response: str) -> str:
+    response = response.strip("\n")
+    if response.endswith("\nNOCHANGE"):
+        return "NOCHANGE"
+    return response
+
+
+def _strip_ai_cleanup_output_guards(response: str) -> str:
+    response = response.strip()
+    if (
+        len(response) >= 2
+        and response[0] == response[-1]
+        and response[0] in {'"', "'", "`"}
+    ):
+        return response[1:-1].strip()
+    return response
+
+
+def _make_ai_cleanup_perf(
+    backend: DictationAiCleanupBackend, wall_ms: float
+) -> DictationAiCleanupPerf:
+    return DictationAiCleanupPerf(backend=backend, wall_ms=wall_ms)
+
+
+def _extract_ollama_response_and_perf(
+    body: bytes, wall_ms: float = 0.0
+) -> tuple[str, DictationAiCleanupPerf]:
+    data = json.loads(body.decode("utf-8"))
+    perf = _make_ai_cleanup_perf("ollama", wall_ms)
+    perf.prompt_tokens = data["prompt_eval_count"]
+    perf.completion_tokens = data["eval_count"]
+    perf.prefill_ms = data["prompt_eval_duration"] / 1_000_000.0
+    perf.decode_ms = data["eval_duration"] / 1_000_000.0
+    perf.total_ms = data["total_duration"] / 1_000_000.0
+    perf.load_ms = data["load_duration"] / 1_000_000.0
+    response = data["response"]
+    return _normalize_ai_cleanup_response(response), perf
+
+
+def _extract_mlx_vlm_response_and_perf(
+    body: bytes, wall_ms: float = 0.0
+) -> tuple[str, DictationAiCleanupPerf]:
+    data = json.loads(body.decode("utf-8"))
+    perf = _make_ai_cleanup_perf("mlx", wall_ms)
+    usage = data["usage"]
+    perf.prompt_tokens = usage["input_tokens"]
+    perf.completion_tokens = usage["output_tokens"]
+    perf.prefill_tps = usage["prompt_tps"]
+    perf.decode_tps = usage["generation_tps"]
+    perf.peak_memory_gb = usage["peak_memory"]
+    perf.prefill_ms = (perf.prompt_tokens / perf.prefill_tps) * 1000.0
+    perf.decode_ms = (perf.completion_tokens / perf.decode_tps) * 1000.0
+    choices = data["choices"]
+    first_choice = choices[0]
+    message = first_choice["message"]
+    content = message["content"]
+    if isinstance(content, str):
+        return _normalize_ai_cleanup_response(content), perf
+    if isinstance(content, list):
+        text_parts = []
+        for item in content:
+            if item["type"] in {"text", "output_text"}:
+                text_parts.append(item["text"])
+        return _normalize_ai_cleanup_response("".join(text_parts)), perf
+    return "", perf
+
+
+def _log_ai_cleanup_perf(perf: DictationAiCleanupPerf) -> None:
+    parts = [
+        f"backend={perf.backend}",
+        f"wall={perf.wall_ms:.1f}ms",
+    ]
+    if perf.total_ms is not None:
+        parts.append(f"backend_total={perf.total_ms:.1f}ms")
+    if perf.load_ms is not None:
+        parts.append(f"load={perf.load_ms:.1f}ms")
+    if perf.prompt_tokens is not None:
+        parts.append(f"prompt_tokens={perf.prompt_tokens}")
+    if perf.cached_prompt_tokens is not None:
+        parts.append(f"cached_prompt_tokens={perf.cached_prompt_tokens}")
+    if perf.completion_tokens is not None:
+        parts.append(f"completion_tokens={perf.completion_tokens}")
+    if perf.peak_memory_gb is not None:
+        parts.append(f"peak_memory={perf.peak_memory_gb:.2f}GB")
+    prefill_tps = perf.prefill_tokens_per_second()
+    if perf.prefill_ms is not None:
+        parts.append(f"prefill={perf.prefill_ms:.1f}ms")
+    if prefill_tps is not None:
+        parts.append(f"prefill_rate={prefill_tps:.1f} tok/s")
+    decode_tps = perf.decode_tokens_per_second()
+    if perf.decode_ms is not None:
+        parts.append(f"decode={perf.decode_ms:.1f}ms")
+    if decode_tps is not None:
+        parts.append(f"decode_rate={decode_tps:.1f} tok/s")
+    if perf.prefill_ms is None and perf.decode_ms is None:
+        parts.append("phase_rates=unavailable")
+    log_dictation_debug(logging.DEBUG, "Dictation AI cleanup perf: %s", " ".join(parts))
+
+
+def _is_dictation_ai_cleanup_backend(
+    value: object,
+) -> TypeGuard[DictationAiCleanupBackend]:
+    return value in {"ollama", "mlx"}
+
+
+def _is_outer_guard(char: str) -> bool:
+    return char.isspace() or unicodedata.category(char).startswith("P")
+
+
+def _split_outer_guards(text: str) -> tuple[str, str, str]:
+    left = 0
+    right = len(text)
+    while left < right and _is_outer_guard(text[left]):
+        left += 1
+    while right > left and _is_outer_guard(text[right - 1]):
+        right -= 1
+    return text[:left], text[left:right], text[right:]
+
+
+def _run_ai_cleanup(
+    prior_context: str,
+    utterance_text: str,
+    model: str,
+    url: str,
+    timeout_seconds: int,
+    backend: DictationAiCleanupBackend,
+) -> Optional[str]:
+    leading_guard, utterance_core, trailing_guard = _split_outer_guards(utterance_text)
+    if not utterance_core:
+        return None
+    request_started = time.perf_counter()
+    try:
+        prompt = _cleanup_prompt(prior_context, utterance_core)
+        if backend == "ollama":
+            payload_dict = {
+                "model": model,
+                "prompt": prompt,
+                "stream": False,
+                "think": False,
+            }
+        else:
+            payload_dict = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": False,
+                "temperature": 0.0,
+            }
+        payload = json.dumps(payload_dict).encode("utf-8")
+        response = requests.post(
+            url,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=timeout_seconds,
+        )
+        response_body = response.content
+        wall_ms = (time.perf_counter() - request_started) * 1000.0
+        if backend == "ollama":
+            corrected_raw, perf = _extract_ollama_response_and_perf(
+                response_body, wall_ms
+            )
+        else:
+            corrected_raw, perf = _extract_mlx_vlm_response_and_perf(
+                response_body, wall_ms
+            )
+    except (
+        requests.exceptions.RequestException,
+        urllib.error.URLError,
+        TimeoutError,
+        json.JSONDecodeError,
+    ) as error:
+        wall_ms = (time.perf_counter() - request_started) * 1000.0
+        log_dictation_debug(
+            logging.DEBUG,
+            "Dictation AI cleanup perf: backend=%s wall=%.1fms error=%s",
+            backend,
+            wall_ms,
+            error,
+        )
+        logging.debug("Dictation AI cleanup skipped: %s", error)
+        return None
+    _log_ai_cleanup_perf(perf)
+    corrected_core = _strip_ai_cleanup_output_guards(corrected_raw)
+    logging.debug(
+        "Dictation AI cleanup model I/O(core): prior_context=%r input=%r output=%r",
+        prior_context,
+        utterance_core,
+        corrected_core,
+    )
+    if corrected_core == "NOCHANGE":
+        logging.debug("Dictation AI cleanup: model reported no change")
+        return None
+    if not corrected_core:
+        logging.debug("Dictation AI cleanup: empty response, skipping rewrite")
+        return None
+    if corrected_core == utterance_core:
+        logging.debug("Dictation AI cleanup: unchanged response, skipping rewrite")
+        return None
+    corrected = f"{leading_guard}{corrected_core}{trailing_guard}"
+    return corrected
+
+
+def _apply_ai_cleanup_rewrite(
+    prior_context: str,
+    chunks: list[tuple[str, str]],
+    corrected_before: str,
+    after_suffix: str,
+):
+    for _ in chunks:
+        actions.user.clear_last_phrase()
+    if after_suffix:
+        actions.user.insert_between(corrected_before, after_suffix)
+    else:
+        actions.insert(corrected_before)
+    actions.user.add_phrase_to_history(corrected_before, after_suffix)
+    dictation_formatter.update_context(prior_context)
+    dictation_formatter.pass_through(corrected_before)
 
 
 speech_system.register("pre:phrase", on_pre_phrase)
@@ -611,6 +968,7 @@ class Actions:
         original_text = text
         needs_check_after = False
         add_space_after = False
+        prior_context = dictation_formatter.before
         if settings.get("user.context_sensitive_dictation"):
             global context_check_phrase_timestamp, phrase_timestamp
             if context_check_phrase_timestamp != phrase_timestamp:
@@ -636,6 +994,7 @@ class Actions:
                     after,
                 )
                 dictation_formatter.update_context(before)
+                prior_context = dictation_formatter.before
                 add_space_after = (
                     after is not None and actions.user.needs_space_between(text, after)
                 )
@@ -662,6 +1021,12 @@ class Actions:
         if add_space_after:
             actions.user.insert_between("", " ")
         actions.user.add_phrase_to_history(text, " " if add_space_after else "")
+        if phrase_timestamp is not None:
+            global utterance_prior_context, utterance_had_dictation
+            if not utterance_had_dictation:
+                utterance_prior_context = prior_context
+            utterance_had_dictation = True
+            utterance_chunks.append((text, " " if add_space_after else ""))
 
     def dictation_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
         """

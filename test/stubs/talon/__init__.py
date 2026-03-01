@@ -202,6 +202,16 @@ class Settings:
     """
 
 
+class Cron:
+    """
+    Implements something like talon.cron
+    """
+
+    def after(self, _time: str, callback: Callable):
+        callback()
+        return None
+
+
 class Registry:
     """
     Implements something like Talon's registry
@@ -248,6 +258,7 @@ imgui = ImgUI()
 speech_system = SpeechSystem()
 ui = UI()
 settings = Settings()
+cron = Cron()
 resource = Resource()
 registry = Registry()
 
