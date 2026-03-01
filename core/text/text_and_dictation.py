@@ -1,7 +1,11 @@
 # Descended from https://github.com/dwiel/talon_community/blob/master/misc/dictation.py
+import json
 import logging
 import re
 import time
+import unicodedata
+import urllib.error
+import urllib.request
 from typing import Callable, Optional
 
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
@@ -21,6 +25,30 @@ mod.setting(
     type=bool,
     default=False,
     desc="If true, log context-sensitive dictation diagnostics for timing-sensitive peek behavior.",
+)
+mod.setting(
+    "dictation_ai_cleanup",
+    type=bool,
+    default=False,
+    desc="If true, send each dictation utterance to an LLM and rewrite only when corrections are found.",
+)
+mod.setting(
+    "dictation_ai_cleanup_model",
+    type=str,
+    default="gemma4:e4b",
+    desc="Ollama model used for dictation cleanup.",
+)
+mod.setting(
+    "dictation_ai_cleanup_url",
+    type=str,
+    default="http://127.0.0.1:11434/api/generate",
+    desc="Ollama generate API endpoint.",
+)
+mod.setting(
+    "dictation_ai_cleanup_timeout_s",
+    type=int,
+    default=5,
+    desc="Timeout for Ollama dictation cleanup requests, in seconds.",
 )
 setting_peek_right_after_insertion = mod.setting(
     "peek_right_after_insertion",
@@ -431,16 +459,162 @@ ui.register("win_focus", lambda win: dictation_formatter.reset())
 # TODO: Use a stack
 phrase_timestamp = None
 context_check_phrase_timestamp = None
+utterance_chunks: list[tuple[str, str]] = []
+utterance_prior_context = ""
+utterance_had_dictation = False
 
 
 def on_pre_phrase(d):
     global phrase_timestamp
+    global utterance_chunks, utterance_prior_context, utterance_had_dictation
     phrase_timestamp = time.time()
+    utterance_chunks = []
+    utterance_prior_context = ""
+    utterance_had_dictation = False
 
 
 def on_post_phrase(d):
-    global phrase_timestamp
+    global phrase_timestamp, utterance_chunks, utterance_prior_context
+    global utterance_had_dictation
+    chunks = utterance_chunks
+    prior_context = utterance_prior_context
+    had_dictation = utterance_had_dictation
     phrase_timestamp = None
+    utterance_chunks = []
+    utterance_prior_context = ""
+    utterance_had_dictation = False
+    if not had_dictation or not chunks or not settings.get("user.dictation_ai_cleanup"):
+        return
+    utterance_before_text = "".join(before for before, _ in chunks)
+    utterance_after_text = "".join(after for _, after in reversed(chunks))
+    model = settings.get("user.dictation_ai_cleanup_model")
+    url = settings.get("user.dictation_ai_cleanup_url")
+    timeout = settings.get("user.dictation_ai_cleanup_timeout_s")
+    corrected_before = _run_ai_cleanup(
+        prior_context, utterance_before_text, model, url, timeout
+    )
+    if not corrected_before:
+        return
+    _apply_ai_cleanup_rewrite(
+        prior_context, chunks, corrected_before, utterance_after_text
+    )
+
+
+def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
+    utterance_json = json.dumps(utterance_text)
+    return (
+        "You clean up speech recognition dictation text.\n"
+        "Fix only likely recognition errors, especially homophones/near-homophones.\n"
+        "Use PRIOR_CONTEXT to disambiguate.\n"
+        "You may merge/split words when clearly needed (for example multiword to single word).\n"
+        "Convert spoken punctuation words to punctuation when clearly intended.\n"
+        "Example: 'giraffe common elephant common lion' -> 'giraffe, elephant, lion'.\n"
+        "Do not paraphrase, summarize, or change meaning.\n"
+        "Do not drop existing punctuation unless it is clearly part of a recognition error.\n"
+        "Keep straight quotes straight (\" and '). Do not convert to curly quotes.\n"
+        "Preserve whitespace exactly unless a whitespace change is strictly required by a correction.\n"
+        "If whitespace-only changes are possible, prefer NO whitespace changes.\n"
+        "Assume leading/trailing whitespace and punctuation are handled externally.\n"
+        "Do NOT wrap the response in quotes.\n"
+        "Return output for UTTERANCE_OUTPUT only.\n"
+        "Never prepend, append, or otherwise add content from PRIOR_CONTEXT.\n"
+        "Do not auto-complete the phrase.\n"
+        "Only change tokens that are likely recognition mistakes; keep all other tokens unchanged.\n"
+        "If uncertain, return NOCHANGE.\n"
+        "If no correction is needed, return exactly: NOCHANGE\n"
+        "If correction is needed, return ONLY the corrected UTTERANCE_OUTPUT text.\n"
+        "Return no commentary.\n\n"
+        f"PRIOR_CONTEXT:\n{prior_context}\n\n"
+        f"UTTERANCE_OUTPUT_JSON:\n{utterance_json}\n"
+    )
+
+
+def _extract_ollama_response(body: bytes) -> str:
+    data = json.loads(body.decode("utf-8"))
+    response = data.get("response", "")
+    if not isinstance(response, str):
+        return ""
+    return response.strip("\n")
+
+
+def _is_outer_guard(char: str) -> bool:
+    return char.isspace() or unicodedata.category(char).startswith("P")
+
+
+def _split_outer_guards(text: str) -> tuple[str, str, str]:
+    left = 0
+    right = len(text)
+    while left < right and _is_outer_guard(text[left]):
+        left += 1
+    while right > left and _is_outer_guard(text[right - 1]):
+        right -= 1
+    return text[:left], text[left:right], text[right:]
+
+
+def _run_ai_cleanup(
+    prior_context: str,
+    utterance_text: str,
+    model: str,
+    url: str,
+    timeout_seconds: int,
+) -> Optional[str]:
+    leading_guard, utterance_core, trailing_guard = _split_outer_guards(utterance_text)
+    if not utterance_core:
+        return None
+    try:
+        payload = json.dumps(
+            {
+                "model": model,
+                "prompt": _cleanup_prompt(prior_context, utterance_core),
+                "stream": False,
+            }
+        ).encode("utf-8")
+        request = urllib.request.Request(
+            url,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+            corrected_raw = _extract_ollama_response(response.read())
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+        logging.debug("Dictation AI cleanup skipped: %s", error)
+        return None
+    _, corrected_core, _ = _split_outer_guards(corrected_raw)
+    logging.debug(
+        "Dictation AI cleanup model I/O(core): prior_context=%r input=%r output=%r",
+        prior_context,
+        utterance_core,
+        corrected_core,
+    )
+    if corrected_core == "NOCHANGE":
+        logging.debug("Dictation AI cleanup: model reported no change")
+        return None
+    if not corrected_core:
+        logging.debug("Dictation AI cleanup: empty response, skipping rewrite")
+        return None
+    if corrected_core == utterance_core:
+        logging.debug("Dictation AI cleanup: unchanged response, skipping rewrite")
+        return None
+    corrected = f"{leading_guard}{corrected_core}{trailing_guard}"
+    return corrected
+
+
+def _apply_ai_cleanup_rewrite(
+    prior_context: str,
+    chunks: list[tuple[str, str]],
+    corrected_before: str,
+    after_suffix: str,
+):
+    for _ in chunks:
+        actions.user.clear_last_phrase()
+    if after_suffix:
+        actions.user.insert_between(corrected_before, after_suffix)
+    else:
+        actions.insert(corrected_before)
+    actions.user.add_phrase_to_history(corrected_before, after_suffix)
+    dictation_formatter.update_context(prior_context)
+    dictation_formatter.pass_through(corrected_before)
 
 
 speech_system.register("pre:phrase", on_pre_phrase)
@@ -496,6 +670,7 @@ class Actions:
         original_text = text
         needs_check_after = False
         add_space_after = False
+        prior_context = dictation_formatter.before
         if settings.get("user.context_sensitive_dictation"):
             global context_check_phrase_timestamp, phrase_timestamp
             if context_check_phrase_timestamp != phrase_timestamp:
@@ -521,6 +696,7 @@ class Actions:
                     after,
                 )
                 dictation_formatter.update_context(before)
+                prior_context = dictation_formatter.before
                 add_space_after = after is not None and needs_space_between(text, after)
                 context_check_phrase_timestamp = phrase_timestamp
         text = dictation_formatter.format(text, auto_cap)
@@ -545,6 +721,12 @@ class Actions:
         if add_space_after:
             actions.user.insert_between("", " ")
         actions.user.add_phrase_to_history(text, " " if add_space_after else "")
+        if phrase_timestamp is not None:
+            global utterance_prior_context, utterance_had_dictation
+            if not utterance_had_dictation:
+                utterance_prior_context = prior_context
+            utterance_had_dictation = True
+            utterance_chunks.append((text, " " if add_space_after else ""))
 
     def dictation_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
         """

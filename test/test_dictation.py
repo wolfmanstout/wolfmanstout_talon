@@ -1,3 +1,5 @@
+import json
+
 import talon
 
 PHRASE_EXAMPLES = ["", "foo", "foo bar", "lorem ipsum dolor sit amet"]
@@ -75,3 +77,11 @@ if hasattr(talon, "test_mode"):
         assert result == " third("
         result = format.format("fourth")
         assert result == "fourth"
+
+    def test_extract_ollama_response():
+        payload = json.dumps({"response": " corrected text\n"}).encode("utf-8")
+        assert text_and_dictation._extract_ollama_response(payload) == " corrected text"
+
+    def test_extract_ollama_response_invalid_shape():
+        payload = json.dumps({"response": 123}).encode("utf-8")
+        assert text_and_dictation._extract_ollama_response(payload) == ""
