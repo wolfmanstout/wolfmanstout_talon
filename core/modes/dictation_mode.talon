@@ -2,6 +2,7 @@ mode: dictation
 -
 settings():
     speech.timeout = 0.5
+    user.dictation_ai_cleanup = 1
 
 # Everything here should call `user.dictation_insert()` instead of `insert()`, to correctly auto-capitalize/auto-space.
 <user.raw_prose>: user.dictation_insert(raw_prose)
