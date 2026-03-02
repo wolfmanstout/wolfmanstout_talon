@@ -112,6 +112,7 @@ git worktree list
 worktree
 worktree add
 worktree remove
+worktree list: git worktree list
 
 
 # NPM
