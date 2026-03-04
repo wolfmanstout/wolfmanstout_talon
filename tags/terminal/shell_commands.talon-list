@@ -115,6 +115,13 @@ worktree add
 worktree remove
 worktree list: git worktree list
 
+# Talon
+link talon: link_talon
+link talon live: link_talon --live
+link talon snapshot: link_talon --snapshot
+link talon main: link_talon --main --live
+pull talon repos: pull_talon_repos
+
 
 # NPM
 npm
