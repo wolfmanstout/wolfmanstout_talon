@@ -70,3 +70,9 @@ if hasattr(talon, "test_mode"):
     def test_extract_ollama_response_invalid_shape():
         payload = json.dumps({"response": 123}).encode("utf-8")
         assert text_and_dictation._extract_ollama_response(payload) == ""
+
+    def test_extract_ollama_response_trailing_nochange():
+        payload = json.dumps(
+            {"response": "some echoed text\nNOCHANGE\n"}
+        ).encode("utf-8")
+        assert text_and_dictation._extract_ollama_response(payload) == "NOCHANGE"

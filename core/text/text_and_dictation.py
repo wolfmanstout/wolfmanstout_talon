@@ -480,31 +480,24 @@ def on_post_phrase(d):
 
 
 def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
-    utterance_json = json.dumps(utterance_text)
     return (
-        "You clean up speech recognition dictation text.\n"
-        "Fix only likely recognition errors, especially homophones/near-homophones.\n"
-        "Use PRIOR_CONTEXT to disambiguate.\n"
-        "You may merge/split words when clearly needed (for example multiword to single word).\n"
-        "Convert spoken punctuation words to punctuation when clearly intended.\n"
-        "Example: 'giraffe common elephant common lion' -> 'giraffe, elephant, lion'.\n"
-        "Do not paraphrase, summarize, or change meaning.\n"
-        "Do not drop existing punctuation unless it is clearly part of a recognition error.\n"
-        "Keep straight quotes straight (\" and '). Do not convert to curly quotes.\n"
-        "Preserve whitespace exactly unless a whitespace change is strictly required by a correction.\n"
-        "If whitespace-only changes are possible, prefer NO whitespace changes.\n"
-        "Assume leading/trailing whitespace and punctuation are handled externally.\n"
-        "Do NOT wrap the response in quotes.\n"
-        "Return output for UTTERANCE_OUTPUT only.\n"
-        "Never prepend, append, or otherwise add content from PRIOR_CONTEXT.\n"
-        "Do not auto-complete the phrase.\n"
-        "Only change tokens that are likely recognition mistakes; keep all other tokens unchanged.\n"
-        "If uncertain, return NOCHANGE.\n"
-        "If no correction is needed, return exactly: NOCHANGE\n"
-        "If correction is needed, return ONLY the corrected UTTERANCE_OUTPUT text.\n"
-        "Return no commentary.\n\n"
+        "Speech recognition sometimes writes a word instead of a comma.\n"
+        "These words may be mistranscribed commas: "
+        "'comment', 'come and', 'comma', 'come in'.\n"
+        "Replace ALL of these words with ', ' ONLY when they appear as list "
+        "separators between items (like 'A comment B comment C').\n"
+        "Do NOT replace them when used with normal meaning "
+        "(like 'please comment on' or 'come and see').\n"
+        "Do NOT insert commas anywhere else. Do NOT change any other words.\n"
+        "Replace ALL occurrences in a single pass, not just the first.\n"
+        "If no replacement is needed, return exactly: NOCHANGE\n"
+        "Otherwise return ONLY the corrected text.\n\n"
+        "Examples:\n"
+        "- 'apples comment oranges comment bananas' -> 'apples, oranges, bananas'\n"
+        "- 'please comment on the issue' -> NOCHANGE\n"
+        "- 'come and see this' -> NOCHANGE\n\n"
         f"PRIOR_CONTEXT:\n{prior_context}\n\n"
-        f"UTTERANCE_OUTPUT_JSON:\n{utterance_json}\n"
+        f"UTTERANCE:\n{utterance_text}\n"
     )
 
 
@@ -513,7 +506,11 @@ def _extract_ollama_response(body: bytes) -> str:
     response = data.get("response", "")
     if not isinstance(response, str):
         return ""
-    return response.strip("\n")
+    response = response.strip("\n")
+    # The model sometimes echoes the text then appends NOCHANGE on a new line.
+    if response.endswith("\nNOCHANGE"):
+        return "NOCHANGE"
+    return response
 
 
 def _is_outer_guard(char: str) -> bool:

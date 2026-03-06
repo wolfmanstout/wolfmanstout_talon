@@ -9,8 +9,9 @@ This is the Talon Community repository, a comprehensive voice command set for [T
 **Unit Testing:**
 
 ```bash
-pytest                    # Run test suite
-pytest test/specific_test.py  # Run specific test
+uv run pytest                    # Run test suite
+uv run pytest test/specific_test.py  # Run specific test
+uv run pytest -m ollama          # Run Ollama eval tests (requires running Ollama)
 ```
 
 **Code Quality:**
