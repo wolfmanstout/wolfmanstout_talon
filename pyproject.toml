@@ -9,6 +9,15 @@ pythonpath = [
     ".",
     "test/stubs",
 ]
+markers = [
+    "ollama: tests that require a running Ollama instance (deselected by default)",
+]
+addopts = "-m 'not ollama'"
 
 [tool.pyright]
 reportSelfClsParameterName = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
