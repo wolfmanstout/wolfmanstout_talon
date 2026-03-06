@@ -1,5 +1,9 @@
 [tool.pytest.ini_options]
 pythonpath = [".", "test/stubs"]
+markers = [
+    "ollama: tests that require a running Ollama instance (deselected by default)",
+]
+addopts = "-m 'not ollama'"
 
 [tool.ruff]
 target-version = "py310"
@@ -13,6 +17,7 @@ select = [
     "B", # flake8-bugbear
     "SIM", # flake8-simplify
 ]
+<<<<<<< HEAD
 ignore = [
     "E501", # line-too-long (until we decide)
     "E722", # except: (consider replacing with catching Exception)
@@ -22,6 +27,11 @@ ignore = [
     "UP045", # Optional[X] -> X | None not supported in Talon 0.4 actions
 ]
 
-
 [tool.pyright]
 reportSelfClsParameterName = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "requests>=2.33.1",
+]
