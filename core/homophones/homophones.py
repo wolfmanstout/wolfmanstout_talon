@@ -10,7 +10,7 @@ from talon import Context, Module, actions, app, clip, fs, imgui, ui
 # e.g. where,wear,ware
 # a suitable one can be found here:
 # https://github.com/pimentel/homophones
-cwd = os.path.dirname(os.path.realpath(__file__))
+cwd = os.path.dirname(__file__)
 homophones_file = os.path.join(cwd, "homophones.csv")
 # if quick_replace, then when a word is selected and only one homophone exists,
 # replace it without bringing up the options
