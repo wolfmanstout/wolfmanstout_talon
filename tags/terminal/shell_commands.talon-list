@@ -119,6 +119,7 @@ worktree list: git worktree list
 deploy talon: deploy_talon
 deploy talon live: deploy_talon --live
 deploy talon snapshot: deploy_talon --snapshot
+deploy talon show: deploy_talon --show
 deploy talon main: deploy_talon --main --live
 pull talon repos: pull_talon_repos
 
