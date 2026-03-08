@@ -1,6 +1,6 @@
 import logging
 
-from talon import Module
+from talon import Module, ui
 
 mod = Module()
 
@@ -10,3 +10,6 @@ class Actions:
     def log_tracker_disconnect():
         """Log when the tracker disconnects."""
         logging.debug("Eye tracker disconnected")
+
+
+ui.register("screen_wake", lambda *a: print(f"SCREEN WAKE {a}"))
