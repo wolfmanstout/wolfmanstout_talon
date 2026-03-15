@@ -129,9 +129,9 @@ def on_contacts_json(f):
 def create_pronunciation_to_name_map(contact):
     result = {}
     if contact.full_name:
-        result[contact.pronunciations.get(contact.full_name, contact.full_name)] = (
-            contact.full_name
-        )
+        result[
+            contact.pronunciations.get(contact.full_name, contact.full_name)
+        ] = contact.full_name
         # Add pronunciation mapping for first name only
         first_name = contact.full_name.split()[0]
         result[contact.pronunciations.get(first_name, first_name)] = first_name
