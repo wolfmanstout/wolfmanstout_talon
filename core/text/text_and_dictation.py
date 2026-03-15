@@ -16,6 +16,12 @@ mod.setting(
     default=False,
     desc="Look at surrounding text to improve auto-capitalization/spacing in dictation mode. By default, this works by selecting that text & copying it to the clipboard, so it may be slow or fail in some applications.",
 )
+mod.setting(
+    "dictation_debug_mode",
+    type=bool,
+    default=False,
+    desc="If true, log context-sensitive dictation diagnostics for timing-sensitive peek behavior.",
+)
 setting_peek_right_after_insertion = mod.setting(
     "peek_right_after_insertion",
     type=bool,
@@ -403,6 +409,11 @@ def format_first_letter(text, formatter):
     return text
 
 
+def log_dictation_debug(level: int, message: str, *args) -> None:
+    if settings.get("user.dictation_debug_mode"):
+        logging.log(level, message, *args)
+
+
 dictation_formatter = DictationFormat()
 ui.register("app_deactivate", lambda app: dictation_formatter.reset())
 ui.register("win_focus", lambda win: dictation_formatter.reset())
@@ -491,6 +502,14 @@ class Actions:
                 else:
                     need_right = not omit_space_after(text)
                 before, after = actions.user.dictation_peek(need_left, need_right)
+                log_dictation_debug(
+                    logging.INFO,
+                    "Context-sensitive dictation peek before insertion: left=%s right=%s before=%r after=%r",
+                    need_left,
+                    need_right,
+                    before,
+                    after,
+                )
                 dictation_formatter.update_context(before)
                 add_space_after = after is not None and needs_space_between(text, after)
                 context_check_phrase_timestamp = phrase_timestamp
@@ -506,6 +525,12 @@ class Actions:
             _, after = actions.user.dictation_peek(False, True)
             add_space_after = after is not None and needs_space_between(
                 original_text, after
+            )
+            log_dictation_debug(
+                logging.INFO,
+                "Context-sensitive dictation peek after insertion: after=%r add_space_after=%s",
+                after,
+                add_space_after,
             )
         if add_space_after:
             actions.user.insert_between("", " ")
@@ -545,6 +570,11 @@ class Actions:
             actions.edit.extend_word_left()
             actions.edit.extend_word_left()
             selected_text = actions.edit.selected_text()
+            log_dictation_debug(
+                logging.INFO,
+                "Context-sensitive dictation left selection: %r",
+                selected_text,
+            )
             if selected_text and selected_text[-1] == ".":
                 before = selected_text[:-1]
             elif (
@@ -552,8 +582,10 @@ class Actions:
             ):  # Observed in Google Docs after a bullet.
                 before = selected_text[:-2]
             else:
-                logging.warning(
-                    f"Selected text did not contain newly-added period: {selected_text}"
+                log_dictation_debug(
+                    logging.WARNING,
+                    "Context-sensitive dictation left selection did not include marker: %r",
+                    selected_text,
                 )
                 before = selected_text
             # Unfortunately, in web Slack, if our selection ends at newline,
@@ -579,11 +611,19 @@ class Actions:
             actions.edit.extend_word_right()
             actions.edit.extend_word_right()
             selection = actions.edit.selected_text()
+            log_dictation_debug(
+                logging.INFO,
+                "Context-sensitive dictation right selection: %r",
+                selection,
+            )
             if selection:
                 after = selection[1:]
             else:
                 # Observed on Mac in Gmail.
-                print("Unable to get selected text.")
+                log_dictation_debug(
+                    logging.WARNING,
+                    "Context-sensitive dictation right selection was empty after marker insert",
+                )
                 after = ""
             actions.edit.left()
             # Needed to avoid clobbering text in some apps (e.g. Gemini).
