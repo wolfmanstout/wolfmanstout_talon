@@ -592,10 +592,12 @@ class Actions:
             # this will go right over the newline. Argh.
             actions.edit.right()
         if not right:
-            actions.key("backspace")  # remove the space
+            # Needed to avoid clobbering text in some apps (e.g. Codex).
+            actions.sleep("50ms")
+            actions.key("backspace")  # remove the marker
         else:
-            actions.edit.left()  # go left before space
-            # We want to select at least two characters to the right, plus the space
+            actions.edit.left()  # go left before marker
+            # We want to select at least two characters to the right, plus the marker
             # we inserted, because no_space_before needs two characters in the worst
             # case -- for example, inserting before "' hello" we don't want to add
             # space, while inserted before "'hello" we do.
@@ -610,23 +612,23 @@ class Actions:
             actions.edit.extend_word_right()
             actions.edit.extend_word_right()
             actions.edit.extend_word_right()
-            selection = actions.edit.selected_text()
+            selected_text = actions.edit.selected_text()
             log_dictation_debug(
                 logging.INFO,
                 "Context-sensitive dictation right selection: %r",
-                selection,
+                selected_text,
             )
-            if selection:
-                after = selection[1:]
+            if selected_text and selected_text[0] == ".":
+                after = selected_text[1:]
             else:
-                # Observed on Mac in Gmail.
                 log_dictation_debug(
                     logging.WARNING,
-                    "Context-sensitive dictation right selection was empty after marker insert",
+                    "Context-sensitive dictation right selection did not include marker: %r",
+                    selected_text,
                 )
-                after = ""
+                after = selected_text
             actions.edit.left()
             # Needed to avoid clobbering text in some apps (e.g. Gemini).
             actions.sleep("50ms")
-            actions.key("delete")  # remove space
+            actions.key("delete")  # remove marker
         return before, after
