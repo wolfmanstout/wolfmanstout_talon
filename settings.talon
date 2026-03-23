@@ -115,7 +115,7 @@ settings():
 
     user.ocr_use_window_at_api = true
 
-    user.ocr_scroll_debug_mode = true
+    # user.ocr_scroll_debug_mode = true
     user.dictation_debug_mode = true
 
 # Uncomment to enable the curse yes/curse no commands (show/hide mouse cursor).
