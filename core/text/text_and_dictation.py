@@ -329,7 +329,7 @@ def auto_capitalize(text, state=None):
     sentence_end = False
     for c in text:
         # Sentence endings followed by space create a charge.
-        if sentence_end and c in " \n\t":
+        if sentence_end and c.isspace():
             charge = True
         # Alphanumeric characters and commas/colons absorb charge & try to
         # capitalize (for numbers & punctuation this does nothing, which is what
