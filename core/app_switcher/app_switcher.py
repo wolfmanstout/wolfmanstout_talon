@@ -12,6 +12,8 @@ from talon import Context, Module, actions, app, fs, imgui, ui
 # CSV files contain lines of the form:
 # <spoken form>,<app name or .exe> - to add a spoken form override for the app, or
 # <app name or .exe> - to exclude the app from appearing in "running list" or "focus <app>"
+# A hostname-specific overlay file can optionally be added at:
+# app_name_overrides.<platform>.<hostname>.csv
 
 # TODO: Consider moving overrides to settings directory
 overrides_directory = os.path.dirname(__file__)
@@ -19,6 +21,7 @@ override_file_name = f"app_name_overrides.{talon.app.platform}.csv"
 override_file_path = os.path.normcase(
     os.path.join(overrides_directory, override_file_name)
 )
+hostname_override_file_path = None
 
 mod = Module()
 mod.list("running", desc="all running applications")
@@ -293,19 +296,27 @@ def update_overrides(name, flags):
     """Updates the overrides and excludes lists"""
     global overrides, excludes
 
-    if name is None or os.path.normcase(name) == override_file_path:
+    override_file_paths = [override_file_path]
+    if hostname_override_file_path is not None:
+        override_file_paths.append(hostname_override_file_path)
+
+    normalized_name = None if name is None else os.path.normcase(name)
+    if normalized_name is None or normalized_name in override_file_paths:
         overrides = {}
         excludes = set()
 
-        # print("update_overrides")
-        with open(override_file_path) as f:
-            for line in f:
-                line = line.rstrip().lower()
-                line = line.split(",")
-                if len(line) == 2 and line[0] != "spoken form":
-                    overrides[line[0]] = line[1].strip()
-                if len(line) == 1:
-                    excludes.add(line[0].strip())
+        for path in override_file_paths:
+            if not os.path.isfile(path):
+                continue
+
+            with open(path) as f:
+                for line in f:
+                    line = line.rstrip().lower()
+                    line = line.split(",")
+                    if len(line) == 2 and line[0] != "spoken form":
+                        overrides[line[0]] = line[1].strip()
+                    if len(line) == 1:
+                        excludes.add(line[0].strip())
 
         update_running_list()
 
@@ -459,6 +470,15 @@ dragon_ctx.lists["user.running"] = {}
 
 
 def on_ready():
+    global hostname_override_file_path
+
+    hostname = actions.user.talon_get_hostname()
+    hostname_override_file_name = (
+        f"app_name_overrides.{talon.app.platform}.{hostname}.csv"
+    )
+    hostname_override_file_path = os.path.normcase(
+        os.path.join(overrides_directory, hostname_override_file_name)
+    )
     update_overrides(None, None)
     fs.watch(overrides_directory, update_overrides)
     update_launch_list()
