@@ -33,6 +33,7 @@ mod.list("prose_modifiers", desc="Modifiers that can be used within prose")
 mod.list("prose_snippets", desc="Snippets that can be used within prose")
 mod.list("phrase_ender", "List of commands that can be used to end a phrase")
 mod.list("prose_number_punctuation", desc="Punctuation that can be used in a number")
+mod.list("prose_number_suffix", desc="Suffixes that can be used after a prose number")
 mod.list("hours_twelve", desc="Names for hours up to 12")
 mod.list("hours", desc="Names for hours up to 24")
 mod.list("minutes", desc="Names for minutes, 01 up to 59")
@@ -48,6 +49,11 @@ ctx.lists["user.prose_number_punctuation"] = {
     "colon": ":",
     "slash": "/",
     "percent": "%",
+}
+ctx.lists["user.prose_number_suffix"] = {
+    "k": "K",
+    "m": "M",
+    "b": "B",
 }
 
 ctx.lists["user.hours_twelve"] = get_spoken_form_under_one_hundred(
@@ -114,6 +120,7 @@ def prose_time_hours_am_pm(m) -> str:
     rule=(
         "(numeral | numb) (<user.number_string> | <user.prose_number_with_dot>)"
         " [{user.prose_number_punctuation} | (<user.number_string> | <user.prose_number_with_dot>)]*"
+        " [{user.prose_number_suffix}]"
     )
 )
 def prose_number(m) -> str:

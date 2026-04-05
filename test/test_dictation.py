@@ -18,6 +18,11 @@ if hasattr(talon, "test_mode"):
             for l in [[s], s.split(), list(s)]:
                 assert text_and_dictation.capture_to_words(l) == l
 
+    def test_prose_number_with_suffixes():
+        assert text_and_dictation.prose_number(["numeral", "5", "K"]) == "5K"
+        assert text_and_dictation.prose_number(["numeral", "2.5", "M"]) == "2.5M"
+        assert text_and_dictation.prose_number(["numb", "12", ":", "30", "B"]) == "12:30B"
+
     def test_spacing_and_capitalization():
         format = text_and_dictation.DictationFormat()
         format.state = None
