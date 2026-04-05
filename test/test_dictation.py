@@ -48,6 +48,12 @@ if hasattr(talon, "test_mode"):
         result = format.format("nbsp.\xa0space")
         assert result == " nbsp.\xa0Space"
 
+    def test_capitalization_after_sentence_end_trailing_quote():
+        for before in ['done."', "done.”"]:
+            format = text_and_dictation.DictationFormat()
+            format.update_context(before)
+            assert format.format("a new sentence") == " A new sentence"
+
     def test_force_spacing_and_capitalization():
         format = text_and_dictation.DictationFormat()
         format.state = None

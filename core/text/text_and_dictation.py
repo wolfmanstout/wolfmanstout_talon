@@ -311,6 +311,8 @@ no_cap_after = re.compile(
     re.VERBOSE,
 )
 
+sentence_end_trailers = "\"'”’)]}"
+
 
 def auto_capitalize(text, state=None):
     """
@@ -339,9 +341,10 @@ def auto_capitalize(text, state=None):
             c = c.capitalize()
         # Otherwise the charge just passes through.
         output += c
-        sentence_end = (
+        sentence_end_now = (
             c in ".!?\n" or output.endswith("TODO")
         ) and not no_cap_after.search(output)
+        sentence_end = sentence_end_now or (sentence_end and c in sentence_end_trailers)
         # A newline is both a sentence ending and whitespace, so create
         # the charge immediately.
         if c == "\n" and sentence_end:
