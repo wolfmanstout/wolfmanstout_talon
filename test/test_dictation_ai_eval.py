@@ -56,6 +56,17 @@ if hasattr(talon, "test_mode"):
                 "",
                 "I'm not sure, can you help",
             ),
+            # "common" -> comma
+            (
+                "giraffe common elephant common lion",
+                "",
+                "giraffe, elephant, lion",
+            ),
+            (
+                "I went to the store common bought milk common and came home",
+                "",
+                "I went to the store, bought milk, and came home",
+            ),
         ],
         ids=[
             "comment-multiple",
@@ -63,6 +74,8 @@ if hasattr(talon, "test_mode"):
             "comma-multiple",
             "comment-single",
             "come-and-real-log",
+            "common-multiple",
+            "common-single",
         ],
     )
     def test_should_fix_comma(utterance, prior_context, expected):
@@ -108,6 +121,8 @@ if hasattr(talon, "test_mode"):
             ("come and see this", ""),
             ("I want to comment on that", ""),
             ("come and get it", "Let's go"),
+            ("this is a common problem", ""),
+            ("we have a common interest in this", ""),
         ],
         ids=[
             "simple-text",
@@ -127,6 +142,8 @@ if hasattr(talon, "test_mode"):
             "actual-come-and-see",
             "actual-comment-on-that",
             "actual-come-and-get",
+            "actual-common-problem",
+            "actual-common-interest",
         ],
     )
     def test_should_not_change(utterance, prior_context):

@@ -504,7 +504,7 @@ def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
     return (
         "Speech recognition sometimes writes a word instead of a comma.\n"
         "These words may be mistranscribed commas: "
-        "'comment', 'come and', 'comma', 'come in'.\n"
+        "'comment', 'come and', 'comma', 'come in', 'common'.\n"
         "Replace ALL of these words with ', ' ONLY when they appear as list "
         "separators between items (like 'A comment B comment C').\n"
         "Do NOT replace them when used with normal meaning "
