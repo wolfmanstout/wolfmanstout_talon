@@ -11,7 +11,7 @@ if hasattr(talon, "test_mode"):
 
     from core.text.text_and_dictation import _run_ai_cleanup
 
-    DEFAULT_MODEL = "gemma3:4b"
+    DEFAULT_MODEL = "gemma4:e4b"
     DEFAULT_URL = "http://127.0.0.1:11434/api/generate"
     DEFAULT_TIMEOUT = 10
 
