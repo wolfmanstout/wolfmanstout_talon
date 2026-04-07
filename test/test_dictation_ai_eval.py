@@ -123,6 +123,9 @@ if hasattr(talon, "test_mode"):
             ("come and get it", "Let's go"),
             ("this is a common problem", ""),
             ("we have a common interest in this", ""),
+            # From real logs: model added a comma without any trigger word
+            ("Also create", ""),
+            ("Also create clod", ""),
         ],
         ids=[
             "simple-text",
@@ -144,6 +147,8 @@ if hasattr(talon, "test_mode"):
             "actual-come-and-get",
             "actual-common-problem",
             "actual-common-interest",
+            "no-trigger-also-create",
+            "no-trigger-also-create-clod",
         ],
     )
     def test_should_not_change(utterance, prior_context):
