@@ -564,6 +564,7 @@ def _run_ai_cleanup(
                 "model": model,
                 "prompt": _cleanup_prompt(prior_context, utterance_core),
                 "stream": False,
+                "think": False,
             }
         ).encode("utf-8")
         request = urllib.request.Request(
