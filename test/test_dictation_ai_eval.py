@@ -126,6 +126,11 @@ if hasattr(talon, "test_mode"):
             # From real logs: model added a comma without any trigger word
             ("Also create", ""),
             ("Also create clod", ""),
+            # From real logs: "comment" used with normal meaning (code comment)
+            (
+                "No don't fix the stale comment, fix the code so that it aligns with that comment",
+                "",
+            ),
         ],
         ids=[
             "simple-text",
@@ -149,6 +154,7 @@ if hasattr(talon, "test_mode"):
             "actual-common-interest",
             "no-trigger-also-create",
             "no-trigger-also-create-clod",
+            "actual-stale-comment",
         ],
     )
     def test_should_not_change(utterance, prior_context):
