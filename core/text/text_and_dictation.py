@@ -522,6 +522,8 @@ def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
         "- 'apples comment oranges comment bananas' -> 'apples, oranges, bananas'\n"
         "- 'please comment on the issue' -> NOCHANGE\n"
         "- 'come and see this' -> NOCHANGE\n"
+        "- 'fix the stale comment, fix the code' -> NOCHANGE  "
+        "('comment' is a noun here, not a separator)\n"
         "- 'Also create' -> NOCHANGE  (no trigger word present)\n"
         "- 'Also create clod' -> NOCHANGE  (no trigger word present)\n\n"
         f"PRIOR_CONTEXT:\n{prior_context}\n\n"
