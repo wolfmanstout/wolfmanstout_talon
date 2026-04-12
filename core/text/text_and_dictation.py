@@ -6,13 +6,15 @@ import time
 import unicodedata
 import urllib.error
 import urllib.request
-from typing import Callable, Optional
+from typing import Callable, Literal, Optional, TypeGuard
 
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
 
 from ..numbers.numbers import get_spoken_form_under_one_hundred
 
 mod = Module()
+
+DictationAiCleanupBackend = Literal["ollama", "mlx"]
 
 mod.setting(
     "context_sensitive_dictation",
@@ -35,20 +37,26 @@ mod.setting(
 mod.setting(
     "dictation_ai_cleanup_model",
     type=str,
-    default="gemma4:e4b",
-    desc="Ollama model used for dictation cleanup.",
+    default="mlx-community/gemma-4-e4b-it-4bit",
+    desc="Model used for dictation cleanup.",
 )
 mod.setting(
-    "dictation_ai_cleanup_url",
+    "dictation_ai_cleanup_backend",
     type=str,
-    default="http://127.0.0.1:11434/api/generate",
-    desc="Ollama generate API endpoint.",
+    default="mlx",
+    desc="LLM backend used for dictation cleanup. Supported values: 'ollama' and 'mlx'.",
+)
+mod.setting(
+    "dictation_ai_cleanup_port",
+    type=int,
+    default=0,
+    desc="Port for dictation cleanup backends. Set to 0 to use the backend default (11434 for Ollama, 8080 for mlx).",
 )
 mod.setting(
     "dictation_ai_cleanup_timeout_s",
     type=int,
     default=5,
-    desc="Timeout for Ollama dictation cleanup requests, in seconds.",
+    desc="Timeout for dictation cleanup requests, in seconds.",
 )
 setting_peek_right_after_insertion = mod.setting(
     "peek_right_after_insertion",
@@ -487,11 +495,21 @@ def on_post_phrase(d):
         return
     utterance_before_text = "".join(before for before, _ in chunks)
     utterance_after_text = "".join(after for _, after in reversed(chunks))
+    backend = settings.get("user.dictation_ai_cleanup_backend")
+    if not _is_dictation_ai_cleanup_backend(backend):
+        logging.debug("Dictation AI cleanup skipped: unsupported backend %r", backend)
+        return
     model = settings.get("user.dictation_ai_cleanup_model")
-    url = settings.get("user.dictation_ai_cleanup_url")
+    port = settings.get("user.dictation_ai_cleanup_port")
+    if backend == "ollama":
+        resolved_port = port if port > 0 else 11434
+        url = f"http://127.0.0.1:{resolved_port}/api/generate"
+    else:
+        resolved_port = port if port > 0 else 8080
+        url = f"http://127.0.0.1:{resolved_port}/chat/completions"
     timeout = settings.get("user.dictation_ai_cleanup_timeout_s")
     corrected_before = _run_ai_cleanup(
-        prior_context, utterance_before_text, model, url, timeout
+        prior_context, utterance_before_text, model, url, timeout, backend
     )
     if not corrected_before:
         return
@@ -531,16 +549,54 @@ def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
     )
 
 
-def _extract_ollama_response(body: bytes) -> str:
-    data = json.loads(body.decode("utf-8"))
-    response = data.get("response", "")
-    if not isinstance(response, str):
-        return ""
+def _normalize_ai_cleanup_response(response: str) -> str:
     response = response.strip("\n")
     # The model sometimes echoes the text then appends NOCHANGE on a new line.
     if response.endswith("\nNOCHANGE"):
         return "NOCHANGE"
     return response
+
+
+def _extract_ollama_response(body: bytes) -> str:
+    data = json.loads(body.decode("utf-8"))
+    response = data.get("response", "")
+    if not isinstance(response, str):
+        return ""
+    return _normalize_ai_cleanup_response(response)
+
+
+def _extract_mlx_vlm_response(body: bytes) -> str:
+    data = json.loads(body.decode("utf-8"))
+    choices = data.get("choices")
+    if not isinstance(choices, list) or not choices:
+        return ""
+    first_choice = choices[0]
+    if not isinstance(first_choice, dict):
+        return ""
+    message = first_choice.get("message")
+    if not isinstance(message, dict):
+        return ""
+    content = message.get("content", "")
+    if isinstance(content, str):
+        return _normalize_ai_cleanup_response(content)
+    if isinstance(content, list):
+        text_parts = []
+        for item in content:
+            if not isinstance(item, dict):
+                continue
+            if item.get("type") not in {"text", "output_text"}:
+                continue
+            text = item.get("text")
+            if isinstance(text, str):
+                text_parts.append(text)
+        return _normalize_ai_cleanup_response("".join(text_parts))
+    return ""
+
+
+def _is_dictation_ai_cleanup_backend(
+    value: object,
+) -> TypeGuard[DictationAiCleanupBackend]:
+    return value in {"ollama", "mlx"}
 
 
 def _is_outer_guard(char: str) -> bool:
@@ -563,19 +619,28 @@ def _run_ai_cleanup(
     model: str,
     url: str,
     timeout_seconds: int,
+    backend: DictationAiCleanupBackend,
 ) -> Optional[str]:
     leading_guard, utterance_core, trailing_guard = _split_outer_guards(utterance_text)
     if not utterance_core:
         return None
     try:
-        payload = json.dumps(
-            {
+        prompt = _cleanup_prompt(prior_context, utterance_core)
+        if backend == "ollama":
+            payload_dict = {
                 "model": model,
-                "prompt": _cleanup_prompt(prior_context, utterance_core),
+                "prompt": prompt,
                 "stream": False,
                 "think": False,
             }
-        ).encode("utf-8")
+        else:
+            payload_dict = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": False,
+                "temperature": 0.0,
+            }
+        payload = json.dumps(payload_dict).encode("utf-8")
         request = urllib.request.Request(
             url,
             data=payload,
@@ -583,7 +648,11 @@ def _run_ai_cleanup(
             method="POST",
         )
         with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-            corrected_raw = _extract_ollama_response(response.read())
+            response_body = response.read()
+            if backend == "ollama":
+                corrected_raw = _extract_ollama_response(response_body)
+            else:
+                corrected_raw = _extract_mlx_vlm_response(response_body)
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
         logging.debug("Dictation AI cleanup skipped: %s", error)
         return None

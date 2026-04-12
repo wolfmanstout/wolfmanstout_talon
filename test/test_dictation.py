@@ -87,7 +87,42 @@ if hasattr(talon, "test_mode"):
         assert text_and_dictation._extract_ollama_response(payload) == ""
 
     def test_extract_ollama_response_trailing_nochange():
-        payload = json.dumps(
-            {"response": "some echoed text\nNOCHANGE\n"}
-        ).encode("utf-8")
+        payload = json.dumps({"response": "some echoed text\nNOCHANGE\n"}).encode(
+            "utf-8"
+        )
         assert text_and_dictation._extract_ollama_response(payload) == "NOCHANGE"
+
+    def test_extract_mlx_vlm_response():
+        payload = json.dumps(
+            {
+                "choices": [
+                    {"message": {"content": " corrected text\n"}},
+                ]
+            }
+        ).encode("utf-8")
+        assert (
+            text_and_dictation._extract_mlx_vlm_response(payload) == " corrected text"
+        )
+
+    def test_extract_mlx_vlm_response_content_blocks():
+        payload = json.dumps(
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "content": [
+                                {"type": "output_text", "text": "some echoed text\n"},
+                                {"type": "output_text", "text": "NOCHANGE\n"},
+                            ]
+                        }
+                    },
+                ]
+            }
+        ).encode("utf-8")
+        assert text_and_dictation._extract_mlx_vlm_response(payload) == "NOCHANGE"
+
+    def test_extract_mlx_vlm_response_invalid_shape():
+        payload = json.dumps({"choices": [{"message": {"content": 123}}]}).encode(
+            "utf-8"
+        )
+        assert text_and_dictation._extract_mlx_vlm_response(payload) == ""
