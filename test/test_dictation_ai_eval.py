@@ -1,8 +1,15 @@
 """Evaluation tests for dictation AI cleanup prompt.
 
-Requires a running Ollama instance. Skipped by default.
-Run with: pytest -m ollama
+Requires a running local LLM server. Skipped by default.
+Run with: pytest -m ollama test/test_dictation_ai_eval.py
+
+Override the target server with environment variables, for example:
+DICTATION_AI_CLEANUP_BACKEND=mlx
+DICTATION_AI_CLEANUP_MODEL=mlx-community/gemma-4-e4b-it-4bit
+DICTATION_AI_CLEANUP_URL=http://127.0.0.1:8080/chat/completions
 """
+
+import os
 
 import talon
 
@@ -11,13 +18,23 @@ if hasattr(talon, "test_mode"):
 
     from core.text.text_and_dictation import _run_ai_cleanup
 
-    DEFAULT_MODEL = "gemma4:e4b"
-    DEFAULT_URL = "http://127.0.0.1:11434/api/generate"
-    DEFAULT_TIMEOUT = 10
+    DEFAULT_BACKEND = os.getenv("DICTATION_AI_CLEANUP_BACKEND", "mlx")
+    DEFAULT_MODEL = os.getenv(
+        "DICTATION_AI_CLEANUP_MODEL", "mlx-community/gemma-4-e4b-it-4bit"
+    )
+    DEFAULT_URL = os.getenv(
+        "DICTATION_AI_CLEANUP_URL", "http://127.0.0.1:8080/chat/completions"
+    )
+    DEFAULT_TIMEOUT = int(os.getenv("DICTATION_AI_CLEANUP_TIMEOUT_S", "10"))
 
     def cleanup(utterance, prior_context=""):
         return _run_ai_cleanup(
-            prior_context, utterance, DEFAULT_MODEL, DEFAULT_URL, DEFAULT_TIMEOUT
+            prior_context,
+            utterance,
+            DEFAULT_MODEL,
+            DEFAULT_URL,
+            DEFAULT_TIMEOUT,
+            DEFAULT_BACKEND,
         )
 
     # -- Cases where commas should be inserted (returned text != None) --
@@ -80,11 +97,13 @@ if hasattr(talon, "test_mode"):
     )
     def test_should_fix_comma(utterance, prior_context, expected):
         result = cleanup(utterance, prior_context)
-        assert result is not None, f"Expected correction but got NOCHANGE for: {utterance}"
+        assert (
+            result is not None
+        ), f"Expected correction but got NOCHANGE for: {utterance}"
         # Strip leading/trailing whitespace for comparison
-        assert result.strip() == expected, (
-            f"Input: {utterance!r}\nExpected: {expected!r}\nGot: {result!r}"
-        )
+        assert (
+            result.strip() == expected
+        ), f"Input: {utterance!r}\nExpected: {expected!r}\nGot: {result!r}"
 
     # -- Cases where nothing should change (returned None) --
 
@@ -159,6 +178,6 @@ if hasattr(talon, "test_mode"):
     )
     def test_should_not_change(utterance, prior_context):
         result = cleanup(utterance, prior_context)
-        assert result is None, (
-            f"Expected NOCHANGE but got correction for: {utterance!r}\nGot: {result!r}"
-        )
+        assert (
+            result is None
+        ), f"Expected NOCHANGE but got correction for: {utterance!r}\nGot: {result!r}"
