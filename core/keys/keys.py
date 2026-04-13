@@ -128,6 +128,8 @@ punctuation_words = {
     "question look": "?",
     "question mark": "?",
     "question more": "?",
+    "quest more": "?",
+    "questioning": "?",
     "questioner": "?",
     "exclamation mark": "!",
     "estimation mark": "!",
