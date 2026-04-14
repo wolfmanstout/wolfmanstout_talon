@@ -6,6 +6,7 @@ import time
 import unicodedata
 import urllib.error
 import urllib.request
+from dataclasses import dataclass
 from typing import Callable, Literal, Optional, TypeGuard
 
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
@@ -15,6 +16,41 @@ from ..numbers.numbers import get_spoken_form_under_one_hundred
 mod = Module()
 
 DictationAiCleanupBackend = Literal["ollama", "mlx"]
+
+
+@dataclass
+class DictationAiCleanupPerf:
+    backend: DictationAiCleanupBackend
+    wall_ms: float
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    prefill_ms: Optional[float] = None
+    decode_ms: Optional[float] = None
+    total_ms: Optional[float] = None
+    load_ms: Optional[float] = None
+    cached_prompt_tokens: Optional[int] = None
+    prefill_tps: Optional[float] = None
+    decode_tps: Optional[float] = None
+    peak_memory_gb: Optional[float] = None
+
+    @staticmethod
+    def _tokens_per_second(
+        token_count: Optional[int], duration_ms: Optional[float]
+    ) -> Optional[float]:
+        if token_count is None or duration_ms is None or duration_ms <= 0:
+            return None
+        return token_count / (duration_ms / 1000.0)
+
+    def prefill_tokens_per_second(self) -> Optional[float]:
+        return self.prefill_tps or self._tokens_per_second(
+            self.prompt_tokens, self.prefill_ms
+        )
+
+    def decode_tokens_per_second(self) -> Optional[float]:
+        return self.decode_tps or self._tokens_per_second(
+            self.completion_tokens, self.decode_ms
+        )
+
 
 mod.setting(
     "context_sensitive_dictation",
@@ -557,40 +593,85 @@ def _normalize_ai_cleanup_response(response: str) -> str:
     return response
 
 
-def _extract_ollama_response(body: bytes) -> str:
-    data = json.loads(body.decode("utf-8"))
-    response = data.get("response", "")
-    if not isinstance(response, str):
-        return ""
-    return _normalize_ai_cleanup_response(response)
+def _make_ai_cleanup_perf(
+    backend: DictationAiCleanupBackend, wall_ms: float
+) -> DictationAiCleanupPerf:
+    return DictationAiCleanupPerf(backend=backend, wall_ms=wall_ms)
 
 
-def _extract_mlx_vlm_response(body: bytes) -> str:
+def _extract_ollama_response_and_perf(
+    body: bytes, wall_ms: float = 0.0
+) -> tuple[str, DictationAiCleanupPerf]:
     data = json.loads(body.decode("utf-8"))
-    choices = data.get("choices")
-    if not isinstance(choices, list) or not choices:
-        return ""
+    perf = _make_ai_cleanup_perf("ollama", wall_ms)
+    perf.prompt_tokens = data["prompt_eval_count"]
+    perf.completion_tokens = data["eval_count"]
+    perf.prefill_ms = data["prompt_eval_duration"] / 1_000_000.0
+    perf.decode_ms = data["eval_duration"] / 1_000_000.0
+    perf.total_ms = data["total_duration"] / 1_000_000.0
+    perf.load_ms = data["load_duration"] / 1_000_000.0
+    response = data["response"]
+    return _normalize_ai_cleanup_response(response), perf
+
+
+def _extract_mlx_vlm_response_and_perf(
+    body: bytes, wall_ms: float = 0.0
+) -> tuple[str, DictationAiCleanupPerf]:
+    data = json.loads(body.decode("utf-8"))
+    perf = _make_ai_cleanup_perf("mlx", wall_ms)
+    usage = data["usage"]
+    perf.prompt_tokens = usage["input_tokens"]
+    perf.completion_tokens = usage["output_tokens"]
+    perf.prefill_tps = usage["prompt_tps"]
+    perf.decode_tps = usage["generation_tps"]
+    perf.peak_memory_gb = usage["peak_memory"]
+    perf.prefill_ms = (perf.prompt_tokens / perf.prefill_tps) * 1000.0
+    perf.decode_ms = (perf.completion_tokens / perf.decode_tps) * 1000.0
+    choices = data["choices"]
     first_choice = choices[0]
-    if not isinstance(first_choice, dict):
-        return ""
-    message = first_choice.get("message")
-    if not isinstance(message, dict):
-        return ""
-    content = message.get("content", "")
+    message = first_choice["message"]
+    content = message["content"]
     if isinstance(content, str):
-        return _normalize_ai_cleanup_response(content)
+        return _normalize_ai_cleanup_response(content), perf
     if isinstance(content, list):
         text_parts = []
         for item in content:
-            if not isinstance(item, dict):
-                continue
-            if item.get("type") not in {"text", "output_text"}:
-                continue
-            text = item.get("text")
-            if isinstance(text, str):
-                text_parts.append(text)
-        return _normalize_ai_cleanup_response("".join(text_parts))
-    return ""
+            if item["type"] in {"text", "output_text"}:
+                text_parts.append(item["text"])
+        return _normalize_ai_cleanup_response("".join(text_parts)), perf
+    return "", perf
+
+
+def _log_ai_cleanup_perf(perf: DictationAiCleanupPerf) -> None:
+    parts = [
+        f"backend={perf.backend}",
+        f"wall={perf.wall_ms:.1f}ms",
+    ]
+    if perf.total_ms is not None:
+        parts.append(f"backend_total={perf.total_ms:.1f}ms")
+    if perf.load_ms is not None:
+        parts.append(f"load={perf.load_ms:.1f}ms")
+    if perf.prompt_tokens is not None:
+        parts.append(f"prompt_tokens={perf.prompt_tokens}")
+    if perf.cached_prompt_tokens is not None:
+        parts.append(f"cached_prompt_tokens={perf.cached_prompt_tokens}")
+    if perf.completion_tokens is not None:
+        parts.append(f"completion_tokens={perf.completion_tokens}")
+    if perf.peak_memory_gb is not None:
+        parts.append(f"peak_memory={perf.peak_memory_gb:.2f}GB")
+    prefill_tps = perf.prefill_tokens_per_second()
+    if perf.prefill_ms is not None:
+        parts.append(f"prefill={perf.prefill_ms:.1f}ms")
+    if prefill_tps is not None:
+        parts.append(f"prefill_rate={prefill_tps:.1f} tok/s")
+    decode_tps = perf.decode_tokens_per_second()
+    if perf.decode_ms is not None:
+        parts.append(f"decode={perf.decode_ms:.1f}ms")
+    if decode_tps is not None:
+        parts.append(f"decode_rate={decode_tps:.1f} tok/s")
+    if perf.prefill_ms is None and perf.decode_ms is None:
+        parts.append("phase_rates=unavailable")
+    log_dictation_debug(logging.DEBUG, "Dictation AI cleanup perf: %s", " ".join(parts))
 
 
 def _is_dictation_ai_cleanup_backend(
@@ -624,6 +705,7 @@ def _run_ai_cleanup(
     leading_guard, utterance_core, trailing_guard = _split_outer_guards(utterance_text)
     if not utterance_core:
         return None
+    request_started = time.perf_counter()
     try:
         prompt = _cleanup_prompt(prior_context, utterance_core)
         if backend == "ollama":
@@ -649,13 +731,27 @@ def _run_ai_cleanup(
         )
         with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
             response_body = response.read()
-            if backend == "ollama":
-                corrected_raw = _extract_ollama_response(response_body)
-            else:
-                corrected_raw = _extract_mlx_vlm_response(response_body)
+        wall_ms = (time.perf_counter() - request_started) * 1000.0
+        if backend == "ollama":
+            corrected_raw, perf = _extract_ollama_response_and_perf(
+                response_body, wall_ms
+            )
+        else:
+            corrected_raw, perf = _extract_mlx_vlm_response_and_perf(
+                response_body, wall_ms
+            )
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+        wall_ms = (time.perf_counter() - request_started) * 1000.0
+        log_dictation_debug(
+            logging.DEBUG,
+            "Dictation AI cleanup perf: backend=%s wall=%.1fms error=%s",
+            backend,
+            wall_ms,
+            error,
+        )
         logging.debug("Dictation AI cleanup skipped: %s", error)
         return None
+    _log_ai_cleanup_perf(perf)
     _, corrected_core, _ = _split_outer_guards(corrected_raw)
     logging.debug(
         "Dictation AI cleanup model I/O(core): prior_context=%r input=%r output=%r",

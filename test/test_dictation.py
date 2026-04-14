@@ -79,30 +79,111 @@ if hasattr(talon, "test_mode"):
         assert result == "fourth"
 
     def test_extract_ollama_response():
-        payload = json.dumps({"response": " corrected text\n"}).encode("utf-8")
-        assert text_and_dictation._extract_ollama_response(payload) == " corrected text"
+        payload = json.dumps(
+            {
+                "response": " corrected text\n",
+                "prompt_eval_count": 50,
+                "prompt_eval_duration": 500_000_000,
+                "eval_count": 10,
+                "eval_duration": 200_000_000,
+                "total_duration": 900_000_000,
+                "load_duration": 100_000_000,
+            }
+        ).encode("utf-8")
+        response, _ = text_and_dictation._extract_ollama_response_and_perf(payload)
+        assert response == " corrected text"
 
-    def test_extract_ollama_response_invalid_shape():
-        payload = json.dumps({"response": 123}).encode("utf-8")
-        assert text_and_dictation._extract_ollama_response(payload) == ""
+    def test_extract_ollama_response_perf():
+        payload = json.dumps(
+            {
+                "response": " corrected text\n",
+                "prompt_eval_count": 50,
+                "prompt_eval_duration": 500_000_000,
+                "eval_count": 10,
+                "eval_duration": 200_000_000,
+                "total_duration": 900_000_000,
+                "load_duration": 100_000_000,
+            }
+        ).encode("utf-8")
+        response, perf = text_and_dictation._extract_ollama_response_and_perf(
+            payload, wall_ms=321.5
+        )
+        assert response == " corrected text"
+        assert perf.backend == "ollama"
+        assert perf.wall_ms == 321.5
+        assert perf.prompt_tokens == 50
+        assert perf.completion_tokens == 10
+        assert perf.prefill_ms == 500.0
+        assert perf.decode_ms == 200.0
+        assert perf.total_ms == 900.0
+        assert perf.load_ms == 100.0
+        assert perf.prefill_tokens_per_second() == 100.0
+        assert perf.decode_tokens_per_second() == 50.0
 
     def test_extract_ollama_response_trailing_nochange():
-        payload = json.dumps({"response": "some echoed text\nNOCHANGE\n"}).encode(
-            "utf-8"
-        )
-        assert text_and_dictation._extract_ollama_response(payload) == "NOCHANGE"
+        payload = json.dumps(
+            {
+                "response": "some echoed text\nNOCHANGE\n",
+                "prompt_eval_count": 50,
+                "prompt_eval_duration": 500_000_000,
+                "eval_count": 10,
+                "eval_duration": 200_000_000,
+                "total_duration": 900_000_000,
+                "load_duration": 100_000_000,
+            }
+        ).encode("utf-8")
+        response, _ = text_and_dictation._extract_ollama_response_and_perf(payload)
+        assert response == "NOCHANGE"
 
     def test_extract_mlx_vlm_response():
         payload = json.dumps(
             {
                 "choices": [
                     {"message": {"content": " corrected text\n"}},
-                ]
+                ],
+                "usage": {
+                    "input_tokens": 120,
+                    "output_tokens": 8,
+                    "total_tokens": 128,
+                    "prompt_tps": 240.0,
+                    "generation_tps": 40.0,
+                    "peak_memory": 5.5,
+                },
             }
         ).encode("utf-8")
-        assert (
-            text_and_dictation._extract_mlx_vlm_response(payload) == " corrected text"
+        response, _ = text_and_dictation._extract_mlx_vlm_response_and_perf(payload)
+        assert response == " corrected text"
+
+    def test_extract_mlx_vlm_response_perf():
+        payload = json.dumps(
+            {
+                "choices": [
+                    {"message": {"content": " corrected text\n"}},
+                ],
+                "usage": {
+                    "input_tokens": 120,
+                    "output_tokens": 8,
+                    "total_tokens": 128,
+                    "prompt_tps": 240.0,
+                    "generation_tps": 40.0,
+                    "peak_memory": 5.5,
+                },
+            }
+        ).encode("utf-8")
+        response, perf = text_and_dictation._extract_mlx_vlm_response_and_perf(
+            payload, wall_ms=222.0
         )
+        assert response == " corrected text"
+        assert perf.backend == "mlx"
+        assert perf.wall_ms == 222.0
+        assert perf.prompt_tokens == 120
+        assert perf.completion_tokens == 8
+        assert perf.cached_prompt_tokens is None
+        assert perf.prefill_ms == 500.0
+        assert perf.decode_ms == 200.0
+        assert perf.prefill_tokens_per_second() == 240.0
+        assert perf.decode_tokens_per_second() == 40.0
+        assert perf.peak_memory_gb == 5.5
 
     def test_extract_mlx_vlm_response_content_blocks():
         payload = json.dumps(
@@ -116,13 +197,16 @@ if hasattr(talon, "test_mode"):
                             ]
                         }
                     },
-                ]
+                ],
+                "usage": {
+                    "input_tokens": 120,
+                    "output_tokens": 8,
+                    "total_tokens": 128,
+                    "prompt_tps": 240.0,
+                    "generation_tps": 40.0,
+                    "peak_memory": 5.5,
+                },
             }
         ).encode("utf-8")
-        assert text_and_dictation._extract_mlx_vlm_response(payload) == "NOCHANGE"
-
-    def test_extract_mlx_vlm_response_invalid_shape():
-        payload = json.dumps({"choices": [{"message": {"content": 123}}]}).encode(
-            "utf-8"
-        )
-        assert text_and_dictation._extract_mlx_vlm_response(payload) == ""
+        response, _ = text_and_dictation._extract_mlx_vlm_response_and_perf(payload)
+        assert response == "NOCHANGE"
