@@ -9,6 +9,7 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Callable, Literal, Optional, TypeGuard
 
+import requests
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
 
 from ..numbers.numbers import get_spoken_form_under_one_hundred
@@ -723,14 +724,13 @@ def _run_ai_cleanup(
                 "temperature": 0.0,
             }
         payload = json.dumps(payload_dict).encode("utf-8")
-        request = urllib.request.Request(
+        response = requests.post(
             url,
             data=payload,
             headers={"Content-Type": "application/json"},
-            method="POST",
+            timeout=timeout_seconds,
         )
-        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-            response_body = response.read()
+        response_body = response.content
         wall_ms = (time.perf_counter() - request_started) * 1000.0
         if backend == "ollama":
             corrected_raw, perf = _extract_ollama_response_and_perf(
