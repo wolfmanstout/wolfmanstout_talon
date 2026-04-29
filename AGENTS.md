@@ -16,13 +16,13 @@ pytest test/specific_test.py  # Run specific test
 **Code Quality:**
 
 ```bash
-pre-commit run           # Run all formatters and linters on staged files
-pre-commit run --files file1.py file2.py  # Run on unstaged files
-pre-commit run --all-files  # Run on all files
-pre-commit install       # Set up git hooks
+prek run                 # Run all formatters and linters on staged files
+prek run --files file1.py file2.py  # Run on unstaged files
+prek run --all-files     # Run on all files
+prek install             # Set up git hooks
 ```
 
-If pre-commit fails and changes files, rerun it.
+If prek fails and changes files, rerun it.
 
 **Tools Used:**
 
