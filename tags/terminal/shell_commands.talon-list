@@ -39,6 +39,12 @@ pre commit install: pre-commit install
 pre commit run: pre-commit run
 pre commit run all: pre-commit run --all-files
 
+# prek
+pre k: prek
+pre k install: prek install
+pre k run: prek run
+pre k run all: prek run --all-files
+
 # Fig
 fig: hg
 fig XL: hg xl
