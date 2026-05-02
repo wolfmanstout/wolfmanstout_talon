@@ -4,5 +4,5 @@ ai mode: @aimode
 bookmarks: @bookmarks
 gemini: @gemini
 history: @history
-cs
+code: cs
 moma
