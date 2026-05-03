@@ -103,7 +103,7 @@ settings():
     # Set the preferred editor for draft mode. Comma-separated list of app names.
     user.draft_editor = "Visual Studio Code - Insiders, Visual Studio Code, Code"
 
-    user.preferred_microphones = "Samson, TableMike"
+    user.preferred_microphones = "Vocaster, Samson, TableMike"
 
     user.model_endpoint = "llm"
     user.model_default = "gemini-flash-no-thinking"
