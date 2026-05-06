@@ -84,6 +84,17 @@ if hasattr(talon, "test_mode"):
                 "",
                 "I went to the store, bought milk, and came home",
             ),
+            # Prior context can make a clause-comma reading more obvious.
+            (
+                "common I need to reschedule",
+                "I'm running late",
+                ", I need to reschedule",
+            ),
+            (
+                "come and I can help",
+                "I'm available now",
+                ", I can help",
+            ),
         ],
         ids=[
             "comment-multiple",
@@ -93,6 +104,8 @@ if hasattr(talon, "test_mode"):
             "come-and-real-log",
             "common-multiple",
             "common-single",
+            "context-common-leading-clause",
+            "context-come-and-leading-clause",
         ],
     )
     def test_should_fix_comma(utterance, prior_context, expected):
@@ -150,6 +163,9 @@ if hasattr(talon, "test_mode"):
                 "No don't fix the stale comment, fix the code so that it aligns with that comment",
                 "",
             ),
+            # Prior context is read-only and should not be included or repaired.
+            ("on the issue", "please comment"),
+            ("problem", "this is a common"),
         ],
         ids=[
             "simple-text",
@@ -174,6 +190,8 @@ if hasattr(talon, "test_mode"):
             "no-trigger-also-create",
             "no-trigger-also-create-clod",
             "actual-stale-comment",
+            "context-comment-on",
+            "context-common-problem",
         ],
     )
     def test_should_not_change(utterance, prior_context):
