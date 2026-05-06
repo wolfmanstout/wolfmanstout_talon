@@ -557,32 +557,29 @@ def on_post_phrase(d):
 
 def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
     return (
-        "Speech recognition sometimes writes a word instead of a comma.\n"
-        "These words may be mistranscribed commas: "
-        "'comment', 'come and', 'comma', 'come in', 'common'.\n"
-        "STEP 1: Check if the UTTERANCE contains any of those exact words/"
-        "phrases. If NONE are present, return exactly: NOCHANGE. Do not "
-        "insert commas. Do not change anything. Stop.\n"
-        "STEP 2: If a trigger word IS present, replace it with ', ' when "
-        "it appears as a list separator between items "
-        "(like 'A comment B comment C') OR when it joins two clauses where "
-        "a comma would naturally fit (like 'I'm not sure come and can you "
-        "help' -> 'I'm not sure, can you help'). Do NOT replace when used "
-        "with normal meaning (like 'please comment on' or 'come and see').\n"
-        "Never insert commas anywhere else. Never change any other words.\n"
-        "Replace ALL occurrences in a single pass, not just the first.\n"
-        "If no replacement is needed, return exactly: NOCHANGE\n"
-        "Otherwise return ONLY the corrected text.\n\n"
+        "Speech may write a word instead of a comma.\n"
+        "C is previous text for context only. Fix U only; never output C.\n"
+        "Comma words in U: comment, come and, comma, come in, common.\n"
+        "STEP 1: If U contains none of those exact words/phrases, return exactly NOCHANGE.\n"
+        "STEP 2: If U contains one, replace it with ', ' only when it is punctuation: "
+        "a list separator or a comma between clauses. Do not replace normal word use.\n"
+        "Replace every punctuation use. If no replacement is needed, return exactly NOCHANGE. "
+        "Otherwise return only corrected U.\n\n"
         "Examples:\n"
-        "- 'apples comment oranges comment bananas' -> 'apples, oranges, bananas'\n"
-        "- 'please comment on the issue' -> NOCHANGE\n"
-        "- 'come and see this' -> NOCHANGE\n"
-        "- 'fix the stale comment, fix the code' -> NOCHANGE  "
-        "('comment' is a noun here, not a separator)\n"
-        "- 'Also create' -> NOCHANGE  (no trigger word present)\n"
-        "- 'Also create clod' -> NOCHANGE  (no trigger word present)\n\n"
-        f"PRIOR_CONTEXT:\n{prior_context}\n\n"
-        f"UTTERANCE:\n{utterance_text}\n"
+        "'apples comment oranges comment bananas' -> 'apples, oranges, bananas'\n"
+        "'I like cats comment dogs and birds' -> 'I like cats, dogs and birds'\n"
+        "'first come and second come and third' -> 'first, second, third'\n"
+        "'I'm not sure come and can you help' -> 'I'm not sure, can you help'\n"
+        "C='I'm running late' U='common I need to reschedule' -> ', I need to reschedule'\n"
+        "C='I'm available now' U='come and I can help' -> ', I can help'\n"
+        "'No don't fix the stale comment, fix the code so that it aligns with that comment' -> NOCHANGE\n"
+        "'come and see this' -> NOCHANGE\n"
+        "'come and get it' -> NOCHANGE\n"
+        "'this is a common problem' -> NOCHANGE\n"
+        "'viewport frame purple if it is a cached frame' -> NOCHANGE\n"
+        "'Also create clod' -> NOCHANGE\n"
+        f"\nC:\n{prior_context}\n"
+        f"U:\n{utterance_text}\n"
     )
 
 
@@ -591,6 +588,22 @@ def _normalize_ai_cleanup_response(response: str) -> str:
     # The model sometimes echoes the text then appends NOCHANGE on a new line.
     if response.endswith("\nNOCHANGE"):
         return "NOCHANGE"
+    return response
+
+
+def _strip_ai_cleanup_output_guards(response: str) -> str:
+    response = response.strip()
+    if (
+        len(response) >= 2
+        and response[0] == response[-1]
+        and response[0]
+        in {
+            '"',
+            "'",
+            "`",
+        }
+    ):
+        return response[1:-1].strip()
     return response
 
 
@@ -740,7 +753,12 @@ def _run_ai_cleanup(
             corrected_raw, perf = _extract_mlx_vlm_response_and_perf(
                 response_body, wall_ms
             )
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+    except (
+        requests.exceptions.RequestException,
+        urllib.error.URLError,
+        TimeoutError,
+        json.JSONDecodeError,
+    ) as error:
         wall_ms = (time.perf_counter() - request_started) * 1000.0
         log_dictation_debug(
             logging.DEBUG,
@@ -752,7 +770,7 @@ def _run_ai_cleanup(
         logging.debug("Dictation AI cleanup skipped: %s", error)
         return None
     _log_ai_cleanup_perf(perf)
-    _, corrected_core, _ = _split_outer_guards(corrected_raw)
+    corrected_core = _strip_ai_cleanup_output_guards(corrected_raw)
     logging.debug(
         "Dictation AI cleanup model I/O(core): prior_context=%r input=%r output=%r",
         prior_context,

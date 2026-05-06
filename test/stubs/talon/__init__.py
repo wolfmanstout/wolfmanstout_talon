@@ -98,8 +98,8 @@ class Module:
     def list(self, *args, **kwargs):
         pass
 
-    def setting(self, *args, **kwargs):
-        pass
+    def setting(self, name, *args, **kwargs):
+        settings.register(f"user.{name}", kwargs.get("default"))
 
     def capture(self, rule=None):
         def __funcwrapper(func):
@@ -183,6 +183,15 @@ class Settings:
     """
     Implements something like talon.settings
     """
+
+    def __init__(self):
+        self._values = {}
+
+    def register(self, name: str, default=None):
+        self._values.setdefault(name, default)
+
+    def get(self, name: str):
+        return self._values.get(name)
 
 
 class Cron:

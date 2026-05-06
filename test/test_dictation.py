@@ -210,3 +210,31 @@ if hasattr(talon, "test_mode"):
         ).encode("utf-8")
         response, _ = text_and_dictation._extract_mlx_vlm_response_and_perf(payload)
         assert response == "NOCHANGE"
+
+    def test_strip_ai_cleanup_output_guards_preserves_leading_comma():
+        assert (
+            text_and_dictation._strip_ai_cleanup_output_guards("\n, can you help\n")
+            == ", can you help"
+        )
+        assert (
+            text_and_dictation._strip_ai_cleanup_output_guards('"corrected text"')
+            == "corrected text"
+        )
+
+    def test_run_ai_cleanup_handles_requests_failure(monkeypatch):
+        def raise_timeout(*args, **kwargs):
+            raise text_and_dictation.requests.exceptions.Timeout("too slow")
+
+        monkeypatch.setattr(text_and_dictation.requests, "post", raise_timeout)
+
+        assert (
+            text_and_dictation._run_ai_cleanup(
+                "",
+                "apples comment oranges",
+                "model",
+                "http://127.0.0.1:8080/chat/completions",
+                1,
+                "mlx",
+            )
+            is None
+        )
