@@ -17,7 +17,6 @@ select = [
     "B", # flake8-bugbear
     "SIM", # flake8-simplify
 ]
-<<<<<<< HEAD
 ignore = [
     "E501", # line-too-long (until we decide)
     "E722", # except: (consider replacing with catching Exception)
