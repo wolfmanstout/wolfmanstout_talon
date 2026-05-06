@@ -114,6 +114,7 @@ settings():
     user.model_llm_plugins = "llm-echo,llm-templates-fabric,llm-fragments-github,llm-docs,llm-anthropic,llm-gemini,llm-fragments-markitdown,llm-templates-github"
 
     user.ocr_use_window_at_api = true
+    user.ocr_scroll_probe_skip_enabled = true
 
     # user.ocr_scroll_debug_mode = true
     user.dictation_debug_mode = true
