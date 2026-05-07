@@ -421,7 +421,9 @@ def format_first_letter(text, formatter):
 
 def log_dictation_debug(level: int, message: str, *args) -> None:
     if settings.get("user.dictation_debug_mode"):
-        logging.log(level, message, *args)
+        active_app = ui.active_app()
+        app_name = active_app.name if active_app else "unknown"
+        logging.log(level, "[%s] " + message, app_name, *args)
 
 
 dictation_formatter = DictationFormat()
