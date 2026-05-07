@@ -579,8 +579,8 @@ class Actions:
             actions.edit.extend_word_left()
             actions.edit.extend_word_left()
             actions.edit.extend_word_left()
-            # Needed to capture text in some apps (Antigravity).
-            actions.sleep("10ms")
+            # Needed to capture text in some apps (Antigravity and Google Chat).
+            actions.sleep("20ms")
             selected_text = actions.edit.selected_text()
             log_dictation_debug(
                 logging.INFO,
@@ -624,6 +624,8 @@ class Actions:
             actions.edit.extend_word_right()
             actions.edit.extend_word_right()
             actions.edit.extend_word_right()
+            # Needed to capture text in some apps (Antigravity and Google Chat).
+            actions.sleep("20ms")
             selected_text = actions.edit.selected_text()
             log_dictation_debug(
                 logging.INFO,
