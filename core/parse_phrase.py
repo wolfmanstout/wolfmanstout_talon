@@ -38,7 +38,7 @@ class Actions:
         samples = samples[pstart:pend]
         if recording_path:
             flac.write_file(recording_path, samples)
-        speech_system._on_audio_frame(samples)
+        speech_system._on_audio_frame(samples, ts=ts + start)
 
 
 # Dragon doesn't support timestamps, so we fall back to mimic()
