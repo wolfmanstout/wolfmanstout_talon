@@ -141,3 +141,5 @@ tag(): user.cursorless_experimental_snippets
 tag(): user.emoji
 
 tag(): user.browser_smooth_scrolling_disabled
+
+tag(): user.gaze_ocr_unprefixed_scroll
