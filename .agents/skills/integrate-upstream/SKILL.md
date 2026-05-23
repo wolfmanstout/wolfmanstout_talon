@@ -14,7 +14,7 @@ Before starting, the worktree must be clean and `HEAD` must be either the branch
 Run:
 
 ```sh
-skills/integrate-upstream/scripts/integrate_upstream.sh baseline --upstream upstream/main
+scripts/integrate_upstream.sh baseline --upstream upstream/main
 uv run prek run --all-files
 uv run pytest
 talonbox start
@@ -22,7 +22,7 @@ talonbox rsync -av --delete --exclude .git --exclude .venv ./ guest:/Users/lume/
 talonbox restart-talon
 talonbox exec -- sh -lc 'tail -n 250 ~/.talon/talon.log'
 <restore command printed by baseline>
-skills/integrate-upstream/scripts/integrate_upstream.sh prepare --upstream upstream/main
+scripts/integrate_upstream.sh prepare --upstream upstream/main
 ```
 
 The script fails on dirty state, missing refs, missing `git-imerge`, or a current `HEAD` that does not match fetched `origin/main`. It accepts either a branch at `origin/main` or detached `HEAD` at that commit. The Talonbox session started during baseline is reused for conflict and final checks.
@@ -34,7 +34,7 @@ After `prepare`, resolve conflicts in the current checkout. The checkout will be
 Use status when unsure:
 
 ```sh
-skills/integrate-upstream/scripts/integrate_upstream.sh status
+scripts/integrate_upstream.sh status
 ```
 
 ## Conflict Loop
@@ -67,7 +67,7 @@ Repeat until imerge is complete.
 When the checkout is clean and imerge is complete:
 
 ```sh
-skills/integrate-upstream/scripts/integrate_upstream.sh finalize
+scripts/integrate_upstream.sh finalize
 ```
 
 The script creates the final merge commit with the real fork tip and upstream tip as parents, verifies that its tree matches the imerge result, and leaves the checkout on the final branch.
