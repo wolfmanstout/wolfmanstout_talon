@@ -1,0 +1,4 @@
+interface:
+  display_name: "Integrate Upstream"
+  short_description: "Bring upstream changes into this fork"
+  default_prompt: "Use $integrate-upstream to integrate upstream/main into this fork."
