@@ -248,8 +248,9 @@ class PatternBuilder:
             )  # fmt: skip
         if ">power" in thresholds:
             detection_calls.append(
-                lambda self, frame, threshold=thresholds[">power"]: frame.power
-                >= threshold
+                lambda self, frame, threshold=thresholds[">power"]: (
+                    frame.power >= threshold
+                )
             )
         if ">ratio" in thresholds and len(sounds) > 1:
             detection_calls.append(
@@ -280,8 +281,9 @@ class PatternBuilder:
             )  # fmt: skip
         if "<power" in thresholds:
             detection_calls.append(
-                lambda self, frame, threshold=thresholds["<power"]: frame.power
-                < threshold
+                lambda self, frame, threshold=thresholds["<power"]: (
+                    frame.power < threshold
+                )
             )
         if "<ratio" in thresholds and len(sounds) > 1:
             detection_calls.append(

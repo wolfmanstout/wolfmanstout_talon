@@ -3,6 +3,7 @@ mode: dictation
 mode: sleep
 not speech.engine: dragon
 -
+
 # The optional <phrase> afterwards allows these to match even if you say arbitrary text
 # after this command, without having to wait for the speech timeout.
 
@@ -14,19 +15,6 @@ not speech.engine: dragon
 # sleep and ignore "hey bob". Note that subtitles will show "sleep all hey bob",
 # because it's part of the rule definition, but "hey bob" will be ignored, because
 # we don't do anything with the <phrase> in the body of the command.
-
-^talon wake$:
-    speech.enable()
-    mode.enable("noise")
-
-# We define this *only* if the speech engine isn't Dragon, because if you're using Dragon,
-# "wake up" is used to specifically control Dragon, and not affect Talon.
-#
-# It's a useful and well known command, though, so if you're using any other speech
-# engine, this controls Talon.
-^(wake up)+$:
-    speech.enable()
-    mode.enable("noise")
 
 # We define this *only* if the speech engine isn't Dragon, because if you're using Dragon,
 # "go to sleep" is used to specifically control Dragon, and not affect Talon.

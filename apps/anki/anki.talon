@@ -1,5 +1,6 @@
 app.exe: anki.exe
 -
+
 show: key(space)
 again: key(1)
 hard: key(2)

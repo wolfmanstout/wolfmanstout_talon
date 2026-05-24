@@ -37,34 +37,14 @@ class ActionsAwakeMode:
 
 @mod.action_class
 class Actions:
-    def talon_mode():
-        """For windows and Mac with Dragon, enables Talon commands and Dragon's command mode."""
-        actions.speech.enable()
-
-        engine = speech_system.engine.name
-        # app.notify(engine)
-        if "dragon" in engine:
-            if app.platform == "mac":
-                actions.user.dragon_engine_sleep()
-            elif app.platform == "windows":
-                actions.user.dragon_engine_wake()
-                # note: this may not do anything for all versions of Dragon. Requires Pro.
-                actions.user.dragon_engine_command_mode()
-
-    def dragon_mode():
-        """For windows and Mac with Dragon, disables Talon commands and exits Dragon's command mode"""
-        engine = speech_system.engine.name
-        # app.notify(engine)
-
-        if "dragon" in engine:
-            # app.notify("dragon mode")
-            actions.speech.disable()
-            if app.platform == "mac":
-                actions.user.dragon_engine_wake()
-            elif app.platform == "windows":
-                actions.user.dragon_engine_wake()
-                # note: this may not do anything for all versions of Dragon. Requires Pro.
-                actions.user.dragon_engine_normal_mode()
+    def command_mode():
+        """Enables command mode."""
+        actions.mode.disable("sleep")
+        actions.mode.disable("dictation")
+        actions.mode.disable("user.dictation_command")
+        actions.mode.enable("command")
+        actions.user.hud_clear_screen_regions("overlay", "mode")
+        actions.user.hud_clear_screen_regions("cursor", "mode")
 
     def dictation_mode():
         """Enables dictation mode."""
@@ -94,14 +74,34 @@ class Actions:
         actions.user.hud_publish_screen_regions("overlay", regions, True)
         actions.user.hud_publish_screen_regions("cursor", regions, True)
 
-    def command_mode():
-        """Enables command mode."""
-        actions.mode.disable("sleep")
-        actions.mode.disable("dictation")
-        actions.mode.disable("user.dictation_command")
-        actions.mode.enable("command")
-        actions.user.hud_clear_screen_regions("overlay", "mode")
-        actions.user.hud_clear_screen_regions("cursor", "mode")
+    def talon_mode():
+        """For windows and Mac with Dragon, enables Talon commands and Dragon's command mode."""
+        actions.speech.enable()
+
+        engine = speech_system.engine.name
+        # app.notify(engine)
+        if "dragon" in engine:
+            if app.platform == "mac":
+                actions.user.dragon_engine_sleep()
+            elif app.platform == "windows":
+                actions.user.dragon_engine_wake()
+                # note: this may not do anything for all versions of Dragon. Requires Pro.
+                actions.user.dragon_engine_command_mode()
+
+    def dragon_mode():
+        """For windows and Mac with Dragon, disables Talon commands and exits Dragon's command mode"""
+        engine = speech_system.engine.name
+        # app.notify(engine)
+
+        if "dragon" in engine:
+            # app.notify("dragon mode")
+            actions.speech.disable()
+            if app.platform == "mac":
+                actions.user.dragon_engine_wake()
+            elif app.platform == "windows":
+                actions.user.dragon_engine_wake()
+                # note: this may not do anything for all versions of Dragon. Requires Pro.
+                actions.user.dragon_engine_normal_mode()
 
     def context_sensitive_mode():
         """Enables context sensitivity."""

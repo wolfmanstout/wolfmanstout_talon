@@ -1,6 +1,7 @@
 app: emacs
 title: these_commands_are_disabled
 -
+
 tag(): user.tabs
 tag(): user.splits
 tag(): user.line_commands
@@ -194,7 +195,7 @@ auto indent: user.emacs("indent-region")
 indent <user.number_signed_small>: user.emacs("indent-rigidly", number_signed_small)
 
 search back: user.emacs("isearch-backward")
-(search regex | regex search): user.emacs("isearch-forward-regexp")
+search regex | regex search: user.emacs("isearch-forward-regexp")
 (search regex | regex search) back: user.emacs("isearch-backward-regexp")
 replace: user.emacs("query-replace")
 replace regex | regex replace: user.emacs("query-replace-regexp")

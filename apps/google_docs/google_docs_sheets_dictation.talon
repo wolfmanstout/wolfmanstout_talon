@@ -3,9 +3,6 @@ mode: user.dictation_command
 app: google_docs
 browser.path: /^\/spreadsheets/
 -
-settings():
-    # TODO: Adjust this to the minimal value that works in Google Sheets on Windows.
-    # key_wait = 10
 
 select column: user.select_column()
 select row: user.select_row()

@@ -2,6 +2,7 @@ tag: browser
 title: /<colab.sandbox.google.com>/
 title: /<colab.research.google.com>/
 -
+
 cell run: key(ctrl-enter)
 all (cell | cells) run: key(ctrl-f9)
 cell (expand | collapse): key(ctrl-')

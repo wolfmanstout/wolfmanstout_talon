@@ -1,4 +1,9 @@
+from contextlib import suppress
+
 from talon import Context, Module, actions, settings
+
+from ...core.described_functions import create_described_insert_between
+from ..tags.operators import Operators
 
 ctx = Context()
 mod = Module()
@@ -6,167 +11,88 @@ ctx.matches = r"""
 code.language: go
 """
 
-# Primitive Types
-ctx.lists["self.code_type"] = {
-    "boolean": "bool",
-    "int": "int",
-    "float": "float",
-    "byte": "byte",
-    "double": "double",
-    "short": "short",
-    "long": "long",
-    "char": "char",
-    "string": "string",
-    "rune": "rune",
-    "void": "void",
-    "channel": "channel",
-}
+operators = Operators(
+    # code_operators_array
+    SUBSCRIPT=create_described_insert_between("[", "]"),
+    # code_operators_assignment
+    ASSIGNMENT=" = ",
+    ASSIGNMENT_ADDITION=" += ",
+    ASSIGNMENT_SUBTRACTION=" -= ",
+    ASSIGNMENT_MULTIPLICATION=" *= ",
+    ASSIGNMENT_DIVISION=" /= ",
+    ASSIGNMENT_MODULO=" %= ",
+    ASSIGNMENT_INCREMENT="++",
+    ASSIGNMENT_BITWISE_AND=" &= ",
+    ASSIGNMENT_BITWISE_OR=" |= ",
+    ASSIGNMENT_BITWISE_EXCLUSIVE_OR=" ^= ",
+    ASSIGNMENT_BITWISE_LEFT_SHIFT=" <<= ",
+    ASSIGNMENT_BITWISE_RIGHT_SHIFT=" >>= ",
+    # code_operators_bitwise
+    BITWISE_AND=" & ",
+    BITWISE_OR=" | ",
+    BITWISE_EXCLUSIVE_OR=" ^ ",
+    BITWISE_LEFT_SHIFT=" << ",
+    BITWISE_RIGHT_SHIFT=" >> ",
+    # code_operators_lambda
+    LAMBDA=" func() ",
+    # code_operators_math
+    MATH_ADD=" + ",
+    MATH_SUBTRACT=" - ",
+    MATH_MULTIPLY=" * ",
+    MATH_DIVIDE=" / ",
+    MATH_MODULO=" % ",
+    MATH_EQUAL=" == ",
+    MATH_NOT_EQUAL=" != ",
+    MATH_OR=" || ",
+    MATH_AND=" && ",
+    MATH_EXPONENT=" ^ ",
+    MATH_GREATER_THAN=" > ",
+    MATH_LESS_THAN=" < ",
+    MATH_GREATER_THAN_OR_EQUAL=" >= ",
+    MATH_LESS_THAN_OR_EQUAL=" <= ",
+    # code_operators_pointer
+    POINTER_ADDRESS_OF="&",
+    POINTER_INDIRECTION="*",
+)
 
-ctx.lists["user.code_keyword"] = {
-    "break": "break",
-    "continue": "continue",
-    "struct": "struct",
-    "type": "type",
-    "return": "return",
-    "package": "package",
-    "import": "import",
-    "null": "nil",
-    "nil": "nil",
-    "true": "true",
-    "false": "false",
-    "defer": "defer",
-    "go": "go",
-    "if": "if",
-    "else": "else",
-    "switch": "switch",
-    "select": "select",
-    "const": "const",
-}
+mod.list("float_type_bit_width", desc="Float type bit widths")
+mod.list("complex_type_bit_width", desc="Complex type bit widths")
 
-ctx.lists["user.code_common_function"] = {
-    # golang buildin functions
-    "append": "append",
-    "length": "len",
-    "make": "make",
-    # formatting
-    "format print": "fmt.Printf",
-    "format sprint": "fmt.Sprintf",
-    "format print line": "fmt.Println",
-    # time
-    "time hour": "time.Hour",
-    "time minute": "time.Minute",
-    "time second": "time.Second",
-    "time millisecond": "time.Millisecond",
-    "time microsecond": "time.Microsecond",
-    "time nanosecond": "time.Nanosecond",
-    # IO
-    "buf I O": "bufio.",
-    # strings
-    "string convert": "strconv.",
-    "string convert to int": "strconv.AtoI",
-}
+
+@mod.capture(rule="[{user.stdint_signed}] int {user.c_type_bit_width}")
+def go_int_type(m) -> str:
+    """fixed-width integer types (e.g. "uint32")"""
+    prefix = ""
+    with suppress(AttributeError):
+        prefix = m.stdint_signed
+    return f"{prefix}int{m.c_type_bit_width}"
+
+
+@mod.capture(rule="float {user.float_type_bit_width}")
+def go_float_type(m) -> str:
+    """fixed-width float types (e.g. "float32")"""
+    return f"float{m.float_type_bit_width}"
+
+
+@mod.capture(rule="complex {user.complex_type_bit_width}")
+def go_complex_type(m) -> str:
+    """fixed-width complex types (e.g. "complex64")"""
+    return f"complex{m.complex_type_bit_width}"
+
+
+@ctx.capture(
+    "user.code_type",
+    rule="{user.code_type} | <user.go_int_type> | <user.go_float_type> | <user.go_complex_type>",
+)
+def code_type(m) -> str:
+    """All go types"""
+    return "".join(list(m))
 
 
 @ctx.action_class("user")
 class UserActions:
-    def code_operator_lambda():
-        actions.insert(" -> ")
-
-    def code_operator_subscript():
-        actions.user.insert_between("[", "]")
-
-    def code_operator_assignment():
-        actions.insert(" = ")
-
-    def code_operator_subtraction():
-        actions.insert(" - ")
-
-    def code_operator_subtraction_assignment():
-        actions.insert(" -= ")
-
-    def code_operator_addition():
-        actions.insert(" + ")
-
-    def code_operator_addition_assignment():
-        actions.insert(" += ")
-
-    def code_operator_multiplication():
-        actions.insert(" * ")
-
-    def code_operator_multiplication_assignment():
-        actions.insert(" *= ")
-
-    def code_operator_exponent():
-        actions.insert(" ^ ")
-
-    def code_operator_division():
-        actions.insert(" / ")
-
-    def code_operator_division_assignment():
-        actions.insert(" /= ")
-
-    def code_operator_modulo():
-        actions.insert(" % ")
-
-    def code_operator_modulo_assignment():
-        actions.insert(" %= ")
-
-    def code_operator_equal():
-        actions.insert(" == ")
-
-    def code_operator_not_equal():
-        actions.insert(" != ")
-
-    def code_operator_greater_than():
-        actions.insert(" > ")
-
-    def code_operator_greater_than_or_equal_to():
-        actions.insert(" >= ")
-
-    def code_operator_less_than():
-        actions.insert(" < ")
-
-    def code_operator_less_than_or_equal_to():
-        actions.insert(" <= ")
-
-    def code_operator_and():
-        actions.insert(" && ")
-
-    def code_operator_or():
-        actions.insert(" || ")
-
-    def code_operator_bitwise_and():
-        actions.insert(" & ")
-
-    def code_operator_bitwise_and_assignment():
-        actions.insert(" &= ")
-
-    def code_operator_increment():
-        actions.insert("++")
-
-    def code_operator_bitwise_or():
-        actions.insert(" | ")
-
-    def code_operator_bitwise_exclusive_or():
-        actions.insert(" ^ ")
-
-    def code_operator_bitwise_left_shift():
-        actions.insert(" << ")
-
-    def code_operator_bitwise_left_shift_assignment():
-        actions.insert(" <<= ")
-
-    def code_operator_bitwise_right_shift():
-        actions.insert(" >> ")
-
-    def code_operator_bitwise_right_shift_assignment():
-        actions.insert(" >>= ")
-
-    def code_operator_indirection():
-        actions.insert("*")
-
-    def code_operator_address_of():
-        actions.insert("&")
+    def code_get_operators() -> Operators:
+        return operators
 
     def code_self():
         actions.insert("this")
@@ -183,49 +109,11 @@ class UserActions:
     def code_insert_is_not_null():
         actions.insert(" != nil")
 
-    def code_state_if():
-        actions.user.insert_between("if ", " ")
-
-    def code_state_else_if():
-        actions.user.insert_between("else if ", " ")
-
-    def code_state_else():
-        actions.insert("else ")
-        actions.key("enter")
-
-    def code_state_switch():
-        actions.user.insert_between("switch ", " ")
-
-    def code_state_case():
-        actions.user.insert_between("case ", ":")
-
-    def code_state_for():
-        actions.user.insert_between("for ", " ")
-
-    # There is no while keyword in go. Closest approximation is a for loop.
-    def code_state_while():
-        actions.user.insert_between("for ", " ")
-
-    def code_break():
-        actions.insert("break")
-
-    def code_next():
-        actions.insert("continue")
-
     def code_insert_true():
         actions.insert("true")
 
     def code_insert_false():
         actions.insert("false")
-
-    def code_import():
-        actions.insert("import ")
-
-    def code_state_return():
-        actions.insert("return ")
-
-    def code_comment_line_prefix():
-        actions.insert("// ")
 
     def code_insert_function(text: str, selection: str):
         text += f"({selection or ''})"
@@ -241,3 +129,11 @@ class UserActions:
         )
 
         actions.user.code_insert_function(result, None)
+
+
+@mod.action_class
+class Actions:
+    def go_cast_wrap(type: str):
+        """Wraps the selected text in a cast"""
+        current_selected = actions.edit.selected_text()
+        actions.insert(f"{type}({current_selected})")

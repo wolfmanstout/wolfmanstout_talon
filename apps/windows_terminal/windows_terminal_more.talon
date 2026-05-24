@@ -1,5 +1,6 @@
 app: windows_terminal
 -
+
 tab new ubuntu: key(ctrl-shift-3)
 tab new dos: key(ctrl-shift-2)
 tab new powershell: key(ctrl-shift-7)

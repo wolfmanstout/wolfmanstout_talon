@@ -1,8 +1,14 @@
 mode: command
 mode: user.dictation_command
 -
-# Compound of action(select, clear, copy, cut, paste, etc.) and modifier(word, line, etc.) commands for editing text.
+
+# Compound of action(select, clear, copy, cut, paste, etc.) and modifier(word,
+# line, etc.) commands for editing text.
 # eg: "select line", "clear all"
+# For overriding or creating aliases for specific actions, this function will
+# also accept strings, e.g. `user.edit_command("delete", "wordLeft")`.
+# See edit_command_modifiers.py to discover the correct string for the modify argument,
+# and `edit_command_actions.py` `simple_action_callbacks` to find strings for the action argument.
 <user.edit_action> <user.edit_modifier>: user.edit_command(edit_action, edit_modifier)
 
 before: edit.word_left()
@@ -45,7 +51,7 @@ go page down: edit.page_down()
 
 # Indentation
 indent [more]: edit.indent_more()
-(indent less | out dent | dedent): edit.indent_less()
+indent less | out dent | dedent: edit.indent_less()
 
 # Copy
 copy (that | this):
@@ -56,7 +62,7 @@ copy (that | this):
 cut (that | this): edit.cut()
 
 # Paste
-(pace | paste) that: edit.paste()
+(pace | paste) (that | it): edit.paste()
 (pace | paste) enter:
     edit.paste()
     key(enter)

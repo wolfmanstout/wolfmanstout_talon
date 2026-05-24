@@ -1,5 +1,6 @@
 app: emacs
 -
+
 settings():
     key_wait = 2
 

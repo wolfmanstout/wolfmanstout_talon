@@ -1,5 +1,6 @@
 mode: user.dictation_command
 -
+
 format selection <user.formatters>: user.formatters_reformat_selection(formatters)
 
 cap that: user.dictation_reformat_cap()

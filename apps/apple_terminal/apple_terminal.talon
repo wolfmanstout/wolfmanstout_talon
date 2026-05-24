@@ -1,5 +1,6 @@
 app: apple_terminal
 -
+
 settings():
     # Selection does not work properly here.
     user.context_sensitive_dictation = false
@@ -19,7 +20,6 @@ tag(): user.git
 tag(): user.anaconda
 tag(): user.kubectl
 
-# TODO: explain
 tag(): user.tabs
 tag(): user.file_manager
 

@@ -1,6 +1,7 @@
 app: emacs
 title: /- Shell -/
 -
+
 tag(): terminal
 shell up: key(alt-p)
 shell down: key(alt-n)

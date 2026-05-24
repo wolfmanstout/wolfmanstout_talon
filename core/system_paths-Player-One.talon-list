@@ -1,6 +1,7 @@
 list: user.system_paths
 hostname: Player-One
 -
+
 user: C:\Users\james
 desktop: C:\Users\james\Desktop
 desk: C:\Users\james\Desktop

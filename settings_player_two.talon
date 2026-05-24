@@ -2,6 +2,7 @@ os: mac
 hostname: Player-Two
 hostname: player-two.lan
 -
+
 settings():
     user.ocr_logging_dir = "/Users/jwstout/Documents/gaze_ocr"
     # user.vocabulary_recording_dir = "/Users/jwstout/.talon/vocabulary_recordings"

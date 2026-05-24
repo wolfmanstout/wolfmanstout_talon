@@ -1,6 +1,7 @@
 tag: browser
 title: /<todoist.com>/
 -
+
 go inbox: key(g i)
 go today: key(g t)
 go upcoming: key(g u)

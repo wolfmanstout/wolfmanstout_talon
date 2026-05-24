@@ -3,6 +3,7 @@ mode: user.dictation_command
 app: google_docs
 browser.path: /^\/document/
 -
+
 format title: user.google_docs_title()
 format subtitle: user.google_docs_subtitle()
 format heading one: user.google_docs_heading(1)

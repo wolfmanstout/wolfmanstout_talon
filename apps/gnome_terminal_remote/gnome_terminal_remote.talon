@@ -1,5 +1,6 @@
 app: gnome_terminal_remote
 -
+
 tag(): user.tabs
 tag(): terminal
 tab move left: key(ctrl-shift-pgup)

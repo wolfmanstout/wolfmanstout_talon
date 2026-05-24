@@ -1,5 +1,6 @@
 list: user.code_formatter
 -
+
 all caps: ALL_CAPS
 upper: ALL_CAPS
 all down: ALL_LOWERCASE

@@ -1,6 +1,7 @@
 os: mac
 hostname: /jwstout/
 -
+
 settings():
     # user.vocabulary_recording_dir = "/Users/jwstout/.talon/vocabulary_recordings"
     user.model_llm_plugins = "llm-echo,llm-templates-fabric,llm-fragments-github,llm-docs,llm-gemini,llm-fragments-markitdown,llm-templates-github"

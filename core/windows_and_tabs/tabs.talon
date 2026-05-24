@@ -2,6 +2,7 @@ mode: command
 mode: user.dictation_command
 tag: user.tabs
 -
+
 tab (open | new): app.tab_open()
 tab (last | previous | left): app.tab_previous()
 tab (next | right): app.tab_next()

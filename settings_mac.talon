@@ -1,5 +1,6 @@
 os: mac
 -
+
 settings():
     user.accessibility_dictation = 1
     # Adjust globally so that I can scroll emacs even if another window is focused.

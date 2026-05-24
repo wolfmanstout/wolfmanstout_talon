@@ -2,6 +2,7 @@ mode: command
 mode: user.dictation_command
 os: windows
 -
+
 {user.docked_apps} win$: key("win-ctrl-{docked_apps}")
 {user.docked_apps} admin win$: key("win-ctrl-shift-{docked_apps}")
 {user.docked_apps} new win$: key("win-shift-{docked_apps}")

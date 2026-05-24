@@ -2,7 +2,20 @@ from copy import deepcopy
 
 from talon import Context, Module
 
+from .symbols import (
+    dragon_punctuation_dict,
+    punctuation_dict,
+    symbol_key_dict,
+)
+
 mod = Module()
+ctx = Context()
+
+ctx_dragon = Context()
+ctx_dragon.matches = r"""
+speech.engine: dragon
+"""
+
 mod.list("letter", desc="The spoken phonetic alphabet")
 mod.list("symbol_key", desc="All symbols from the keyboard")
 mod.list("arrow_key", desc="All arrow keys")
@@ -105,122 +118,13 @@ def letters(m) -> str:
     return "".join(m.letter_list)
 
 
-ctx = Context()
-
-# `punctuation_words` is for words you want available BOTH in dictation and as key names in command mode.
-# `symbol_key_words` is for key names that should be available in command mode, but NOT during dictation.
-punctuation_words = {
-    "comma": ",",
-    # Workaround for issue with conformer b-series; see #946
-    "coma": ",",
-    "come a": ",",
-    "kama": ",",
-    "period": ".",
-    "buried": ".",
-    "semicolon": ";",
-    "semi colon": ";",
-    "semi corn": ";",
-    "semi cohen": ";",
-    "colon": ":",
-    "corn": ":",
-    "cohen": ":",
-    "slash": "/",
-    "question look": "?",
-    "question mark": "?",
-    "question more": "?",
-    "question work": "?",
-    "quest more": "?",
-    "questioning": "?",
-    "questioner": "?",
-    "exclamation mark": "!",
-    "estimation mark": "!",
-    "exclamation work": "!",
-    "number sign": "#",
-    "percent sign": "%",
-    "at sign": "@",
-    "ampersand": "&",
-    "hyphen": "-",
-    "high and": "-",
-    "minus sign": "-",
-    "under score": "_",
-    # Currencies
-    "dollar sign": "$",
-    "plus sign": "+",
-}
-symbol_key_words = {
-    "dot": ".",
-    "point": ".",
-    "single quote": "'",
-    "single quad": "'",
-    "L square": "[",
-    "open bracket": "[",
-    "lobe": "[",
-    "R square": "]",
-    "close bracket": "]",
-    "robe": "]",
-    "backslash": "\\",
-    "minus": "-",
-    "dash": "-",
-    "equals": "=",
-    "plus": "+",
-    "grave": "`",
-    "tilde": "~",
-    "bang": "!",
-    "down score": "_",
-    "L paren": "(",
-    "leap": "(",
-    "R paren": ")",
-    "reap": ")",
-    "open brace": "{",
-    "lake": "{",
-    "R brace": "}",
-    "close brace": "}",
-    "rake": "}",
-    "L angle": "<",
-    "open angle": "<",
-    "less than": "<",
-    "luke": "<",
-    "R angle": ">",
-    "close angle": ">",
-    "greater than": ">",
-    "ruke": ">",
-    "star": "*",
-    "hash": "#",
-    "percent": "%",
-    "caret": "^",
-    "amper": "&",
-    "pipe": "|",
-    "dub quote": '"',
-    "dub quad": '"',
-    "double quote": '"',
-    "double quad": '"',
-    "quote": '"',
-    "quad": '"',
-    "back tick": "`",
-    # Currencies
-    "dollar": "$",
-    "pound": "£",
-}
-
-# make punctuation words also included in {user.symbol_keys}
-symbol_key_words.update(punctuation_words)
-# Only allow the following words in dictation so that auto-spacing is always applied.
-punctuation_words.update(
-    {
-        "open paren": "(",
-        "open brand": "(",
-        "open print": "(",
-        "close paren": ")",
-        "close brand": ")",
-        "close print": ")",
-    }
-)
-ctx.lists["self.punctuation"] = punctuation_words
-ctx.lists["self.symbol_key"] = symbol_key_words
-
-
 @mod.action_class
 class Actions:
     def get_punctuation_words() -> dict[str, str]:
-        """Get a copy of the punctuation words dict."""
-        return deepcopy(punctuation_words)
+        """Gets a copy of the user.punctuation list"""
+        return deepcopy(punctuation_dict)
+
+
+ctx.lists["user.punctuation"] = punctuation_dict
+ctx.lists["user.symbol_key"] = symbol_key_dict
+ctx_dragon.lists["user.punctuation"] = dragon_punctuation_dict

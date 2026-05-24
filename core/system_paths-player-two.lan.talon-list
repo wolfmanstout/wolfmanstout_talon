@@ -1,6 +1,7 @@
 list: user.system_paths
 hostname: player-two.lan
 -
+
 user: /Users/jwstout
 desktop: /Users/jwstout/Desktop
 desk: /Users/jwstout/Desktop

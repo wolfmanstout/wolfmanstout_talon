@@ -127,8 +127,9 @@ def raise_homophones(word_to_find_homophones_for, forced=False, selection=False)
     # Move current word to end of list to reduce searcher's cognitive load
     valid_homophones_reordered = list(
         filter(
-            lambda word_from_list: word_from_list.lower()
-            != word_to_find_homophones_for,
+            lambda word_from_list: (
+                word_from_list.lower() != word_to_find_homophones_for
+            ),
             valid_homophones,
         )
     ) + [word_to_find_homophones_for]
@@ -169,7 +170,7 @@ def gui(gui: imgui.GUI):
                 actions.user.homophones_hide()
             index = index + 1
 
-        if gui.button("Phones hide"):
+        if gui.button("Phones (hide | exit)"):
             actions.user.homophones_hide()
 
 

@@ -4,6 +4,7 @@ app: vscode
 # See [our vscode docs](./README.md#terminal)
 win.title: /focus:\[Terminal\]/
 -
+
 settings():
     # Selection does not work properly here, at least in Claude Code.
     user.context_sensitive_dictation = false

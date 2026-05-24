@@ -2,6 +2,7 @@ mode: command
 mode: user.dictation_command
 app: emacs
 -
+
 # General
 cancel: key(ctrl-g)
 
