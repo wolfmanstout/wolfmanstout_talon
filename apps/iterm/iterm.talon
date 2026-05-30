@@ -2,9 +2,6 @@ os: mac
 app: iterm2
 -
 
-settings():
-    user.accessibility_dictation = 1
-
 tag(): terminal
 #tag(): user.file_manager
 tag(): user.generic_unix_shell
