@@ -2,7 +2,7 @@ app: google_docs
 -
 
 settings():
-    accessibility_dictation = false
+    user.accessibility_dictation = false
 
 please [<user.prose>]$:
     key(alt-/)
