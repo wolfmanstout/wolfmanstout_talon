@@ -36,7 +36,7 @@ other <number_small> tree (bring | copy) here:
 other <number_small> tree move here:
     user.use_lines(number_small, -1, "ctrl-w", "ctrl-c ctrl-x ctrl-y", 0, 1, 1)
 open org link: key(ctrl-c ctrl-o)
-show todos: key(ctrl-c / t)
+todos open: key(ctrl-c / t)
 archive: key(ctrl-c ctrl-x ctrl-a)
 (org | heading) (west | start): key(ctrl-c c ctrl-a)
 clear heading: key(ctrl-c c ctrl-a ctrl-k)

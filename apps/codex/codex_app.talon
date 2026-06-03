@@ -5,16 +5,16 @@ tag(): user.command_search
 tag(): terminal
 
 # General
-settings show: key(cmd-,)
+settings open: key(cmd-,)
 folder open: key(cmd-o)
 file hunt: key(cmd-p)
 go back: key(cmd-[)
 go forward: key(cmd-])
-bar (hide | show | switch): key(cmd-b)
+bar (open | close | switch): key(cmd-b)
 tab new: key(cmd-t)
-browser (hide | show | switch): key(cmd-shift-b)
-diff (hide | show | switch): key(cmd-alt-b)
-(terminal | shell) (hide | show | switch): key(cmd-j)
+browser (open | close | switch): key(cmd-shift-b)
+diff (open | close | switch): key(cmd-alt-b)
+(terminal | shell) (open | close | switch): key(cmd-j)
 (terminal | shell) clear: key(ctrl-l)
 
 # Thread

@@ -170,7 +170,7 @@ def gui(gui: imgui.GUI):
                 actions.user.homophones_hide()
             index = index + 1
 
-        if gui.button("Phones (hide | exit)"):
+        if gui.button("Phones (close | exit)"):
             actions.user.homophones_hide()
 
 

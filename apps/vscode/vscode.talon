@@ -27,8 +27,8 @@ bar source: user.vscode("workbench.view.scm")
 bar (test | testing): user.vscode("workbench.view.testing.focus")
 bar chat: user.vscode("workbench.panel.chat.view.copilot.focus")
 bar edits: user.vscode("workbench.panel.chat.view.edits.focus")
-bar (hide | show | switch): user.vscode("workbench.action.toggleSidebarVisibility")
-bar right [hide | show | switch]: user.vscode("workbench.action.toggleAuxiliaryBar")
+bar (open | close | switch): user.vscode("workbench.action.toggleSidebarVisibility")
+bar right [open | close | switch]: user.vscode("workbench.action.toggleAuxiliaryBar")
 
 # Symbol search
 symbol hunt:
@@ -45,20 +45,20 @@ panel (debug | console): user.vscode("workbench.panel.repl.view.focus")
 panel output: user.vscode("workbench.panel.output.focus")
 panel problems: user.vscode("workbench.panel.markers.view.focus")
 panel ports: user.vscode("~remote.forwardedPorts.focus")
-panel (hide | show | switch): user.vscode("workbench.action.togglePanel")
+panel (open | close | switch): user.vscode("workbench.action.togglePanel")
 panel (terminal | shell): user.vscode("workbench.action.terminal.focus")
 focus editor: user.vscode("workbench.action.focusActiveEditorGroup")
 
 # Settings
-settings show: user.vscode("workbench.action.openGlobalSettings")
-settings show json: user.vscode("workbench.action.openSettingsJson")
-settings show folder: user.vscode("workbench.action.openFolderSettings")
-settings show folder json: user.vscode("workbench.action.openFolderSettingsFile")
-settings show workspace: user.vscode("workbench.action.openWorkspaceSettings")
-settings show workspace json: user.vscode("workbench.action.openWorkspaceSettingsFile")
-shortcuts show: user.vscode("workbench.action.openGlobalKeybindings")
-shortcuts show json: user.vscode("workbench.action.openGlobalKeybindingsFile")
-snippets show: user.vscode("workbench.action.openSnippets")
+settings open: user.vscode("workbench.action.openGlobalSettings")
+settings open json: user.vscode("workbench.action.openSettingsJson")
+settings open folder: user.vscode("workbench.action.openFolderSettings")
+settings open folder json: user.vscode("workbench.action.openFolderSettingsFile")
+settings open workspace: user.vscode("workbench.action.openWorkspaceSettings")
+settings open workspace json: user.vscode("workbench.action.openWorkspaceSettingsFile")
+shortcuts open: user.vscode("workbench.action.openGlobalKeybindings")
+shortcuts open json: user.vscode("workbench.action.openGlobalKeybindingsFile")
+snippets open: user.vscode("workbench.action.openSnippets")
 
 # VSCode Snippets
 snip (last | previous): user.vscode("jumpToPrevSnippetPlaceholder")
@@ -105,12 +105,12 @@ buff (open | hunt) | tab hunt:
     key(down)
 
 # Language Features
-suggest show: user.vscode("editor.action.triggerSuggest")
-hint show: user.vscode("editor.action.triggerParameterHints")
-definition show: user.vscode("editor.action.revealDefinition")
+suggest open: user.vscode("editor.action.triggerSuggest")
+hint open: user.vscode("editor.action.triggerParameterHints")
+definition open: user.vscode("editor.action.revealDefinition")
 definition peek: user.vscode("editor.action.peekDefinition")
 definition side: user.vscode("editor.action.revealDefinitionAside")
-references show: user.vscode("editor.action.goToReferences")
+references open: user.vscode("editor.action.goToReferences")
 hierarchy peek: user.vscode("editor.showCallHierarchy")
 references find: user.vscode("references-view.find")
 format that: user.vscode("editor.action.formatDocument")
@@ -247,7 +247,7 @@ replace here:
     user.replace("")
     key(cmd-alt-l)
 
-hover show: user.vscode("editor.action.showHover")
+hover open: user.vscode("editor.action.showHover")
 
 join lines: user.vscode("editor.action.joinLines")
 

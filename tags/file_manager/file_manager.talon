@@ -5,7 +5,7 @@ tag(): user.address
 tag(): user.navigation
 
 title force: user.file_manager_refresh_title()
-manager show: user.file_manager_toggle_pickers()
+manager open: user.file_manager_toggle_pickers()
 manager close: user.file_manager_hide_pickers()
 manager refresh: user.file_manager_update_lists()
 go parent | daddy: user.file_manager_open_parent()
@@ -32,8 +32,8 @@ go parent | daddy: user.file_manager_open_parent()
 #new folder
 folder new [<user.text>]: user.file_manager_new_folder(text or "")
 
-#show properties
-properties show: user.file_manager_show_properties()
+#open properties
+properties open: user.file_manager_show_properties()
 
 # open terminal at location
 terminal here: user.file_manager_terminal_here()
