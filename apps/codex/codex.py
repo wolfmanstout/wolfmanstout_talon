@@ -13,6 +13,12 @@ app: codex
 """
 
 
+@ctx.action_class("app")
+class AppActions:
+    def window_open():
+        actions.key("cmd-shift-n")
+
+
 @ctx.action_class("user")
 class UserActions:
     def command_search(command: str = ""):
