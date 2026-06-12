@@ -42,7 +42,7 @@ def should_paste_to_insert(text: str, threshold: int, paste_newlines: bool) -> b
     _, text_to_paste, _ = split_surrounding_horizontal_whitespace(text)
     if not text_to_paste:
         return False
-    return 0 <= threshold and (
+    return threshold >= 0 and (
         threshold < len(text_to_paste) or (paste_newlines and "\n" in text_to_paste)
     )
 

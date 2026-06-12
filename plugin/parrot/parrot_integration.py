@@ -1,9 +1,10 @@
 import json
 import logging
 import time
+from collections.abc import Callable
 from copy import copy
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Optional
 
 from talon import events, resource
 from talon.debug import log_exception
@@ -22,7 +23,7 @@ class PatternMatcher:
     ) -> bool:
         """Matcher for all detection functions"""
         for detect_function in detection_functions:
-            if detect_function(self, frame) == False:
+            if not detect_function(self, frame):
                 return False
         return True
 
@@ -83,34 +84,33 @@ class NoisePattern(PatternMatcher):
         """Matches the pattern against the last N raw frames of the model classifier"""
         grace_detected = False
         detected = False
-        if self.is_active(frame.ts):
-            if self.match_pattern(self, frame, self.timestamps.graceperiod_until):
-                self.timestamps.duration_start = (
-                    self.timestamps.duration_start
-                    if self.timestamps.duration_start > 0
-                    else frame.ts
-                )
-                grace_detected = True
+        if self.is_active(frame.ts) and self.match_pattern(
+            self, frame, self.timestamps.graceperiod_until
+        ):
+            self.timestamps.duration_start = (
+                self.timestamps.duration_start
+                if self.timestamps.duration_start > 0
+                else frame.ts
+            )
+            grace_detected = True
 
-                # If there is a duration threshold, wait to activate until the duration has passed before marking the pattern as detected
-                if (self.timestamps.duration_start + self.detection_after) <= frame.ts:
-                    detected = True
-                    self.timestamps.last_detected_at = frame.ts
-                    self.timestamps.graceperiod_until = (
-                        frame.ts + self.graceperiod_length
-                    )
-                    self.duration = frame.ts - self.timestamps.duration_start
+            # If there is a duration threshold, wait to activate until the duration has passed before marking the pattern as detected
+            if (self.timestamps.duration_start + self.detection_after) <= frame.ts:
+                detected = True
+                self.timestamps.last_detected_at = frame.ts
+                self.timestamps.graceperiod_until = frame.ts + self.graceperiod_length
+                self.duration = frame.ts - self.timestamps.duration_start
 
         # Reset graceperiod if the detection did not match
-        if grace_detected == False:
+        if not grace_detected:
             self.timestamps.graceperiod_until = 0
             self.duration = 0
 
         # Reset the duration if the graceperiod has ended
         if (
             self.timestamps.duration_start > 0
-            and detected == False
-            and grace_detected == False
+            and not detected
+            and not grace_detected
             and self.timestamps.graceperiod_until < (frame.ts + self.graceperiod_length)
         ):
             self.timestamps.duration_start = 0
@@ -209,8 +209,8 @@ class PatternBuilder:
         if "grace_threshold" in pattern and ">power" in pattern["grace_threshold"]:
             lowest_power_thresholds[1] = pattern["grace_threshold"][">power"]
 
-        grace_period = pattern["graceperiod"] if "graceperiod" in pattern else 0
-        detection_after = pattern["detect_after"] if "detect_after" in pattern else 0
+        grace_period = pattern.get("graceperiod", 0)
+        detection_after = pattern.get("detect_after", 0)
 
         def match_pattern(self, frame: ParrotFrame, graceperiod_until: float):
             return (

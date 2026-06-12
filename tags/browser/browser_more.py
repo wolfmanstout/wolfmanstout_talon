@@ -41,7 +41,7 @@ class MacActions:
 
 
 @mac_ctx.action_class("edit")
-class MacActions:
+class MacEditActions:
     def file_end():
         actions.key("cmd-down")
 

@@ -1,4 +1,4 @@
-from talon import Context, Module, actions
+from talon import Module
 
 mod = Module()
 mod.apps.google_calendar = r"""

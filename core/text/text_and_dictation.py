@@ -2,7 +2,8 @@
 import logging
 import re
 import time
-from typing import Callable, Optional
+from collections.abc import Callable
+from typing import Optional
 
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
 
@@ -434,7 +435,7 @@ class DictationFormat:
 
 def format_first_letter(text, formatter):
     i = -1
-    for i, c in enumerate(text):
+    for i, c in enumerate(text):  # noqa: B007
         if c.isalpha():
             break
     if i >= 0 and i < len(text):
