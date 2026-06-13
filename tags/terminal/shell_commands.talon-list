@@ -127,6 +127,7 @@ talon install: talon-install
 talon install live: talon-install --live
 talon install snapshot: talon-install --snapshot
 talon install show: talon-install --show
+talon install list: talon-install --list
 talon install main: talon-install --main --live
 pull talon repos: pull-talon-repos
 
