@@ -37,6 +37,7 @@ home_ctx.lists["self.docked_apps"] = {
     "studio": "6",
     "spotify": "7",
     "gpt": "8",
+    "chrome": "9",
 }
 
 home_ctx.lists["self.known_window_names"] = {
