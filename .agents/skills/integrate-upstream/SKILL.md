@@ -19,19 +19,25 @@ Run:
 scripts/integrate_upstream.sh baseline --upstream upstream/main
 uv run prek --quiet --no-progress --color never run --all-files
 uv run pytest -q
-talonbox start
+TALONBOX_SOURCE=golden
+TALONBOX_VM=upstream-sync
+talonbox list
+talonbox clone "$TALONBOX_SOURCE" "$TALONBOX_VM"
+talonbox start "$TALONBOX_VM"
 talonbox rsync -a --delete \
   --exclude .git \
   --exclude .venv \
   --exclude __pycache__ \
   --exclude .pytest_cache \
   --exclude node_modules \
-  ./ guest:/Users/lume/.talon/user/wolfmanstout_talon/
-talonbox restart-talon
-talonbox exec -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
+  ./ "$TALONBOX_VM":/Users/lume/.talon/user/wolfmanstout_talon/
+talonbox restart-talon "$TALONBOX_VM"
+talonbox exec "$TALONBOX_VM" -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
 <restore command printed by baseline>
 scripts/integrate_upstream.sh prepare --upstream upstream/main
 ```
+
+Talonbox requires explicit VM names. Choose the source and integration VM names before baseline validation. Use `talonbox list` to find the stopped source VM. If the integration VM already exists from the same integration attempt, skip `talonbox clone` and reuse it with `talonbox start "$TALONBOX_VM"`. Do not delete or wipe an existing VM unless the user explicitly approves it. Keep `TALONBOX_VM` set for the whole integration; every Talonbox command below must target that same VM.
 
 Record the three commits reported by `prepare`. These are authoritative because `prepare` refetches the refs used for the integration:
 
@@ -47,7 +53,7 @@ Use these commits when reviewing behavioral conflict intent. If the output is no
 scripts/integrate_upstream.sh status
 ```
 
-The script fails on dirty state, missing refs, missing `git-imerge`, or a current `HEAD` that does not match fetched `origin/main`. It accepts either a branch at `origin/main` or detached `HEAD` at that commit. The Talonbox session started during baseline is reused for conflict and final checks.
+The script fails on dirty state, missing refs, missing `git-imerge`, or a current `HEAD` that does not match fetched `origin/main`. It accepts either a branch at `origin/main` or detached `HEAD` at that commit. The named Talonbox VM started during baseline is reused for conflict and final checks.
 
 During baseline validation, do not keep formatter edits. If `prek` changes files at the baseline checkout, note that fact, restore the baseline checkout to a clean state, and stop if unsure. If either `prek` or `pytest` fails and quiet output is insufficient, rerun the failing command without quiet flags or only on the failing file/test.
 
@@ -187,15 +193,15 @@ talonbox rsync -a --delete \
   --exclude __pycache__ \
   --exclude .pytest_cache \
   --exclude node_modules \
-  ./ guest:/Users/lume/.talon/user/wolfmanstout_talon/
-talonbox restart-talon
-talonbox exec -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
+  ./ "$TALONBOX_VM":/Users/lume/.talon/user/wolfmanstout_talon/
+talonbox restart-talon "$TALONBOX_VM"
+talonbox exec "$TALONBOX_VM" -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
 ```
 
 If the triage command finds an error summary or a signature that is not already known, expand around actual errors:
 
 ```sh
-talonbox exec -- sh -lc 'grep -n -B 3 -A 12 -E "ERROR|Traceback|Exception|ModuleNotFoundError" ~/.talon/talon.log | tail -n 180 || true'
+talonbox exec "$TALONBOX_VM" -- sh -lc 'grep -n -B 3 -A 12 -E "ERROR|Traceback|Exception|ModuleNotFoundError" ~/.talon/talon.log | tail -n 180 || true'
 ```
 
 Ignore only errors captured during baseline or proven by checking the same signature on the fork tip or upstream tip. If the signature differs, stop and report.
@@ -246,15 +252,15 @@ talonbox rsync -a --delete \
   --exclude __pycache__ \
   --exclude .pytest_cache \
   --exclude node_modules \
-  ./ guest:/Users/lume/.talon/user/wolfmanstout_talon/
-talonbox restart-talon
-talonbox exec -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
+  ./ "$TALONBOX_VM":/Users/lume/.talon/user/wolfmanstout_talon/
+talonbox restart-talon "$TALONBOX_VM"
+talonbox exec "$TALONBOX_VM" -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
 ```
 
 If Talonbox reports a summarized startup error, expand it before deciding whether it is known:
 
 ```sh
-talonbox exec -- sh -lc 'grep -n -B 3 -A 12 -E "ERROR|Traceback|Exception|ModuleNotFoundError" ~/.talon/talon.log | tail -n 180 || true'
+talonbox exec "$TALONBOX_VM" -- sh -lc 'grep -n -B 3 -A 12 -E "ERROR|Traceback|Exception|ModuleNotFoundError" ~/.talon/talon.log | tail -n 180 || true'
 ```
 
 ## Final Semantic Backstop
