@@ -18,6 +18,103 @@ if hasattr(talon, "test_mode"):
             for l in [[s], s.split(), list(s)]:
                 assert text_and_dictation.capture_to_words(l) == l
 
+    def test_normalize_dictation_words():
+        assert text_and_dictation.normalize_dictation_words([]) == []
+        assert text_and_dictation.normalize_dictation_words(["..."]) == []
+        assert text_and_dictation.normalize_dictation_words(["…"]) == []
+        assert text_and_dictation.normalize_dictation_words(["Hello,", "world."]) == [
+            "hello,",
+            "world",
+        ]
+        assert text_and_dictation.normalize_dictation_words(
+            ["This", "has", "e.g.", "inside."]
+        ) == ["this", "has", "e.g.", "inside"]
+        assert text_and_dictation.normalize_dictation_words(["wait", "..."]) == ["wait"]
+        assert text_and_dictation.normalize_dictation_words(["wait", "…"]) == ["wait"]
+        assert text_and_dictation.normalize_dictation_words(["really", "?"]) == [
+            "really"
+        ]
+        assert text_and_dictation.normalize_dictation_words(["really", "?!"]) == [
+            "really"
+        ]
+        assert text_and_dictation.normalize_dictation_words(["123", "done."]) == [
+            "123",
+            "done",
+        ]
+        assert text_and_dictation.normalize_dictation_words(["I", "agree."]) == [
+            "I",
+            "agree",
+        ]
+        assert text_and_dictation.normalize_dictation_words(['"I', "agree."]) == [
+            '"I',
+            "agree",
+        ]
+        assert text_and_dictation.normalize_dictation_words(["I'll", "agree."]) == [
+            "I'll",
+            "agree",
+        ]
+        assert text_and_dictation.normalize_dictation_words(["I'll,", "agree."]) == [
+            "I'll,",
+            "agree",
+        ]
+        assert text_and_dictation.normalize_dictation_words(["I’d", "agree."]) == [
+            "I’d",
+            "agree",
+        ]
+        assert text_and_dictation.normalize_dictation_words(["NASA", "works."]) == [
+            "NASA",
+            "works",
+        ]
+        assert text_and_dictation.normalize_dictation_words(["iPhone", "works."]) == [
+            "iPhone",
+            "works",
+        ]
+        assert text_and_dictation.normalize_dictation_words(["OpenAI", "works."]) == [
+            "OpenAI",
+            "works",
+        ]
+        assert text_and_dictation.normalize_dictation_words(['"Hello', "world."]) == [
+            '"hello',
+            "world",
+        ]
+        assert text_and_dictation.normalize_dictation_words(["(Hello", "world."]) == [
+            "(hello",
+            "world",
+        ]
+        assert text_and_dictation.normalize_dictation_words(['"NASA', "works."]) == [
+            '"NASA',
+            "works",
+        ]
+
+    def test_dictation_normalization_precedes_word_replacement():
+        class FakePhrase(talon.grammar.vm.Phrase):
+            pass
+
+        previous_settings_get = getattr(text_and_dictation.settings, "get", None)
+        text_and_dictation.settings.get = lambda name: (
+            name == "user.normalize_dictation"
+        )
+        talon.actions.register_test_action(
+            "dictate", "parse_words", lambda phrase: ["Custom", "thing..."]
+        )
+        talon.actions.register_test_action(
+            "dictate",
+            "replace_words",
+            lambda words: (
+                ["CustomThing"] if words == ["custom", "thing"] else list(words)
+            ),
+        )
+        try:
+            assert text_and_dictation.capture_to_words([FakePhrase()]) == [
+                "CustomThing"
+            ]
+        finally:
+            if previous_settings_get is None:
+                del text_and_dictation.settings.get
+            else:
+                text_and_dictation.settings.get = previous_settings_get
+            talon.actions.reset_test_actions()
+
     def test_prose_number_with_suffixes():
         assert text_and_dictation.prose_number(["numeral", "5", "K"]) == "5K"
         assert text_and_dictation.prose_number(["numeral", "2.5", "M"]) == "2.5M"

@@ -23,6 +23,12 @@ mod.setting(
     default=False,
     desc="If true, log context-sensitive dictation diagnostics for timing-sensitive peek behavior.",
 )
+mod.setting(
+    "normalize_dictation",
+    type=bool,
+    default=False,
+    desc="If true, normalize model-added utterance capitalization and trailing punctuation before dictation formatting.",
+)
 setting_peek_right_after_insertion = mod.setting(
     "peek_right_after_insertion",
     type=bool,
@@ -249,12 +255,54 @@ def format_phrase(m):
 def capture_to_words(m):
     words = []
     for item in m:
-        words.extend(
-            actions.dictate.replace_words(actions.dictate.parse_words(item))
-            if isinstance(item, grammar.vm.Phrase)
-            else [item]
-        )
+        words.extend(_dictation_item_to_words(item))
     return words
+
+
+def _dictation_item_to_words(item):
+    if not isinstance(item, grammar.vm.Phrase):
+        return [item]
+
+    words = actions.dictate.parse_words(item)
+    if settings.get("user.normalize_dictation"):
+        words = normalize_dictation_words(words)
+    return actions.dictate.replace_words(words)
+
+
+def normalize_dictation_words(words):
+    if not words:
+        return words
+
+    words = list(words)
+    # Some models add sentence-ending punctuation for an utterance fragment.
+    words[-1] = re.sub(r"[^\w\s]+$", "", words[-1])
+    words = [word for word in words if word]
+    if not words:
+        return words
+
+    words[0] = normalize_dictation_start_word(words[0])
+    return words
+
+
+def normalize_dictation_start_word(word):
+    first_letter = re.search(r"[A-Za-z]", word)
+    if not first_letter:
+        return word
+
+    i = first_letter.start()
+    word_from_first_letter = word[i:]
+    # Let DictationFormat decide if the utterance starts a sentence, while
+    # preserving I and words with internal capitalization.
+    is_first_person = re.match(
+        r"^I(?:['’][A-Za-z]+)?(?:[^\w\s]+)?$", word_from_first_letter
+    )
+    has_internal_capitalization = any(
+        char.isupper() for char in word_from_first_letter[1:]
+    )
+    if is_first_person or has_internal_capitalization:
+        return word
+
+    return word[:i] + word[i].lower() + word[i + 1 :]
 
 
 def apply_formatting(m):
@@ -266,11 +314,7 @@ def apply_formatting(m):
         if isinstance(item, Callable):
             item(formatter)
         else:
-            words = (
-                actions.dictate.replace_words(actions.dictate.parse_words(item))
-                if isinstance(item, grammar.vm.Phrase)
-                else [item]
-            )
+            words = _dictation_item_to_words(item)
             for word in words:
                 result += formatter.format(word)
     return result

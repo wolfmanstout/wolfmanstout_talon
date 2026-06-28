@@ -114,6 +114,10 @@ class Module:
     def tag(self, name, desc=None):
         pass
 
+    def scope(self, func):
+        func.update = lambda: None
+        return func
+
     def action_class(self, target_class):
         # Register all the methods on the class with our actions implementation
         for name, func in inspect.getmembers(target_class, inspect.isfunction):
@@ -213,10 +217,23 @@ class App:
 
     platform = "mac"
 
+    def register(*args, **kwargs):
+        pass
+
+
+class Cron:
+    """
+    Implements something like the talon cron variable
+    """
+
+    def interval(*args, **kwargs):
+        pass
+
 
 actions = Actions()
 app = App
 clip = None
+cron = Cron()
 imgui = ImgUI()
 speech_system = SpeechSystem()
 ui = UI()
