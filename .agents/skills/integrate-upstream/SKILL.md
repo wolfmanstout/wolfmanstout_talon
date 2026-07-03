@@ -21,6 +21,7 @@ uv run prek --quiet --no-progress --color never run --all-files
 uv run pytest -q
 TALONBOX_SOURCE=golden
 TALONBOX_VM=upstream-sync
+TALONBOX_USER_DIR=/Users/admin/.talon/user/wolfmanstout_talon
 talonbox list
 talonbox clone "$TALONBOX_SOURCE" "$TALONBOX_VM"
 talonbox start "$TALONBOX_VM"
@@ -30,7 +31,7 @@ talonbox rsync -a --delete \
   --exclude __pycache__ \
   --exclude .pytest_cache \
   --exclude node_modules \
-  ./ "$TALONBOX_VM":/Users/lume/.talon/user/wolfmanstout_talon/
+  ./ "$TALONBOX_VM":"$TALONBOX_USER_DIR"/
 talonbox restart-talon "$TALONBOX_VM"
 talonbox exec "$TALONBOX_VM" -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
 <restore command printed by baseline>
@@ -193,7 +194,7 @@ talonbox rsync -a --delete \
   --exclude __pycache__ \
   --exclude .pytest_cache \
   --exclude node_modules \
-  ./ "$TALONBOX_VM":/Users/lume/.talon/user/wolfmanstout_talon/
+  ./ "$TALONBOX_VM":"$TALONBOX_USER_DIR"/
 talonbox restart-talon "$TALONBOX_VM"
 talonbox exec "$TALONBOX_VM" -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
 ```
@@ -252,7 +253,7 @@ talonbox rsync -a --delete \
   --exclude __pycache__ \
   --exclude .pytest_cache \
   --exclude node_modules \
-  ./ "$TALONBOX_VM":/Users/lume/.talon/user/wolfmanstout_talon/
+  ./ "$TALONBOX_VM":"$TALONBOX_USER_DIR"/
 talonbox restart-talon "$TALONBOX_VM"
 talonbox exec "$TALONBOX_VM" -- sh -lc 'tail -n 500 ~/.talon/talon.log | grep -n -E "ERROR|WARNING|Traceback|Exception|ModuleNotFoundError" | tail -n 120 || true'
 ```
@@ -306,6 +307,12 @@ Report:
 - any duplicate functionality identified and whether it was resolved or left for follow-up
 
 If the merge was clean, say that directly.
+
+Encourage the user to review the final merge diff with:
+
+```sh
+git show --remerge-diff HEAD
+```
 
 Stop and report instead of guessing if:
 
