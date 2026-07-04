@@ -40,12 +40,15 @@ class Actions:
         for _ in phrase[0]:
             actions.key("backspace")
 
-    def select_last_phrase():
-        """Selects the last phrase"""
+    def select_last_phrase(skip_whitespace: bool = False):
+        """Selects the last phrase, optionally skipping initial whitespace."""
         if not phrase_history:
             logging.warning("select_last_phrase(): No last phrase to select!")
             return
-        for _ in phrase_history[0][0]:
+        phrase = phrase_history[0][0]
+        if skip_whitespace:
+            phrase = phrase.lstrip()
+        for _ in phrase:
             actions.edit.extend_left()
 
     def before_last_phrase():

@@ -583,7 +583,7 @@ class Actions:
     def dictation_insert_rich_text(text: str, formats: list[str]):
         """Inserts dictated text, then applies rich text formats to it."""
         actions.user.dictation_insert(text)
-        actions.user.select_last_phrase()
+        actions.user.select_last_phrase(skip_whitespace=True)
         text_toggles = []
         for format in formats:
             if format == "bold":
