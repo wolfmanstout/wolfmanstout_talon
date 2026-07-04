@@ -580,6 +580,21 @@ class Actions:
         """Inserts text as-is, without invoking the dictation formatter."""
         actions.user.dictation_insert(text, auto_cap=False)
 
+    def dictation_insert_rich_text(text: str, formats: list[str]):
+        """Inserts dictated text, then applies rich text formats to it."""
+        actions.user.dictation_insert(text)
+        actions.user.select_last_phrase()
+        for format in formats:
+            if format == "bold":
+                actions.user.bold()
+            elif format == "italic":
+                actions.user.italic()
+            elif format == "link":
+                actions.user.link_selection_from_clipboard()
+            else:
+                logging.warning("Unknown rich text format: %s", format)
+        actions.edit.right()
+
     def dictation_insert(text: str, auto_cap: bool = True):
         """Inserts dictated text, formatted appropriately."""
         original_text = text

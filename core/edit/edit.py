@@ -25,6 +25,14 @@ mod.setting(
     desc="Path to the markdownify CLI executable for HTML to markdown conversion",
 )
 
+mod.list("rich_text_format", desc="Rich text formats")
+ctx.lists["user.rich_text_format"] = {
+    "bold": "bold",
+    "italic": "italic",
+    "italics": "italic",
+    "link": "link",
+}
+
 END_OF_WORD_SYMBOLS = ".!?;:—_/\\|@#$%^&*()[]{}<>=+-~`"
 
 
@@ -311,6 +319,14 @@ class Actions:
                     actions.edit.paste()
                     # sleep here so that clip.revert doesn't revert the clipboard too soon
                     actions.sleep("150ms")
+
+    def link_selection_from_clipboard():
+        """Links the selected text to the URL currently in the clipboard."""
+        actions.user.hyperlink()
+        actions.sleep("100ms")
+        actions.edit.paste()
+        actions.sleep("100ms")
+        actions.key("enter")
 
     def delete_right():
         """Delete character to the right"""

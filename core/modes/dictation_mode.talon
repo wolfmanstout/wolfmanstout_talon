@@ -12,6 +12,10 @@ no-caps | no caps: user.dictation_format_no_cap()
 no-space | no space: user.dictation_format_no_space()
 
 # Formatting
+formatted {user.rich_text_format}+ <user.format_text> [over]:
+    user.dictation_insert_rich_text(format_text, rich_text_format_list)
+formatted {user.rich_text_format}+ <user.raw_prose> [over]:
+    user.dictation_insert_rich_text(raw_prose, rich_text_format_list)
 formatted <user.format_text> [over]: user.dictation_insert_raw(format_text)
 
 # Corrections
