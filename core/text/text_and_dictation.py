@@ -584,16 +584,24 @@ class Actions:
         """Inserts dictated text, then applies rich text formats to it."""
         actions.user.dictation_insert(text)
         actions.user.select_last_phrase()
+        text_toggles = []
         for format in formats:
             if format == "bold":
                 actions.user.bold()
+                text_toggles.append(format)
             elif format == "italic":
                 actions.user.italic()
+                text_toggles.append(format)
             elif format == "link":
                 actions.user.link_selection_from_clipboard()
             else:
                 logging.warning("Unknown rich text format: %s", format)
         actions.edit.right()
+        for format in reversed(text_toggles):
+            if format == "bold":
+                actions.user.bold()
+            elif format == "italic":
+                actions.user.italic()
 
     def dictation_insert(text: str, auto_cap: bool = True):
         """Inserts dictated text, formatted appropriately."""
