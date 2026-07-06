@@ -23,13 +23,13 @@ class Contact:
 
     @classmethod
     def from_json(cls, contact):
-        email = contact.get("email")
+        email = contact.get("email").strip()
         if not email:
             logging.error(f"Skipping contact missing email: {contact}")
             return None
 
         # Handle full name with potential pronunciation
-        full_name_raw = contact.get("full_name", "")
+        full_name_raw = contact.get("full_name", "").strip()
         pronunciations = {}
         if ":" in full_name_raw:
             pronunciation, full_name = [x.strip() for x in full_name_raw.split(":", 1)]
@@ -78,7 +78,7 @@ class Contact:
                 pronunciations[nickname] = pronunciation
                 nicknames.append(nickname)
             else:
-                nicknames.append(nickname_raw)
+                nicknames.append(nickname_raw.strip())
 
         return Contact(
             email=email,
@@ -97,11 +97,17 @@ def on_contacts_csv(values):
     global csv_contacts
     csv_contacts = []
     for email, full_name in values.items():
+        email = email.strip()
         if not email:
             logging.error(f"Skipping contact missing email: {full_name}")
             continue
         csv_contacts.append(
-            Contact(email=email, full_name=full_name, nicknames=[], pronunciations={})
+            Contact(
+                email=email,
+                full_name=full_name.strip(),
+                nicknames=[],
+                pronunciations={},
+            )
         )
     reload_contacts()
 
