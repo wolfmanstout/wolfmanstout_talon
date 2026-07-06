@@ -9,8 +9,8 @@ settings():
 
 tag(): user.emoji
 open: key(+ o)
-archive: key(+ {)
-done: key(+ [)
+[this] archive: key(+ {)
+[this] done: key(+ [)
 this unread: key(+ _)
 gmail undo: key(+ z)
 list: key(+ u)
