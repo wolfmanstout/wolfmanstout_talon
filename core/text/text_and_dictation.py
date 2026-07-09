@@ -592,11 +592,14 @@ class Actions:
             elif format == "italic":
                 actions.user.italic()
                 text_toggles.append(format)
-            elif format == "link":
-                actions.user.link_selection_from_clipboard()
-            else:
+            elif format != "link":
                 logging.warning("Unknown rich text format: %s", format)
-        actions.edit.right()
+        if "link" in formats:
+            # Hyperlinking in Google Docs collapses the selection, so it must run
+            # after selection-preserving toggles like bold and italic.
+            actions.user.link_selection_from_clipboard()
+        else:
+            actions.edit.right()
         for format in reversed(text_toggles):
             if format == "bold":
                 actions.user.bold()
