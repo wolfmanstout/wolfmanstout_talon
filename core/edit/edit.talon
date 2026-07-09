@@ -11,9 +11,6 @@ mode: user.dictation_command
 # and `edit_command_actions.py` `simple_action_callbacks` to find strings for the action argument.
 <user.edit_action> <user.edit_modifier>: user.edit_command(edit_action, edit_modifier)
 
-before: edit.word_left()
-after: edit.word_right()
-
 # Zoom
 zoom in: edit.zoom_in()
 zoom out: edit.zoom_out()
@@ -31,17 +28,17 @@ screen down: edit.page_down()
 
 # go left, go left left down, go 5 left 2 down
 # go word left, go 2 words right
-<user.navigation_step>+: user.perform_navigation_steps(navigation_step_list)
+go <user.navigation_step>+: user.perform_navigation_steps(navigation_step_list)
 
-go line start | head: edit.line_start()
-go line end | tail: edit.line_end()
+go (line start | head): edit.line_start()
+go (line end | tail): edit.line_end()
 
-go way left | [go] west:
+go (way left | west):
     edit.line_start()
     edit.line_start()
-go way right | [go] east: edit.line_end()
-go way up | [go] north: edit.file_start()
-go way down | [go] south: edit.file_end()
+go (way right | east): edit.line_end()
+go (way up | north): edit.file_start()
+go (way down | south): edit.file_end()
 
 go top: edit.file_start()
 go bottom: edit.file_end()
@@ -92,8 +89,8 @@ padding: user.insert_between(" ", " ")
 ^redo that$: edit.redo()
 
 # Save
-[file] save: edit.save()
-[file] save all: edit.save_all()
+file save: edit.save()
+file save all: edit.save_all()
 
 [go] line mid: user.line_middle()
 
