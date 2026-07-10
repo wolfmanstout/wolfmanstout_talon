@@ -9,7 +9,21 @@ from talon import Module, actions, settings
 @dataclass
 class NavigationStep:
     modifier: Literal[
-        "wordLeft", "wordRight", "word", "left", "right", "lineUp", "lineDown"
+        "wordLeft",
+        "wordRight",
+        "word",
+        "left",
+        "right",
+        "lineUp",
+        "lineDown",
+        "lineStart",
+        "lineStartAbsolute",
+        "lineEnd",
+        "lineMiddle",
+        "fileStart",
+        "fileEnd",
+        "pageUp",
+        "pageDown",
     ]
     count: int
 
@@ -17,8 +31,23 @@ class NavigationStep:
 mod = Module()
 
 
-@mod.capture(rule="[<number_small>] {user.edit_modifier_repeatable}")
+@mod.capture(rule="line mid")
+def edit_navigation_line_middle(_m) -> NavigationStep:
+    """Navigation-only because extending an existing selection to a line's middle is unreliable."""
+    return NavigationStep("lineMiddle", 1)
+
+
+@mod.capture(
+    rule="([<number_small>] {user.edit_modifier_repeatable}) | "
+    "{user.edit_modifier_boundary} | <user.edit_navigation_line_middle>"
+)
 def navigation_step(m) -> NavigationStep:
+    with suppress(AttributeError):
+        return m.edit_navigation_line_middle
+
+    with suppress(AttributeError):
+        return NavigationStep(m.edit_modifier_boundary, 1)
+
     count = 1
     modifier = m.edit_modifier_repeatable
 
@@ -51,6 +80,22 @@ class Actions:
                     repeat_action(actions.edit.up, step.count)
                 case "lineDown":
                     repeat_action(actions.edit.down, step.count)
+                case "lineStart":
+                    repeat_action(actions.edit.line_start, step.count)
+                case "lineStartAbsolute":
+                    repeat_action(actions.edit.line_start, 2)
+                case "lineEnd":
+                    repeat_action(actions.edit.line_end, step.count)
+                case "lineMiddle":
+                    repeat_action(actions.user.line_middle, step.count)
+                case "fileStart":
+                    repeat_action(actions.edit.file_start, step.count)
+                case "fileEnd":
+                    repeat_action(actions.edit.file_end, step.count)
+                case "pageUp":
+                    repeat_action(actions.edit.page_up, step.count)
+                case "pageDown":
+                    repeat_action(actions.edit.page_down, step.count)
 
 
 def repeat_action(action: Callable, count: int, delay: bool = False):

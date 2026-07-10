@@ -27,24 +27,8 @@ screen up: edit.page_up()
 screen down: edit.page_down()
 
 # go left, go left left down, go 5 left 2 down
-# go word left, go 2 words right
+# go word left, go 2 words right, go down east
 go <user.navigation_step>+: user.perform_navigation_steps(navigation_step_list)
-
-go (line start | head): edit.line_start()
-go (line end | tail): edit.line_end()
-
-go (way left | west):
-    edit.line_start()
-    edit.line_start()
-go (way right | east): edit.line_end()
-go (way up | north): edit.file_start()
-go (way down | south): edit.file_end()
-
-go top: edit.file_start()
-go bottom: edit.file_end()
-
-go page up: edit.page_up()
-go page down: edit.page_down()
 
 # Indentation
 indent [more]: edit.indent_more()
@@ -91,8 +75,6 @@ padding: user.insert_between(" ", " ")
 # Save
 file save: edit.save()
 file save all: edit.save_all()
-
-[go] line mid: user.line_middle()
 
 # Additions
 bold this: user.bold()

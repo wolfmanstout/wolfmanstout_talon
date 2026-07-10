@@ -5,10 +5,22 @@ from dataclasses import dataclass
 from talon import Module, actions
 
 mod = Module()
-mod.list("edit_modifier", desc="Modifiers for the edit command")
+
+# Edit modifiers are split by grammar and behavior:
+# - edit_modifier targets whole structural units and is edit-only.
+# - edit_modifier_boundary names positions shared by edit and navigation commands.
+# - edit_modifier_repeatable names incremental movements and accepts a count.
+mod.list(
+    "edit_modifier",
+    desc="Non-repeatable structural targets for edit commands, such as line, paragraph, or document.",
+)
+mod.list(
+    "edit_modifier_boundary",
+    desc="Non-repeatable caret positions. Navigation commands move to them; edit commands extend the selection to them.",
+)
 mod.list(
     "edit_modifier_repeatable",
-    desc="Edit modifiers that are repeatable. Say a number before the modifier to repeat the action that many times.",
+    desc="Repeatable caret movements shared by edit and navigation commands. Say a number before the modifier to repeat it.",
 )
 
 
@@ -25,7 +37,8 @@ class EditModifierCallback:
 
 
 @mod.capture(
-    rule="({user.edit_modifier}) | ([<number_small>] {user.edit_modifier_repeatable})"
+    rule="({user.edit_modifier} | {user.edit_modifier_boundary}) | "
+    "([<number_small>] {user.edit_modifier_repeatable})"
 )
 def edit_modifier(m) -> EditModifier:
     count = 1
@@ -34,6 +47,9 @@ def edit_modifier(m) -> EditModifier:
 
     with suppress(AttributeError):
         type = m.edit_modifier
+
+    with suppress(AttributeError):
+        type = m.edit_modifier_boundary
 
     with suppress(AttributeError):
         type = m.edit_modifier_repeatable
@@ -54,8 +70,11 @@ modifiers = [
     EditModifierCallback("line", actions.edit.select_line),
     EditModifierCallback("lineEnd", actions.edit.extend_line_end),
     EditModifierCallback("lineStart", actions.edit.extend_line_start),
+    EditModifierCallback("lineStartAbsolute", actions.edit.extend_line_start),
     EditModifierCallback("fileStart", actions.edit.extend_file_start),
     EditModifierCallback("fileEnd", actions.edit.extend_file_end),
+    EditModifierCallback("pageUp", actions.edit.extend_page_up),
+    EditModifierCallback("pageDown", actions.edit.extend_page_down),
     EditModifierCallback("selection", actions.skip),
 ]
 

@@ -1,0 +1,21 @@
+list: user.edit_modifier_boundary
+-
+
+line start: lineStart
+head: lineStart
+way left: lineStartAbsolute
+west: lineStartAbsolute
+line end: lineEnd
+tail: lineEnd
+way right: lineEnd
+east: lineEnd
+file start: fileStart
+way up: fileStart
+north: fileStart
+top: fileStart
+file end: fileEnd
+way down: fileEnd
+south: fileEnd
+bottom: fileEnd
+page up: pageUp
+page down: pageDown

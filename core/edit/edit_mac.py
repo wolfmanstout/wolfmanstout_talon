@@ -58,10 +58,10 @@ class EditActions:
         actions.key("shift-up")
 
     def extend_page_down():
-        actions.key("cmd-shift-pagedown")
+        actions.key("shift-pagedown")
 
     def extend_page_up():
-        actions.key("cmd-shift-pageup")
+        actions.key("shift-pageup")
         # action(edit.extend_paragraph_end):
         # action(edit.extend_paragraph_next()):
         # action(edit.extend_paragraph_previous()):
