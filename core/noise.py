@@ -2,7 +2,7 @@
 Map noises (like pop) to actions so they can have contextually differing behavior
 """
 
-from talon import Module, actions, cron, noise, settings
+from talon import Module, actions, cron, settings
 
 mod = Module()
 hiss_cron = None
@@ -47,5 +47,5 @@ def noise_trigger_hiss_debounce(active: bool):
         actions.user.noise_trigger_hiss(active)
 
 
-noise.register("pop", lambda _: actions.user.noise_trigger_pop())
-noise.register("hiss", noise_trigger_hiss_debounce)
+# noise.register("pop", lambda _: actions.user.noise_trigger_pop())
+# noise.register("hiss", noise_trigger_hiss_debounce)
