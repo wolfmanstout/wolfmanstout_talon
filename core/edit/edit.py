@@ -321,7 +321,10 @@ class Actions:
                     actions.sleep("150ms")
 
     def link_selection_from_clipboard():
-        """Links the selected text to the URL currently in the clipboard."""
+        """Links the selected text to the URL currently in the clipboard.
+
+        Afterwards, the selection should collapse to the right of the newly-linked text.
+        """
         actions.user.hyperlink()
         actions.sleep("100ms")
         actions.edit.paste()
