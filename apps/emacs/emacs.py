@@ -235,12 +235,17 @@ class EditActions:
     def file_end():
         actions.user.emacs("end-of-buffer")
 
-    # works for eg 'select to top', but not if preceded by other selections :(
+    # These commands push the original point to the mark but leave the region
+    # inactive. Exchange twice to reactivate it without changing direction.
     def extend_file_start():
         actions.user.emacs("beginning-of-buffer")
+        actions.user.emacs("exchange-point-and-mark")
+        actions.user.emacs("exchange-point-and-mark")
 
     def extend_file_end():
         actions.user.emacs("end-of-buffer")
+        actions.user.emacs("exchange-point-and-mark")
+        actions.user.emacs("exchange-point-and-mark")
 
     def select_none():
         actions.user.emacs("keyboard-quit")
@@ -279,12 +284,6 @@ class EditActions:
 
     def line_end():
         actions.user.emacs("move-end-of-line")
-
-    def extend_line_start():
-        actions.key("shift-ctrl-a")
-
-    def extend_line_end():
-        actions.key("shift-ctrl-e")
 
     def line_swap_down():
         actions.user.emacs("move-text-down")

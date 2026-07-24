@@ -17,7 +17,7 @@ beginning-of-buffer, meta-<
 bookmark-jump, ctrl-x r b
 bookmark-set, ctrl-x r m
 browse-kill-ring,, b-k-r
-buffer-menu, ctrl-x ctrl-b
+buffer-menu
 bury-buffer,, bur
 byte-compile-file,, by-c
 byte-recompile-directory
@@ -33,7 +33,7 @@ comint-previous-input, meta-p
 comint-show-output, ctrl-c ctrl-r
 comment-dwim, meta-;
 comment-line,, comment-l
-comment-region, ctrl-c ;
+comment-region
 compile
 compile-defun,, co-def
 copy-rectangle-as-kill, ctrl-x r meta-w
@@ -224,22 +224,20 @@ previous-error, meta-g p
 profiler-report
 profiler-start
 profiler-stop
+project-async-shell-command, ctrl-x p &
+project-compile, ctrl-x p c
+project-dired, ctrl-x p shift-d
+project-eshell, ctrl-x p e
 project-find-file, ctrl-x p f
 project-find-regexp, ctrl-x p g
+project-kill-buffers, ctrl-x p k
 project-query-replace-regexp, ctrl-x p r
-project-search, ctrl-x p ctrl-s
-project-switch-project
+project-search
+project-shell, ctrl-x p s
+project-shell-command, ctrl-x p !
+project-switch-project, ctrl-x p p
+project-switch-to-buffer, ctrl-x p b
 project-vc-dir, ctrl-x p v
-projectile-compile-project, ctrl-x p c
-projectile-dired, ctrl-x p d
-projectile-find-file, ctrl-c p f
-projectile-kill-buffers, ctrl-x p k
-projectile-run-async-shell-command-in-root, ctrl-x p &
-projectile-run-eshell, ctrl-x p e
-projectile-run-shell, ctrl-x p s
-projectile-run-shell-command-in-root, ctrl-x p !
-projectile-switch-project, ctrl-c p p
-projectile-switch-to-buffer, ctrl-x p b
 push-mark-no-activate, ctrl-\
 python-check, ctrl-c ctrl-v
 python-indent-shift-left, ctrl-c <
@@ -325,7 +323,7 @@ talonscript-mode
 text-mode,, text-m
 toggle-debug-on-error,, t-d-on-e
 toggle-debug-on-quit,, t-d-on-q
-toggle-input-method, ctrl-\
+toggle-input-method
 toggle-truncate-lines, ctrl-x x t
 toggle-word-wrap
 transient-mark-mode,, tr-m-m
