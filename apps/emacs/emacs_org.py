@@ -15,19 +15,19 @@ app: emacs_org
 @ctx.action_class("edit")
 class EditActions:
     def extend_word_left():
-        actions.key("ctrl-shift-left")
+        actions.user.emacs("org-shiftcontrolleft")
 
     def extend_word_right():
-        actions.key("ctrl-shift-right")
+        actions.user.emacs("org-shiftcontrolright")
 
     def indent_more():
-        actions.key("alt-right")
+        actions.user.emacs("org-metaright")
 
     def indent_less():
-        actions.key("alt-left")
+        actions.user.emacs("org-metaleft")
 
     def word_left():
-        actions.key("ctrl-left")
+        actions.user.emacs("backward-symbol")
 
     def word_right():
-        actions.key("ctrl-right")
+        actions.user.emacs("forward-symbol")

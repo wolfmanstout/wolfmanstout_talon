@@ -1,21 +1,36 @@
 Command, Key binding, Short form, Spoken form
 abort-recursive-edit, ctrl-]
 auto-fill-mode,, auto-f
+back-to-indentation, meta-m
+backward-after-char, ctrl-c c e
+backward-before-char, ctrl-c c b
+backward-cc-expression, ctrl-c c ctrl-b
+backward-kill-word, meta-backspace
 backward-paragraph, meta-{
 backward-sentence, meta-a
 backward-sexp, meta-ctrl-b
+backward-symbol, ctrl-left
 backward-up-list, meta-ctrl-up
 backward-word, meta-b
 balance-windows, ctrl-x +
 beginning-of-buffer, meta-<
+bookmark-jump, ctrl-x r b
+bookmark-set, ctrl-x r m
 browse-kill-ring,, b-k-r
 buffer-menu, ctrl-x ctrl-b
 bury-buffer,, bur
 byte-compile-file,, by-c
 byte-recompile-directory
 byte-recompile-file
+cider-load-buffer, ctrl-c ctrl-k
+cider-repl-set-ns, ctrl-c meta-n
+clang-include-fixer-at-point
 clear-rectangle, ctrl-x r c
 clone-indirect-buffer,, clo-i
+comint-history-isearch-backward-regexp, meta-r
+comint-next-input, meta-n
+comint-previous-input, meta-p
+comint-show-output, ctrl-c ctrl-r
 comment-dwim, meta-;
 comment-line,, comment-l
 comment-region, ctrl-c ;
@@ -23,59 +38,98 @@ compile
 compile-defun,, co-def
 copy-rectangle-as-kill, ctrl-x r meta-w
 copy-rectangle-to-register, ctrl-x r r
+copy-text-down, meta-shift-down
+copy-text-up, meta-shift-up
 copy-to-register, ctrl-x r s
+copy-url-at-point, ctrl-c c u
+cs-feeling-lucky
 custom-theme-visit-theme
+customize-apropos
 customize-face
 customize-group
 customize-variable
+delete-indentation, meta-shift-6
 delete-other-windows, ctrl-x 1
 delete-rectangle, ctrl-x r d
+delete-region, ctrl-c c ctrl-w
 delete-window, ctrl-x 0
 describe-character,, desc-char
+describe-face
+describe-text-properties
 diff-buffer-with-file,, d-b-w-f
-display-buffer, ctrl-x 4 ctrl-o
+dired, ctrl-x d
+dired-hide-details-mode
 dired-jump, ctrl-x ctrl-j
 dired-jump-other-window, ctrl-x 4 ctrl-j
+dired-omit-mode
 display-buffer, ctrl-x 4 ctrl-o
 display-line-numbers-mode,, dis-num
 down-list, meta-ctrl-down
 electric-quote-local-mode
 electric-quote-mode
+emacs-lisp-mode
 end-of-buffer, meta->
 enlarge-window, ctrl-x ^
 enlarge-window-horizontally, ctrl-x }
+er/contract-region, ctrl-+
+er/expand-region, ctrl-=
+eval-defun, meta-ctrl-x
 eval-expression, meta-:
 eval-print-last-sexp,, ev-p
 eval-region,, ev-r
 exchange-point-and-mark, ctrl-x ctrl-x
-execute-extended-command, meta-x
+exchange-point-and-mark-no-activate, ctrl-c ctrl-x
+execute-extended-command, ctrl-c meta-x
+ff-find-other-file
+ffap
 fileloop-continue,, filel
 fill-paragraph, meta-q
 find-file, ctrl-x ctrl-f
+find-file-other-window, ctrl-x 4 f
 font-lock-update, ctrl-x x f
+forward-after-char, ctrl-c c f
+forward-before-char, ctrl-c c s
+forward-cc-expression, ctrl-c c ctrl-f
 forward-paragraph, meta-}
 forward-sentence, meta-e
 forward-sexp, meta-ctrl-f
+forward-symbol, ctrl-right
 forward-word, meta-f
 fundamental-mode,, fun-m
 global-display-line-numbers-mode,, g-d-l-n-m
 global-hl-line-mode,, g-hl-l-m
 global-visual-line-mode,, gl-v-l-m
+goto-last-change, ctrl-c c c
 goto-line, meta-g meta-g
+goto-modulo-line, ctrl-c c g
+helm-mini
+help-go-back
 highlight-lines-matching-regexp, meta-s h l
 highlight-phrase, meta-s h p
 highlight-regexp, meta-s h r
 hl-line-mode,, hl-l-m
+html-mode
+ido-fallback-command, ctrl-f
+ido-goto-symbol
+ido-recentf-open, ctrl-x ctrl-r
+ido-reread-directory, ctrl-l
 indent-region, meta-ctrl-\
 indent-rigidly, ctrl-x tab
+indent-sexp, meta-ctrl-q
 insert-char, ctrl-x 8 enter
+insert-parentheses, meta-(
 insert-register, ctrl-x r i
 isearch-backward, ctrl-r
 isearch-backward-regexp, meta-ctrl-r
 isearch-forward, ctrl-s
 isearch-forward-regexp, meta-ctrl-s
 isearch-forward-symbol, meta-s _
+isearch-forward-symbol-at-point, meta-s .
 isearch-forward-word, meta-s w
+isearch-repeat-backward, ctrl-r
+isearch-repeat-forward, ctrl-s
+js-mode
+jump-to-mark, ctrl-<
 jump-to-register, ctrl-x r j
 keyboard-quit, ctrl-g
 kill-buffer, ctrl-x k
@@ -90,18 +144,50 @@ kill-word, meta-d
 kmacro-end-and-call-macro, ctrl-x e
 kmacro-end-macro, ctrl-x )
 kmacro-start-macro, ctrl-x (
+lisp-interaction-mode
+list-bookmarks, ctrl-x r l
 list-packages
+magit-status, ctrl-c m
 make-frame-command, ctrl-x 5 2
+man
 mark-paragraph, meta-h
 mark-sexp, meta-ctrl-@
 mark-whole-buffer, ctrl-x h
+markdown-mode
+menu-bar-mode
 move-beginning-of-line, ctrl-a
 move-end-of-line, ctrl-e
+move-text-down, meta-down
+move-text-up, meta-up
+my-org-beginning-of-line, ctrl-c c ctrl-a
+my-org-dedent-to-top-level, ctrl-c c meta-left
 narrow-to-region, ctrl-x n n
 next-buffer, ctrl-x right
 next-error, meta-g n
+next-line, down
 occur, meta-s o
 open-rectangle, ctrl-x r o
+org-archive-subtree-default, ctrl-c ctrl-x ctrl-a
+org-backward-heading-same-level, ctrl-c ctrl-b
+org-ctrl-c-star, ctrl-c *
+org-forward-heading-same-level, ctrl-c ctrl-f
+org-insert-heading-respect-content, ctrl-enter
+org-insert-todo-heading, meta-shift-enter
+org-insert-todo-heading-respect-content, ctrl-shift-enter
+org-mark-element, meta-h
+org-meta-return, meta-enter
+org-metaleft, meta-left
+org-metaright, meta-right
+org-open-at-point, ctrl-c ctrl-o
+org-paste-special, ctrl-c ctrl-x ctrl-y
+org-shiftcontrolleft, ctrl-shift-left
+org-shiftcontrolright, ctrl-shift-right
+org-shiftmetadown, meta-shift-down
+org-shiftmetaleft, meta-shift-left
+org-shiftmetaright, meta-shift-right
+org-shiftmetaup, meta-shift-up
+org-show-todo-tree, ctrl-c / t
+org-todo, ctrl-c ctrl-t
 other-frame, ctrl-x 5 o
 other-window, ctrl-x o
 outline-backward-same-level, ctrl-c @ ctrl-b
@@ -115,6 +201,7 @@ outline-hide-sublevels, ctrl-c @ ctrl-q
 outline-hide-subtree, ctrl-c @ ctrl-d
 outline-insert-heading, ctrl-c @ RET
 outline-mark-subtree, ctrl-c @ @
+outline-minor-mode
 outline-move-subtree-down, ctrl-c @ ctrl-v
 outline-move-subtree-up, ctrl-c @ ctrl-^
 outline-next-visible-heading, ctrl-c @ ctrl-n
@@ -128,10 +215,15 @@ outline-show-subtree, ctrl-c @ ctrl-s
 outline-up-heading, ctrl-c @ ctrl-u
 overwrite-mode,, overwr
 package-autoremove
+paredit-mode
+point-to-register, ctrl-x r space
 pop-global-mark, ctrl-x ctrl-@
 pop-to-mark-command, ctrl-u ctrl-space
 previous-buffer, ctrl-x left
 previous-error, meta-g p
+profiler-report
+profiler-start
+profiler-stop
 project-find-file, ctrl-x p f
 project-find-regexp, ctrl-x p g
 project-query-replace-regexp, ctrl-x p r
@@ -140,23 +232,41 @@ project-switch-project
 project-vc-dir, ctrl-x p v
 projectile-compile-project, ctrl-x p c
 projectile-dired, ctrl-x p d
+projectile-find-file, ctrl-c p f
 projectile-kill-buffers, ctrl-x p k
 projectile-run-async-shell-command-in-root, ctrl-x p &
 projectile-run-eshell, ctrl-x p e
 projectile-run-shell, ctrl-x p s
 projectile-run-shell-command-in-root, ctrl-x p !
+projectile-switch-project, ctrl-c p p
 projectile-switch-to-buffer, ctrl-x p b
+push-mark-no-activate, ctrl-\
+python-check, ctrl-c ctrl-v
+python-indent-shift-left, ctrl-c <
+python-indent-shift-right, ctrl-c >
+python-mode
+python-shell-send-buffer
+python-shell-send-defun
+python-shell-send-file
+python-shell-send-region
+python-shell-send-statement
+python-shell-switch-to-shell
 query-replace, meta-%
 query-replace-regexp, meta-ctrl-%
+rainbow-mode
 read-only-mode, ctrl-x ctrl-q
 recenter-top-bottom, ctrl-l
-recenter-top-bottom, ctrl-l
+recompile
 rectangle-number-lines, ctrl-x r N
 rename-buffer, ctrl-x x r, ren-b
+rename-file
 rename-uniquely, ctrl-x x u
 reverse-region
 revert-buffer,, rev-buf
 revert-buffer-quick, ctrl-x x g
+rgrep
+run-python
+safe-kill-line, ctrl-c c k
 save-buffer, ctrl-x ctrl-s
 save-buffers-kill-emacs,, s-b-k-e
 save-some-buffers, ctrl-x s
@@ -165,11 +275,15 @@ scroll-other-window-down, meta-pageup
 server-edit, ctrl-x #
 set-mark-command, ctrl-@
 sh-mode
+shell
 shell-command, meta-!
 shell-command-on-region, meta-|
 shell-script-mode
 shrink-window-horizontally, ctrl-x {
 shrink-window-if-larger-than-buffer, ctrl-x -
+smartscan-symbol-go-backward, meta-p
+smartscan-symbol-go-forward, meta-n
+smartscan-symbol-replace, meta-'
 smerge-combine-with-next
 smerge-diff-base-lower
 smerge-diff-base-upper
@@ -180,23 +294,34 @@ smerge-keep-base
 smerge-keep-current, ctrl-c ^ enter
 smerge-keep-lower, ctrl-c ^ l
 smerge-keep-upper, ctrl-c ^ u
+smerge-mode
 smerge-next, ctrl-c ^ n
 smerge-prev, ctrl-c ^ p
 smerge-refine, ctrl-c ^ R
 smerge-resolve, ctrl-c ^ r
+smex, meta-x
 sort-lines
 sort-words
+sp-backward-sexp, meta-ctrl-b
+sp-backward-up-sexp, meta-ctrl-u
+sp-down-sexp, meta-ctrl-d
+sp-forward-sexp, meta-ctrl-f
+sp-kill-sexp, meta-ctrl-k
 split-window-below, ctrl-x 2
 split-window-right, ctrl-x 3
+subword-mode
 switch-to-buffer, ctrl-x b
 switch-to-buffer-other-window, ctrl-x 4 b
 tab-bar-mode
 tab-close, ctrl-x t 0
 tab-close-other, ctrl-x t 1
+tab-last
 tab-new, ctrl-x t 2
 tab-next, ctrl-x t o
 tab-previous, ctrl-x t O
+tab-select
 tab-undo, ctrl-x t u
+talonscript-mode
 text-mode,, text-m
 toggle-debug-on-error,, t-d-on-e
 toggle-debug-on-quit,, t-d-on-q
@@ -211,15 +336,29 @@ transpose-sentences,, tr-sen
 transpose-sexps, meta-ctrl-t
 transpose-words, meta-t
 undo, ctrl-_
+undo-redo, ctrl-shift-/
 unhighlight-regexp, meta-s h u
 universal-argument, ctrl-u
+up-list
 vc-annotate, ctrl-x v g
+vc-diff, ctrl-x v =
+vc-dir, ctrl-x v d
+vi-open-line-above, meta-enter
+vi-open-line-below, ctrl-enter
 view-lossage, ctrl-h l
+visit-directory-shell, ctrl-c c $
 visit-tags-table,, v-t-t
+visit-vc-directory-shell, ctrl-c c v
 visual-line-mode,, visu-l-m
+web-mode-element-close, ctrl-c ctrl-e /
 whitespace-cleanup,, wh-cl
 whitespace-mode,, white-m
 widen, ctrl-x n w
+windmove-down
+windmove-left
+windmove-right
+windmove-up
+write-file, ctrl-x ctrl-w
 xref-find-apropos, meta-ctrl-.
 xref-find-definitions, meta-.
 xref-find-definitions-other-frame, ctrl-x 5 .
@@ -228,4 +367,8 @@ xref-find-references, meta-?
 xref-find-references-and-replace
 xref-go-back,"meta-,"
 yank, ctrl-y
+yank-pop, meta-y
 yank-rectangle, ctrl-x r y
+yas-new-snippet, ctrl-c & ctrl-n
+yas-reload-all
+yas-visit-snippet-file, ctrl-c & ctrl-v

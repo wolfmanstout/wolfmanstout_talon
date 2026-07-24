@@ -1,15 +1,9 @@
 app: emacs
 -
 
-settings():
-    key_wait = 2
-
 # General
-^emacs close now$: key(ctrl-x ctrl-c)
-exec: key(alt-x)
-helm: key(ctrl-x c)
-helm open: key(ctrl-x c b)
-prefix: key(ctrl-u)
+^emacs close now$: user.emacs("save-buffers-kill-emacs")
+exec: user.emacs("smex")
 reload: key(g)
 quit: key(q)
 confirm:
@@ -19,179 +13,158 @@ deny:
     insert("no")
     key(enter)
 link open:
-    key(ctrl-c c u)
+    user.emacs("copy-url-at-point")
     sleep(25ms)
     user.open_url(clip.text())
 
 # Introspection
-help variable: key(ctrl-h v)
-help function: key(ctrl-h f)
-help key: key(ctrl-h k)
-help mode: key(ctrl-h m)
-help back: key(ctrl-c ctrl-b)
-customize open:
-    key(ctrl-c alt-x)
-    insert("customize-apropos")
-    key(enter)
+help variable: user.emacs_help("v")
+help function: user.emacs_help("f")
+help key: user.emacs_help("k")
+help mode: user.emacs_help("m")
+help back: user.emacs("help-go-back")
+customize open: user.emacs("customize-apropos")
 
 # Filesystem
-save as: key(ctrl-x ctrl-w)
-save all: key(ctrl-x s)
-save all now: key(ctrl-u ctrl-x s)
-file open: key(ctrl-x ctrl-f)
-ido close: key(ctrl-f)
-ido reload: key(ctrl-l)
-directory open: key(ctrl-x d)
-file open recent: key(ctrl-x ctrl-r)
-file open split: key(ctrl-x 4 f)
-file open project: key(ctrl-c p f)
-file open simulator: key(ctrl-c c p s)
-project open: key(ctrl-c p p)
-project switch: key(ctrl-c s)
-result next: key(alt-,)
-def open: key(alt-.)
-ref open: key(alt-shift-/ enter)
-def close: key(alt-,)
-R grep:
-    key(ctrl-c alt-x)
-    insert("rgrep")
+save as: user.emacs("write-file")
+save all: user.emacs("save-some-buffers")
+save all now: user.emacs("save-some-buffers", 1)
+ido close: user.emacs("ido-fallback-command")
+ido reload: user.emacs("ido-reread-directory")
+directory open: user.emacs("dired")
+file open recent: user.emacs("ido-recentf-open")
+file open split: user.emacs("find-file-other-window")
+file open project: user.emacs("projectile-find-file")
+project open: user.emacs("projectile-switch-project")
+result next: user.emacs("xref-go-back")
+def open: user.emacs("xref-find-definitions")
+ref open:
+    user.emacs("xref-find-references")
     key(enter)
-code search:
-    key(ctrl-c alt-x)
-    insert("cs-feeling-lucky")
-    key(enter)
+def close: user.emacs("xref-go-back")
+R grep: user.emacs("rgrep")
+code search: user.emacs("cs-feeling-lucky")
 
 # Bookmarks
-bookmark open: key(ctrl-x r b)
-bookmark save: key(ctrl-x r m)
-bookmark list: key(ctrl-x r l)
+bookmark open: user.emacs("bookmark-jump")
+bookmark save: user.emacs("bookmark-set")
+bookmark list: user.emacs("list-bookmarks")
 
 # Movement
-last | preev: key(ctrl-r)
-next: key(ctrl-s)
-layer (last | preev): key(ctrl-alt-b)
-layer next: key(ctrl-alt-f)
-layer down: key(ctrl-alt-d)
-layer up: key(ctrl-alt-u)
-exper (last | preev): key(ctrl-c c ctrl-b)
-exper next: key(ctrl-c c ctrl-f)
-word (last | preev): key(alt-p)
-word next: key(alt-n)
-error (last | preev): key(f11)
-error next: key(f12)
-search edit: key(alt-e)
-search word: key(alt-s w)
-search symbol: key(alt-s _)
-regex (last | preev): key(ctrl-alt-r)
-regex next: key(ctrl-alt-s)
-occur: key(alt-s o)
-symbol (last | preev): key(alt-s . ctrl-r ctrl-r)
-symbol next: key(alt-s . ctrl-s)
+last | preev: user.emacs("isearch-backward")
+next: user.emacs("isearch-forward")
+layer (last | preev): user.emacs("sp-backward-sexp")
+layer next: user.emacs("sp-forward-sexp")
+layer down: user.emacs("sp-down-sexp")
+layer up: user.emacs("sp-backward-up-sexp")
+exper (last | preev): user.emacs("backward-cc-expression")
+exper next: user.emacs("forward-cc-expression")
+word (last | preev): user.emacs("smartscan-symbol-go-backward")
+word next: user.emacs("smartscan-symbol-go-forward")
+error preev: user.emacs("previous-error")
+regex (last | preev): user.emacs("isearch-backward-regexp")
+regex next: user.emacs("isearch-forward-regexp")
+occur: user.emacs("occur")
+symbol (last | preev):
+    user.emacs("isearch-forward-symbol-at-point")
+    user.emacs("isearch-repeat-backward")
+    user.emacs("isearch-repeat-backward")
+symbol next:
+    user.emacs("isearch-forward-symbol-at-point")
+    user.emacs("isearch-repeat-forward")
 
 # Editing
-ahead: key(alt-f)
-behind: key(alt-b)
-aheads delete | clear ahead: key(alt-d)
-behinds delete | clear behind: key(alt-backspace)
-aheads | select ahead: key(ctrl-space alt-f)
-behinds | select behind: key(ctrl-space alt-b)
-line open up: key(alt-enter)
-line open down: key(ctrl-enter)
-(this | line) copy up: key(alt-shift-up)
-(line | lines) join: key(alt-shift-6)
+ahead: user.emacs("forward-word")
+behind: user.emacs("backward-word")
+aheads delete | clear ahead: user.emacs("kill-word")
+behinds delete | clear behind: user.emacs("backward-kill-word")
+aheads | select ahead:
+    user.emacs("set-mark-command")
+    user.emacs("forward-word")
+behinds | select behind:
+    user.emacs("set-mark-command")
+    user.emacs("backward-word")
+line open up: user.emacs("vi-open-line-above")
+line open down: user.emacs("vi-open-line-below")
+(this | line) copy up: user.emacs("copy-text-up")
+(line | lines) join: user.emacs("delete-indentation")
 line <number_small> open:
-    key(ctrl-u)
-    insert("{number_small}")
-    key(ctrl-c c g alt-enter)
-this indent: key(ctrl-alt-\)
-(this | here) comment: key(alt-;)
-this format [clang]: key(ctrl-alt-q)
-this format comment: key(alt-q)
-replace: key(alt-shift-5)
-regex replace: key(ctrl-alt-shift-5)
-symbol replace: key(alt-')
-paste (other | last | preev): key(alt-y)
-layer select: key(ctrl-alt-shift-2)
-layer kill: key(ctrl-alt-k)
-select more: key(ctrl-=)
-select less: key(ctrl-+)
-this parens: key(alt-()
-tag close: key(ctrl-c ctrl-e)
+    user.jump_modulo_line(number_small)
+    user.emacs("vi-open-line-above")
+this indent: user.emacs("indent-region")
+(this | here) comment: user.emacs("comment-dwim")
+this format [clang]: user.emacs("indent-sexp")
+this format comment: user.emacs("fill-paragraph")
+symbol replace: user.emacs("smartscan-symbol-replace")
+paste (other | last | preev): user.emacs("yank-pop")
+layer select: user.emacs("mark-sexp")
+layer kill: user.emacs("sp-kill-sexp")
+select more: user.emacs("er/expand-region")
+select less: user.emacs("er/contract-region")
+this parens: user.emacs("insert-parentheses")
+tag close: user.emacs("web-mode-element-close")
 
 # Registers
-mark save (reg | rej) <user.letter>: key("ctrl-x r space {letter}")
-go (reg | rej) <user.letter>: key("ctrl-x r j {letter}")
-copy (reg | rej) <user.letter>: key("ctrl-x r s {letter}")
-(reg | rej) <user.letter> paste: key("ctrl-u ctrl-x r i {letter}")
+mark save (reg | rej) <user.letter>:
+    user.emacs("point-to-register")
+    key("{letter}")
+go (reg | rej) <user.letter>:
+    user.emacs("jump-to-register")
+    key("{letter}")
+copy (reg | rej) <user.letter>:
+    user.emacs("copy-to-register")
+    key("{letter}")
+(reg | rej) <user.letter> paste:
+    user.emacs_prefix()
+    user.emacs("insert-register")
+    key("{letter}")
 
 # Templates
-(snippet | template) open: key(ctrl-c & ctrl-v)
-(snippet | template) new: key(ctrl-c & ctrl-n)
-(snippets | templates) reload:
-    key(ctrl-c alt-x)
-    insert("yas-reload-all")
-    key(enter)
+(snippet | template) open: user.emacs("yas-visit-snippet-file")
+(snippet | template) new: user.emacs("yas-new-snippet")
+(snippets | templates) reload: user.emacs("yas-reload-all")
 
 # Compilation
 file build: key(ctrl-c ctrl-g)
 file test: key(ctrl-c ctrl-t)
-recompile:
-    key(ctrl-c alt-x)
-    insert("recompile")
-    key(enter)
+recompile: user.emacs("recompile")
 
 # Dired
-toggle details:
-    key(ctrl-c alt-x)
-    insert("dired-hide-details-mode")
-    key(enter)
+toggle details: user.emacs("dired-hide-details-mode")
 
 # Web editing
-JavaScript mode:
-    key(ctrl-c alt-x)
-    insert("js-mode")
-    key(enter)
-HTML mode:
-    key(ctrl-c alt-x)
-    insert("html-mode")
-    key(enter)
+JavaScript mode: user.emacs("js-mode")
+HTML mode: user.emacs("html-mode")
 
 # C++
-header open: key(ctrl-x ctrl-h)
-header open split: key(ctrl-x 3 ctrl-x o ctrl-x ctrl-h)
+header open: user.emacs("ff-find-other-file")
+header open split:
+    user.emacs("split-window-right")
+    user.emacs("other-window")
+    user.emacs("ff-find-other-file")
 import copy: key(f5)
 import paste: key(f6)
-this import:
-    key(ctrl-c alt-x)
-    insert("clang-include-fixer-at-point")
-    key(enter)
+this import: user.emacs("clang-include-fixer-at-point")
 
 # Python
-pie flakes: key(ctrl-c ctrl-v)
+pie flakes: user.emacs("python-check")
 
 # Shell
-shell open:
-    key(ctrl-c alt-x)
-    insert("shell")
-    key(enter)
-shell open directory: key(ctrl-c c $)
-shell open vc: key(ctrl-c c v)
+shell open: user.emacs("shell")
+shell open directory: user.emacs("visit-directory-shell")
+shell open vc: user.emacs("visit-vc-directory-shell")
 
 # Clojure
-closure compile: key(ctrl-c ctrl-k)
-closure namespace: key(ctrl-c alt-n)
+closure compile: user.emacs("cider-load-buffer")
+closure namespace: user.emacs("cider-repl-set-ns")
 
 # Lisp
-function run: key(ctrl-alt-x)
-this run:
-    key(ctrl-c alt-x)
-    insert("eval-region")
-    key(enter)
+function run: user.emacs("eval-defun")
+this run: user.emacs("eval-region")
 
 # Version control
-magit open: key(ctrl-c m)
-diff open: key(ctrl-x v =)
-VC open: key(ctrl-x v d enter)
-
-# GhostText
-ghost close: key(ctrl-c ctrl-c)
+magit open: user.emacs("magit-status")
+diff open: user.emacs("vc-diff")
+VC open:
+    user.emacs("vc-dir")
+    key(enter)

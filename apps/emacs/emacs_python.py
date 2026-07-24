@@ -10,7 +10,7 @@ title: /- Python -/
 @ctx.action_class("edit")
 class EditActions:
     def indent_more():
-        actions.key("ctrl-c >")
+        actions.user.emacs("python-indent-shift-right")
 
     def indent_less():
-        actions.key("ctrl-c <")
+        actions.user.emacs("python-indent-shift-left")

@@ -1,13 +1,15 @@
 app: emacs
-title: these_commands_are_disabled
 -
 
 tag(): user.tabs
 tag(): user.splits
 tag(): user.line_commands
+tag(): user.find_and_replace
+
+settings():
+    key_wait = 2
 
 # ----- GENERAL ----- #
-#suplex: key(ctrl-x)
 cancel: user.emacs("keyboard-quit")
 exchange: user.emacs("exchange-point-and-mark")
 execute: user.emacs("execute-extended-command")
@@ -200,7 +202,7 @@ search regex | regex search: user.emacs("isearch-forward-regexp")
 replace: user.emacs("query-replace")
 replace regex | regex replace: user.emacs("query-replace-regexp")
 # These start a word/symbol-search or toggle an existing search's mode.
-search [toggle] words: user.emacs("isearch-forward-word")
+search [toggle] (word | words): user.emacs("isearch-forward-word")
 search [toggle] symbol: user.emacs("isearch-forward-symbol")
 # These keybindings are only active in isearch-mode.
 search edit: user.emacs_meta("e")
@@ -314,7 +316,7 @@ project [run] async shell command:
     user.emacs("projectile-run-async-shell-command-in-root")
 project (switch [to buffer] | buffer | buff): user.emacs("projectile-switch-to-buffer")
 project kill [buffers]: user.emacs("projectile-kill-buffers")
-project switch [project]: user.emacs("project-switch-project")
+project switch [project]: user.emacs("projectile-switch-project")
 
 # ----- VC/GIT SUPPORT ----- #
 vc (annotate | blame): user.emacs("vc-annotate")

@@ -23,12 +23,10 @@ mod.apps.emacs = r"""
 os: windows
 app.exe: /^emacs\.exe$/i
 """
+mod.apps.emacs = "title: /Emacs editor/"
 
 ctx = Context()
-ctx.matches = r"""
-app: emacs
-title: these_commands_are_disabled
-"""
+ctx.matches = "app: emacs"
 
 
 def meta(keys):
@@ -97,8 +95,7 @@ class Actions:
 
     def emacs_help(key: str = None):
         "Runs the emacs help command prefix, optionally followed by some keys."
-        # NB. f1 works in ansi-term mode; C-h doesn't.
-        actions.key("f1")
+        actions.key("ctrl-h")
         if key is not None:
             actions.key(key)
 
@@ -110,10 +107,10 @@ class UserActions:
         actions.user.emacs("kill-line", 1)
 
     def split_window():
-        actions.user.emacs("split-window-below")
+        actions.user.emacs("split-window-right")
 
     def split_window_vertically():
-        actions.user.emacs("split-window-below")
+        actions.user.emacs("split-window-right")
 
     def split_window_up():
         actions.user.emacs("split-window-below")
@@ -123,7 +120,7 @@ class UserActions:
         actions.user.emacs("other-window")
 
     def split_window_horizontally():
-        actions.user.emacs("split-window-right")
+        actions.user.emacs("split-window-below")
 
     def split_window_left():
         actions.user.emacs("split-window-right")
@@ -171,19 +168,30 @@ class UserActions:
     #     actions.key("ctrl-@ ctrl-@")
     #     actions.edit.jump_line(line_start)
 
-    # dictation_peek() probably won't work in a terminal. PRs welcome.
-    def dictation_peek(left, right):
-        # clobber transient selection if it exists
-        actions.key("space backspace")
+    def dictation_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
+        if not (left or right):
+            return None, None
+
         before, after = None, None
+        # Inserting a space ensures that there is something to select at the
+        # beginning of a buffer. The space is removed before returning.
+        actions.insert(" ")
         if left:
+            # Select two words because one word is not enough around some
+            # punctuation, such as the closing backtick in "`foo`".
             actions.edit.extend_word_left()
-            before = actions.edit.selected_text()
+            actions.edit.extend_word_left()
+            before = actions.edit.selected_text()[:-1]
             actions.user.emacs("pop-to-mark-command")
-        if right:
-            actions.edit.extend_line_end()
-            after = actions.edit.selected_text()
+        if not right:
+            actions.key("backspace")
+        else:
+            actions.edit.left()
+            actions.edit.extend_word_right()
+            actions.edit.extend_word_right()
+            after = actions.edit.selected_text()[1:]
             actions.user.emacs("pop-to-mark-command")
+            actions.key("delete")
         return (before, after)
 
 
@@ -197,6 +205,9 @@ class EditActions:
 
     def copy():
         actions.user.emacs("kill-ring-save")
+        # Restore the active region and its original direction after copying.
+        actions.user.emacs("exchange-point-and-mark")
+        actions.user.emacs("exchange-point-and-mark")
 
     def cut():
         actions.user.emacs("kill-region")
@@ -205,7 +216,16 @@ class EditActions:
         actions.user.emacs("undo")
 
     def paste():
-        actions.user.emacs("yank")
+        # Keep this as a physical key so paste-to-insert can call edit.paste()
+        # without recursively re-entering user.emacs() while it types an M-x
+        # command name.
+        actions.key("ctrl-y")
+
+    def paste_match_style():
+        actions.key("ctrl-y")
+
+    def redo():
+        actions.user.emacs("undo-redo")
 
     def delete():
         actions.user.emacs("kill-region")
@@ -274,16 +294,16 @@ class EditActions:
         actions.key("shift-ctrl-e")
 
     def line_swap_down():
-        actions.key("down ctrl-x ctrl-t up")
+        actions.user.emacs("move-text-down")
 
     def line_swap_up():
-        actions.key("ctrl-x ctrl-t up:2")
+        actions.user.emacs("move-text-up")
 
     def delete_line():
         actions.key("ctrl-a ctrl-k")
 
     def line_clone():
-        actions.user.emacs_key("ctrl-a meta-1 ctrl-k ctrl-y ctrl-y up meta-m")
+        actions.user.emacs("copy-text-down")
 
     def jump_line(n):
         actions.user.emacs("goto-line", n)
@@ -300,10 +320,12 @@ class EditActions:
         actions.user.emacs("exchange-point-and-mark")
 
     def indent_more():
-        actions.user.emacs("indent-rigidly", 4)
+        actions.user.emacs("indent-rigidly")
+        actions.key("shift-right")
 
     def indent_less():
-        actions.user.emacs("indent-rigidly", -4)
+        actions.user.emacs("indent-rigidly")
+        actions.key("shift-left")
 
     # These all perform text-scale-adjust, which examines the actual key pressed, so can't
     # be done with actions.user.emacs.
