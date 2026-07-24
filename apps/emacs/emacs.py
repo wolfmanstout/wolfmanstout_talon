@@ -83,14 +83,13 @@ class Actions:
         """
         meta_x = actions.user.emacs_command_keybinding("execute-extended-command")
         keys = actions.user.emacs_command_keybinding(command_name)
-        short_form = actions.user.emacs_command_short_form(command_name)
         if prefix is not None:
             actions.user.emacs_prefix(prefix)
         if keys is not None:
             actions.user.emacs_key(keys)
         else:
             actions.user.emacs_key(meta_x or "meta-x")
-            actions.insert(short_form or command_name)
+            actions.insert(command_name)
             actions.key("enter")
 
     def emacs_help(key: str = None):
@@ -256,12 +255,6 @@ class EditActions:
 
     def word_right():
         actions.user.emacs("forward-word")
-
-    def extend_word_left():
-        actions.user.emacs_meta("shift-b")
-
-    def extend_word_right():
-        actions.user.emacs_meta("shift-f")
 
     def sentence_start():
         actions.user.emacs("backward-sentence")
