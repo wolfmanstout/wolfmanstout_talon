@@ -1,3 +1,5 @@
+mode: command
+mode: user.dictation_command
 app: emacs
 title: /- Shell -/
 -
