@@ -326,9 +326,9 @@ class Actions:
         Afterwards, the selection should collapse to the right of the newly-linked text.
         """
         actions.user.hyperlink()
-        actions.sleep("100ms")
+        actions.sleep("200ms")
         actions.edit.paste()
-        actions.sleep("100ms")
+        actions.sleep("200ms")
         actions.key("enter")
 
     def delete_right():
