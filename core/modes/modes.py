@@ -5,7 +5,6 @@ ctx_sleep = Context()
 ctx_awake = Context()
 
 modes = {
-    "presentation": "a more strict form of sleep where only a more strict wake up command works",
     "private": "a mode that disables recording",
     "context_insensitive": "a mode that disables context sensitivity",
     "dictation_command": "a mode that enables commands within dictation mode",
