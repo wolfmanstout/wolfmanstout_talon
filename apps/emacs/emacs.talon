@@ -13,7 +13,7 @@ settings():
 
 # ----- GENERAL ----- #
 cancel: user.emacs("keyboard-quit")
-exchange: user.emacs("exchange-point-and-mark")
+exchange | this select: user.emacs("exchange-point-and-mark")
 execute: user.emacs("execute-extended-command")
 execute {user.emacs_command}$: user.emacs(emacs_command)
 execute <user.text>$:
@@ -23,18 +23,34 @@ evaluate | (evaluate | eval) (exper | expression): user.emacs("eval-expression")
 prefix: user.emacs_prefix()
 prefix <user.number_signed_small>: user.emacs_prefix(number_signed_small)
 
+exec: user.emacs("smex")
+reload: key(g)
+quit: key(q)
+confirm:
+    insert("yes")
+    key(enter)
+deny:
+    insert("no")
+    key(enter)
+link open:
+    user.emacs("copy-url-at-point")
+    sleep(25ms)
+    user.open_url(clip.text())
+
 abort recursive [edit]: user.emacs("abort-recursive-edit")
 browse kill ring: user.emacs("browse-kill-ring")
-fill paragraph: user.emacs("fill-paragraph")
+fill paragraph | this format comment: user.emacs("fill-paragraph")
 insert char: user.emacs("insert-char")
-occurs: user.emacs("occur")
-other scroll [down]: user.emacs("scroll-other-window")
-other scroll up: user.emacs("scroll-other-window-down")
+occurs | occur: user.emacs("occur")
+other scroll [down] | other screen down: user.emacs("scroll-other-window")
+other scroll up | other screen up: user.emacs("scroll-other-window-down")
 package autoremove: user.emacs("package-autoremove")
 package list | [package] list packages: user.emacs("list-packages")
 reverse (lines | region): user.emacs("reverse-region")
 save buffers kill emacs: user.emacs("save-buffers-kill-emacs")
-save some buffers: user.emacs("save-some-buffers")
+^emacs close now$: user.emacs("save-buffers-kill-emacs")
+save some buffers | save all: user.emacs("save-some-buffers")
+save all now: user.emacs("save-some-buffers", 1)
 sort lines: user.emacs("sort-lines")
 sort words: user.emacs("sort-words")
 file [loop] continue: user.emacs("fileloop-continue")
@@ -54,7 +70,14 @@ manual <user.text>:
     user.insert_formatted(text, "DASH_SEPARATED")
 
 # BUFFER SWITCHING #
-switch: user.emacs("switch-to-buffer")
+switch | buff open: user.emacs("switch-to-buffer")
+buff switch:
+    user.emacs("switch-to-buffer")
+    key(enter)
+buff open split:
+    user.emacs("split-window-right")
+    user.emacs("other-window")
+    user.emacs("switch-to-buffer")
 other switch: user.emacs("switch-to-buffer-other-window")
 display: user.emacs("display-buffer")
 
@@ -67,6 +90,9 @@ shell command on region: user.emacs("shell-command-on-region")
 shell command on region replacing:
     user.emacs_prefix()
     user.emacs("shell-command-on-region")
+shell open: user.emacs("shell")
+shell open directory: user.emacs("visit-directory-shell")
+shell open vc: user.emacs("visit-vc-directory-shell")
 
 # CUSTOMIZE #
 customize face: user.emacs("customize-face")
@@ -76,6 +102,7 @@ customize face <user.text>$:
 customize group: user.emacs("customize-group")
 customize variable: user.emacs("customize-variable")
 (customize | custom) [theme] visit theme: user.emacs("custom-theme-visit-theme")
+customize open: user.emacs("customize-apropos")
 
 # MODE COMMANDS #
 auto fill mode: user.emacs("auto-fill-mode")
@@ -103,6 +130,8 @@ text mode: user.emacs("text-mode")
 transient mark mode: user.emacs("transient-mark-mode")
 visual line mode: user.emacs("visual-line-mode")
 whitespace mode: user.emacs("whitespace-mode")
+JavaScript mode: user.emacs("js-mode")
+HTML mode: user.emacs("html-mode")
 
 # MACROS #
 emacs record: user.emacs("kmacro-start-macro")
@@ -133,19 +162,26 @@ split widen [<number_small>]:
 split narrow [<number_small>]:
     user.emacs("shrink-window-horizontally", number_small or 1)
 
+buff close: user.emacs("delete-window")
+buff up: user.emacs("windmove-up")
+buff down: user.emacs("windmove-down")
+buff left: user.emacs("windmove-left")
+buff right: user.emacs("windmove-right")
+
 # ----- HELP ----- #
 apropos: user.emacs_help("a")
-describe (fun | function): user.emacs_help("f")
-describe key: user.emacs_help("k")
+describe (fun | function) | help function: user.emacs_help("f")
+describe key | help key: user.emacs_help("k")
 describe key briefly: user.emacs_help("c")
 describe symbol: user.emacs_help("o")
-describe variable: user.emacs_help("v")
-describe mode: user.emacs_help("m")
+describe variable | help variable: user.emacs_help("v")
+describe mode | help mode: user.emacs_help("m")
 describe bindings: user.emacs_help("b")
 describe (char | character): user.emacs("describe-character")
 describe text properties: user.emacs("describe-text-properties")
 describe face: user.emacs("describe-face")
 view lossage: user.emacs_help("l")
+help back: user.emacs("help-go-back")
 
 apropos <user.text>$:
     user.emacs_help("a")
@@ -168,17 +204,20 @@ describe variable <user.text>$:
 file open: user.emacs("find-file")
 file rename: user.emacs("rename-file")
 (file open | find file) at point: user.emacs("ffap")
-other file open: user.emacs("find-file-other-window")
-(file | buffer) close:
+other file open | file open split: user.emacs("find-file-other-window")
+file open recent: user.emacs("ido-recentf-open")
+save as: user.emacs("write-file")
+(file | buffer) close | buff kill:
     user.emacs("kill-buffer")
     key(enter)
 
 buffer kill: user.emacs("kill-buffer")
 buffer bury: user.emacs("bury-buffer")
-buffer revert | revert buffer: user.emacs("revert-buffer")
+buffer revert | revert buffer | buff revert: user.emacs("revert-buffer")
 buffer finish:
     edit.save()
     user.emacs("server-edit")
+buff done: user.emacs("server-edit")
 buffer list: user.emacs("buffer-menu")
 buffer next: user.emacs("next-buffer")
 buffer last: user.emacs("previous-buffer")
@@ -186,21 +225,52 @@ buffer rename: user.emacs("rename-buffer")
 buffer widen: user.emacs("widen")
 buffer narrow | [buffer] narrow to region: user.emacs("narrow-to-region")
 
+directory open: user.emacs("dired")
+toggle details: user.emacs("dired-hide-details-mode")
+ido close: user.emacs("ido-fallback-command")
+ido reload: user.emacs("ido-reread-directory")
+
+bookmark open: user.emacs("bookmark-jump")
+bookmark save: user.emacs("bookmark-set")
+bookmark list: user.emacs("list-bookmarks")
+
 diff (buffer | [buffer] with file):
     user.emacs("diff-buffer-with-file")
     key(enter)
 
 # ----- MOTION AND EDITING ----- #
-mark: user.emacs("set-mark-command")
+mark | mark set: user.emacs("set-mark-command")
 go back: user.emacs("pop-to-mark-command")
 global [go] back: user.emacs("pop-global-mark")
+mark save: user.emacs("push-mark-no-activate")
+go mark: user.emacs("jump-to-mark")
+go mark switch: user.emacs("exchange-point-and-mark-no-activate")
+go change: user.emacs("goto-last-change")
+go symbol: user.emacs("ido-goto-symbol")
+delete: user.emacs("delete-region")
 
-auto indent: user.emacs("indent-region")
+start: user.emacs("back-to-indentation")
+line <number_small> [short]: user.jump_modulo_line(number_small)
+go before [last | preev] <user.any_alphanumeric_key>:
+    user.emacs("backward-before-char")
+    key("{any_alphanumeric_key}")
+go after [next] <user.any_alphanumeric_key>:
+    user.emacs("forward-after-char")
+    key("{any_alphanumeric_key}")
+go before next <user.any_alphanumeric_key>:
+    user.emacs("forward-before-char")
+    key("{any_alphanumeric_key}")
+go after (last | preev) <user.any_alphanumeric_key>:
+    user.emacs("backward-after-char")
+    key("{any_alphanumeric_key}")
+
+auto indent | this indent: user.emacs("indent-region")
 indent <user.number_signed_small>: user.emacs("indent-rigidly", number_signed_small)
 
-search back: user.emacs("isearch-backward")
-search regex | regex search: user.emacs("isearch-forward-regexp")
-(search regex | regex search) back: user.emacs("isearch-backward-regexp")
+search back | last | preev: user.emacs("isearch-backward")
+search regex | regex search | regex next: user.emacs("isearch-forward-regexp")
+(search regex | regex search) back | regex (last | preev):
+    user.emacs("isearch-backward-regexp")
 replace: user.emacs("query-replace")
 replace regex | regex replace: user.emacs("query-replace-regexp")
 # These start a word/symbol-search or toggle an existing search's mode.
@@ -210,6 +280,17 @@ search [toggle] symbol: user.emacs("isearch-forward-symbol")
 search edit: user.emacs_meta("e")
 search toggle case [fold | sensitive]: user.emacs_meta("c")
 search toggle regex: user.emacs_meta("r")
+
+next: user.emacs("isearch-forward")
+R grep: user.emacs("rgrep")
+code search: user.emacs("cs-feeling-lucky")
+symbol (last | preev):
+    user.emacs("isearch-forward-symbol-at-point")
+    user.emacs("isearch-repeat-backward")
+    user.emacs("isearch-repeat-backward")
+symbol next:
+    user.emacs("isearch-forward-symbol-at-point")
+    user.emacs("isearch-repeat-forward")
 
 highlight lines matching [regex]: user.emacs("highlight-lines-matching-regexp")
 highlight phrase: user.emacs("highlight-phrase")
@@ -222,6 +303,7 @@ unhighlight all:
 recenter:
     user.emacs_prefix()
     user.emacs("recenter-top-bottom")
+here scroll: user.emacs("recenter-top-bottom")
 (center | [center] <number_small> from) top:
     user.emacs("recenter-top-bottom", number_small or 0)
 (center | [center] <number_small> from) bottom:
@@ -235,7 +317,7 @@ go <number> bottom:
     user.emacs("recenter-top-bottom", -2)
 
 next error | error next: user.emacs("next-error")
-last error | error last: user.emacs("previous-error")
+last error | error last | error preev: user.emacs("previous-error")
 
 term right: user.emacs("forward-sexp")
 term left: user.emacs("backward-sexp")
@@ -243,8 +325,9 @@ term up: user.emacs("backward-up-list")
 term end: user.emacs("up-list")
 term down: user.emacs("down-list")
 term kill: user.emacs("kill-sexp")
+layer kill: user.emacs("sp-kill-sexp")
 term wipe: user.emacs("kill-sexp", -1)
-term (mark | select): user.emacs("mark-sexp")
+term (mark | select) | layer select: user.emacs("mark-sexp")
 term copy:
     user.emacs("mark-sexp")
     edit.copy()
@@ -254,6 +337,13 @@ term freeze:
 term [auto] indent:
     user.emacs("mark-sexp")
     user.emacs("indent-region")
+
+layer (last | preev): user.emacs("sp-backward-sexp")
+layer next: user.emacs("sp-forward-sexp")
+layer down: user.emacs("sp-down-sexp")
+layer up: user.emacs("sp-backward-up-sexp")
+exper (last | preev): user.emacs("backward-cc-expression")
+exper next: user.emacs("forward-cc-expression")
 
 (sentence | sent) (right | end): edit.sentence_end()
 (sentence | sent) (left | start): edit.sentence_start()
@@ -270,6 +360,54 @@ graph cut:
     user.emacs("mark-paragraph")
     edit.cut()
 
+ahead: user.emacs("forward-word")
+behind: user.emacs("backward-word")
+word (last | preev): user.emacs("smartscan-symbol-go-backward")
+word next: user.emacs("smartscan-symbol-go-forward")
+aheads delete | clear ahead: user.emacs("kill-word")
+behinds delete | clear behind: user.emacs("backward-kill-word")
+aheads | select ahead:
+    user.emacs("set-mark-command")
+    user.emacs("forward-word")
+behinds | select behind:
+    user.emacs("set-mark-command")
+    user.emacs("backward-word")
+
+line open up: user.emacs("vi-open-line-above")
+line open down: user.emacs("vi-open-line-below")
+(this | line) copy up: user.emacs("copy-text-up")
+(line | lines) join: user.emacs("delete-indentation")
+line <number_small> open:
+    user.jump_modulo_line(number_small)
+    user.emacs("vi-open-line-above")
+(this | here) comment: user.emacs("comment-dwim")
+symbol replace: user.emacs("smartscan-symbol-replace")
+paste (other | last | preev): user.emacs("yank-pop")
+select more: user.emacs("er/expand-region")
+select less: user.emacs("er/contract-region")
+this parens: user.emacs("insert-parentheses")
+
+<number_small> (through | until) [<number_small>] [select]:
+    user.mark_lines(number_small_1, number_small_2 or -1)
+<number_small> (through | until) [<number_small>] short [select]:
+    user.mark_lines(number_small_1, number_small_2 or -1, true)
+<number_small> (through | until) [<number_small>] (bring | copy) here:
+    user.use_lines(number_small_1, number_small_2 or -1, true)
+<number_small> (through | until) [<number_small>] short (bring | copy) here:
+    user.use_lines(number_small_1, number_small_2 or -1, true, true)
+<number_small> (through | until) [<number_small>] move here:
+    user.use_lines(number_small_1, number_small_2 or -1)
+<number_small> (through | until) [<number_small>] short move here:
+    user.use_lines(number_small_1, number_small_2 or -1, false, true)
+other <number_small> (through | until) [<number_small>] (bring | copy) here:
+    user.use_lines(number_small_1, number_small_2 or -1, true, false, true)
+other <number_small> (through | until) [<number_small>] short (bring | copy) here:
+    user.use_lines(number_small_1, number_small_2 or -1, true, true, true)
+other <number_small> (through | until) [<number_small>] move here:
+    user.use_lines(number_small_1, number_small_2 or -1, false, false, true)
+other <number_small> (through | until) [<number_small>] short move here:
+    user.use_lines(number_small_1, number_small_2 or -1, false, true, true)
+
 # NB. can use these to implement "drag <X> left/right/up/down" commands,
 # but note that 'transpose line' and 'drag line down' are different.
 transpose [word | words]: user.emacs("transpose-words")
@@ -282,29 +420,55 @@ transpose (graph | graphs | paragraphs): user.emacs("transpose-paragraphs")
 register (copy | save): user.emacs("copy-to-register")
 register (paste | insert): user.emacs("insert-register")
 register jump: user.emacs("jump-to-register")
-register (copy | save) rectangle: user.emacs("copy-rectangle-to-register")
+register (copy | save) rectangle | rectangle (copy | save) [to] register:
+    user.emacs("copy-rectangle-to-register")
+mark save (reg | rej) <user.letter>:
+    user.emacs("point-to-register")
+    key("{letter}")
+go (reg | rej) <user.letter>:
+    user.emacs("jump-to-register")
+    key("{letter}")
+copy (reg | rej) <user.letter>:
+    user.emacs("copy-to-register")
+    key("{letter}")
+(reg | rej) <user.letter> paste:
+    user.emacs_prefix()
+    user.emacs("insert-register")
+    key("{letter}")
 
 rectangle clear: user.emacs("clear-rectangle")
 rectangle delete: user.emacs("delete-rectangle")
 rectangle kill: user.emacs("kill-rectangle")
 rectangle open: user.emacs("open-rectangle")
-rectangle (copy | save) [to] register: user.emacs("copy-rectangle-to-register")
 rectangle (yank | paste): user.emacs("yank-rectangle")
 rectangle copy: user.emacs("copy-rectangle-as-kill")
 rectangle number lines: user.emacs("rectangle-number-lines")
 
+# ----- TEMPLATES ----- #
+(snippet | template) open: user.emacs("yas-visit-snippet-file")
+(snippet | template) new: user.emacs("yas-new-snippet")
+(snippets | templates) reload: user.emacs("yas-reload-all")
+
 # ----- XREF SUPPORT ----- #
-[xref] find definition: user.emacs("xref-find-definitions")
+[xref] find definition | def open: user.emacs("xref-find-definitions")
 [xref] find definition other window: user.emacs("xref-find-definitions-other-window")
 [xref] find definition other frame: user.emacs("xref-find-definitions-other-frame")
 [xref] find references: user.emacs("xref-find-references")
+ref open:
+    user.emacs("xref-find-references")
+    key(enter)
 [xref] find references [and] replace: user.emacs("xref-find-references-and-replace")
 xref find apropos: user.emacs("xref-find-apropos")
-xref go back: user.emacs("xref-go-back")
+xref go back | result next | def close: user.emacs("xref-go-back")
 visit tags table: user.emacs("visit-tags-table")
 
+# ----- COMPILATION ----- #
+file build: key(ctrl-c ctrl-g)
+file test: key(ctrl-c ctrl-t)
+recompile: user.emacs("recompile")
+
 # ----- PROJECT SUPPORT ----- #
-project [find] file: user.emacs("project-find-file")
+project [find] file | file open project: user.emacs("project-find-file")
 project [find] (regex | grep): user.emacs("project-find-regexp")
 project [query] replace regex: user.emacs("project-query-replace-regexp")
 project (dired | directory): user.emacs("project-dired")
@@ -317,12 +481,31 @@ project [run] shell command: user.emacs("project-shell-command")
 project [run] async shell command: user.emacs("project-async-shell-command")
 project (switch [to buffer] | buffer | buff): user.emacs("project-switch-to-buffer")
 project kill [buffers]: user.emacs("project-kill-buffers")
-project switch [project]: user.emacs("project-switch-project")
+project (switch [project] | open): user.emacs("project-switch-project")
 
 # ----- VC/GIT SUPPORT ----- #
 vc (annotate | blame): user.emacs("vc-annotate")
+magit open: user.emacs("magit-status")
+diff open: user.emacs("vc-diff")
+VC open:
+    user.emacs("vc-dir")
+    key(enter)
 
 # ----- MAJOR & MINOR MODES ----- #
+# web-mode #
+tag close: user.emacs("web-mode-element-close")
+
+# c++-mode #
+header open: user.emacs("ff-find-other-file")
+header open split:
+    user.emacs("split-window-right")
+    user.emacs("other-window")
+    user.emacs("ff-find-other-file")
+import copy: key(f5)
+import paste: key(f6)
+this import: user.emacs("clang-include-fixer-at-point")
+this format [clang]: user.emacs("indent-sexp")
+
 # python-mode #
 python mode: user.emacs("python-mode")
 run python: user.emacs("run-python")
@@ -332,6 +515,15 @@ python [shell] send region: user.emacs("python-shell-send-region")
 python [shell] send (function | defun): user.emacs("python-shell-send-defun")
 python [shell] send statement: user.emacs("python-shell-send-statement")
 python (shell switch | switch [to] shell): user.emacs("python-shell-switch-to-shell")
+pie flakes: user.emacs("python-check")
+
+# clojure-mode #
+closure compile: user.emacs("cider-load-buffer")
+closure namespace: user.emacs("cider-repl-set-ns")
+
+# lisp-mode #
+function run: user.emacs("eval-defun")
+this run: user.emacs("eval-region")
 
 # smerge-mode #
 smerge mode: user.emacs("smerge-mode")
