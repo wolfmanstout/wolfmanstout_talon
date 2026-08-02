@@ -319,6 +319,7 @@ tab-next, ctrl-x t o
 tab-previous, ctrl-x t O
 tab-select
 tab-undo, ctrl-x t u
+talon-dictation-peek, ctrl-c c p
 talonscript-mode
 text-mode,, text-m
 toggle-debug-on-error,, t-d-on-e

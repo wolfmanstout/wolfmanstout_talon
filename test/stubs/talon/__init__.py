@@ -91,10 +91,20 @@ class Actions:
             return RegisteredActionsAccessor(self.registered_actions, name)
 
 
+class Apps:
+    """Accept Talon app declarations made through Module.apps."""
+
+    def __setattr__(self, name, value):
+        pass
+
+
 class Module:
     """
     Implements something like the Module class built in to Talon
     """
+
+    def __init__(self):
+        self.apps = Apps()
 
     def list(self, *args, **kwargs):
         pass
