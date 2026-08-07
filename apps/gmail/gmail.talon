@@ -83,7 +83,7 @@ this select: key(+ x)
 # <n> select: {['plus, x, plus, j']}n
 (message | messages) reload: key(+ N)
 go inbox | going box: key(+ g i)
-go starred: key(+ g s)
+go (starred | star): key(+ g s)
 go sent: key(+ g t)
 go drafts: key(+ g d)
 # expand all: ClickElementAction("//*[@aria-label='Expand all']")
