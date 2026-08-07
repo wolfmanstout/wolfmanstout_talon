@@ -1,3 +1,4 @@
+mode: dictation
 mode: user.dictation_command
 -
 

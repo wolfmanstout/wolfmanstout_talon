@@ -1,3 +1,7 @@
+mode: command
+and not mode: dictation
+-
+
 #provide both anchored and unachored commands via 'over'
 phrase <user.text>$:
     user.add_phrase_to_history(text)
