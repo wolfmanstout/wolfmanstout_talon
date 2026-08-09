@@ -1,3 +1,5 @@
+mode: command
+and not mode: dictation
 tag: user.find_and_replace
 -
 
