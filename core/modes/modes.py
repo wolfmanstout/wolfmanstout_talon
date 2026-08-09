@@ -40,6 +40,7 @@ class Actions:
         """Enables command mode."""
         actions.mode.disable("sleep")
         actions.mode.disable("dictation")
+        actions.mode.disable("user.dictation_command")
         actions.mode.enable("command")
         actions.user.hud_clear_screen_regions("overlay", "mode")
         actions.user.hud_clear_screen_regions("cursor", "mode")
@@ -48,6 +49,7 @@ class Actions:
         """Enables dictation mode."""
         actions.mode.disable("sleep")
         actions.mode.enable("dictation")
+        actions.mode.enable("user.dictation_command")
         actions.mode.enable("command")
         actions.user.code_clear_language_mode()
         actions.user.gdb_disable()
