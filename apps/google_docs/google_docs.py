@@ -35,6 +35,14 @@ os: mac
 """
 
 
+@ctx.action_class("user")
+class UserActions:
+    def command_search(command: str = ""):
+        actions.key("alt-/")
+        if command:
+            actions.insert(command)
+
+
 @mod.action_class
 class Actions:
     def select_column():

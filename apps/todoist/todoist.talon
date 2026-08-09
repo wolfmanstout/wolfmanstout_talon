@@ -2,6 +2,8 @@ tag: browser
 title: /<todoist.com>/
 -
 
+tag(): user.command_search
+
 go inbox: key(g i)
 go today: key(g t)
 go upcoming: key(g u)
@@ -27,9 +29,6 @@ project open | go project: key(g p)
 task select: key(x)
 task done: key(e)
 task edit: key(E)
-please [<user.prose>]$:
-    key(ctrl-k)
-    insert(user.prose or "")
 task new: key(q)
 task add [bottom] | add task [bottom]: key(a)
 task add top | add task top: key(A)
