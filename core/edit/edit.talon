@@ -44,7 +44,7 @@ cut (that | this): edit.cut()
 
 # Paste
 (pace | paste) (that | it): edit.paste()
-(pace | paste) enter:
+(pace | paste) (enter | slap):
     edit.paste()
     key(enter)
 (pace | paste) (match | raw): edit.paste_match_style()
