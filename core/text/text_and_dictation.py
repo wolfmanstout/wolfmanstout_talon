@@ -3,13 +3,11 @@ import json
 import logging
 import re
 import time
-from collections.abc import Callable
 import unicodedata
 import urllib.error
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal, Optional, TypeGuard
-
-import requests
 
 import requests
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
@@ -53,6 +51,7 @@ class DictationAiCleanupPerf:
         return self.decode_tps or self._tokens_per_second(
             self.completion_tokens, self.decode_ms
         )
+
 
 mod.setting(
     "context_sensitive_dictation",
