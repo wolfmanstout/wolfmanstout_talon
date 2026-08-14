@@ -30,7 +30,4 @@ ignore = [
 reportSelfClsParameterName = false
 
 [dependency-groups]
-dev = [
-    "pytest>=9.0.2",
-    "requests>=2.33.1",
-]
+dev = ["pytest>=9.0.2", "requests>=2.33.1"]

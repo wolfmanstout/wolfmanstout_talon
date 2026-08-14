@@ -250,15 +250,6 @@ class App:
         pass
 
 
-class Cron:
-    """
-    Implements something like the talon cron variable
-    """
-
-    def interval(*args, **kwargs):
-        pass
-
-
 actions = Actions()
 app = App
 clip = None
@@ -267,7 +258,6 @@ imgui = ImgUI()
 speech_system = SpeechSystem()
 ui = UI()
 settings = Settings()
-cron = Cron()
 resource = Resource()
 registry = Registry()
 
