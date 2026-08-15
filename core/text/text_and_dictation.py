@@ -23,6 +23,8 @@ DictationAiCleanupBackend = Literal["ollama", "mlx"]
 class DictationAiCleanupPerf:
     backend: DictationAiCleanupBackend
     wall_ms: float
+    server_call_ms: Optional[float] = None
+    client_prep_ms: Optional[float] = None
     prompt_tokens: Optional[int] = None
     completion_tokens: Optional[int] = None
     prefill_ms: Optional[float] = None
@@ -739,6 +741,10 @@ def _log_ai_cleanup_perf(perf: DictationAiCleanupPerf) -> None:
         f"backend={perf.backend}",
         f"wall={perf.wall_ms:.1f}ms",
     ]
+    if perf.server_call_ms is not None:
+        parts.append(f"server_call={perf.server_call_ms:.1f}ms")
+    if perf.client_prep_ms is not None:
+        parts.append(f"client_prep={perf.client_prep_ms:.1f}ms")
     if perf.total_ms is not None:
         parts.append(f"backend_total={perf.total_ms:.1f}ms")
     if perf.load_ms is not None:
@@ -798,6 +804,7 @@ def _run_ai_cleanup(
     if not utterance_core:
         return None
     request_started = time.perf_counter()
+    server_call_started: Optional[float] = None
     try:
         prompt = _cleanup_prompt(prior_context, utterance_core)
         if backend == "ollama":
@@ -815,6 +822,7 @@ def _run_ai_cleanup(
                 "temperature": 0.0,
             }
         payload = json.dumps(payload_dict).encode("utf-8")
+        server_call_started = time.perf_counter()
         response = requests.post(
             url,
             data=payload,
@@ -822,7 +830,18 @@ def _run_ai_cleanup(
             timeout=timeout_seconds,
         )
         response_body = response.content
-        wall_ms = (time.perf_counter() - request_started) * 1000.0
+        response_received = time.perf_counter()
+        wall_ms = (response_received - request_started) * 1000.0
+        server_call_ms = (
+            (response_received - server_call_started) * 1000.0
+            if server_call_started is not None
+            else None
+        )
+        client_prep_ms = (
+            (server_call_started - request_started) * 1000.0
+            if server_call_started is not None
+            else None
+        )
         if backend == "ollama":
             corrected_raw, perf = _extract_ollama_response_and_perf(
                 response_body, wall_ms
@@ -831,18 +850,37 @@ def _run_ai_cleanup(
             corrected_raw, perf = _extract_mlx_vlm_response_and_perf(
                 response_body, wall_ms
             )
+        perf.server_call_ms = server_call_ms
+        perf.client_prep_ms = client_prep_ms
     except (
         requests.exceptions.RequestException,
         urllib.error.URLError,
         TimeoutError,
         json.JSONDecodeError,
     ) as error:
-        wall_ms = (time.perf_counter() - request_started) * 1000.0
+        failed_at = time.perf_counter()
+        wall_ms = (failed_at - request_started) * 1000.0
+        server_call_ms = (
+            (failed_at - server_call_started) * 1000.0
+            if server_call_started is not None
+            else None
+        )
+        client_prep_ms = (
+            (server_call_started - request_started) * 1000.0
+            if server_call_started is not None
+            else None
+        )
+        extra_parts = []
+        if server_call_ms is not None:
+            extra_parts.append(f" server_call={server_call_ms:.1f}ms")
+        if client_prep_ms is not None:
+            extra_parts.append(f" client_prep={client_prep_ms:.1f}ms")
         log_dictation_debug(
             logging.DEBUG,
-            "Dictation AI cleanup perf: backend=%s wall=%.1fms error=%s",
+            "Dictation AI cleanup perf: backend=%s wall=%.1fms%s error=%s",
             backend,
             wall_ms,
+            "".join(extra_parts),
             error,
         )
         logging.debug("Dictation AI cleanup skipped: %s", error)
