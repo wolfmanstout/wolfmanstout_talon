@@ -308,6 +308,42 @@ if hasattr(talon, "test_mode"):
         response, _ = text_and_dictation._extract_mlx_vlm_response_and_perf(payload)
         assert response == "NOCHANGE"
 
+    def test_extract_mlx_vlm_response_openai_usage_shape():
+        payload = json.dumps(
+            {
+                "choices": [
+                    {"message": {"content": " corrected text\n"}},
+                ],
+                "usage": {
+                    "prompt_tokens": 120,
+                    "completion_tokens": 8,
+                    "total_tokens": 128,
+                    "prompt_tokens_details": {"cached_tokens": 9},
+                },
+                "timings": {
+                    "prompt_ms": 500.0,
+                    "prompt_per_second": 240.0,
+                    "predicted_ms": 200.0,
+                    "predicted_per_second": 40.0,
+                    "peak_memory": 5.5,
+                },
+            }
+        ).encode("utf-8")
+        response, perf = text_and_dictation._extract_mlx_vlm_response_and_perf(
+            payload, wall_ms=222.0
+        )
+        assert response == " corrected text"
+        assert perf.backend == "mlx"
+        assert perf.wall_ms == 222.0
+        assert perf.prompt_tokens == 120
+        assert perf.completion_tokens == 8
+        assert perf.cached_prompt_tokens == 9
+        assert perf.prefill_ms == 500.0
+        assert perf.decode_ms == 200.0
+        assert perf.prefill_tokens_per_second() == 240.0
+        assert perf.decode_tokens_per_second() == 40.0
+        assert perf.peak_memory_gb == 5.5
+
     def test_strip_ai_cleanup_output_guards_preserves_leading_comma():
         assert (
             text_and_dictation._strip_ai_cleanup_output_guards("\n, can you help\n")
