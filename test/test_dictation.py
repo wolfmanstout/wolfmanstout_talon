@@ -6,6 +6,7 @@ PHRASE_EXAMPLES = ["", "foo", "foo bar", "lorem ipsum dolor sit amet"]
 
 if hasattr(talon, "test_mode"):
     # Only include this when we're running tests
+    import logging
 
     from core.text import text_and_dictation
 
@@ -379,6 +380,30 @@ if hasattr(talon, "test_mode"):
         assert perf.prefill_tokens_per_second() == 244.1
         assert perf.decode_tokens_per_second() == 108.9
         assert perf.peak_memory_gb == 16.31
+
+    def test_log_ai_cleanup_perf_includes_server_call_and_client_prep(monkeypatch):
+        perf = text_and_dictation.DictationAiCleanupPerf(
+            backend="mlx",
+            wall_ms=422.7,
+            server_call_ms=401.2,
+            client_prep_ms=21.5,
+        )
+        calls = []
+
+        def fake_log(level, message, *args):
+            calls.append((level, message % args))
+
+        monkeypatch.setattr(text_and_dictation, "log_dictation_debug", fake_log)
+
+        text_and_dictation._log_ai_cleanup_perf(perf)
+
+        assert calls == [
+            (
+                logging.DEBUG,
+                "Dictation AI cleanup perf: backend=mlx wall=422.7ms "
+                "server_call=401.2ms client_prep=21.5ms phase_rates=unavailable",
+            )
+        ]
 
     def test_strip_ai_cleanup_output_guards_preserves_leading_comma():
         assert (
