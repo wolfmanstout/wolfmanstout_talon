@@ -706,14 +706,19 @@ def _extract_mlx_vlm_response_and_perf(
     perf.prefill_tps = usage.get("prompt_tps", timings.get("prompt_per_second"))
     perf.decode_tps = usage.get("generation_tps", timings.get("predicted_per_second"))
     perf.peak_memory_gb = usage.get("peak_memory", timings.get("peak_memory"))
-    if perf.prompt_tokens is not None and perf.prefill_tps:
-        perf.prefill_ms = (perf.prompt_tokens / perf.prefill_tps) * 1000.0
-    elif "prompt_ms" in timings:
+    if "prompt_ms" in timings:
         perf.prefill_ms = timings["prompt_ms"]
-    if perf.completion_tokens is not None and perf.decode_tps:
-        perf.decode_ms = (perf.completion_tokens / perf.decode_tps) * 1000.0
-    elif "predicted_ms" in timings:
+    elif perf.prompt_tokens is not None and perf.prefill_tps:
+        uncached_prompt_tokens = perf.prompt_tokens
+        if perf.cached_prompt_tokens is not None:
+            uncached_prompt_tokens = max(
+                0, perf.prompt_tokens - perf.cached_prompt_tokens
+            )
+        perf.prefill_ms = (uncached_prompt_tokens / perf.prefill_tps) * 1000.0
+    if "predicted_ms" in timings:
         perf.decode_ms = timings["predicted_ms"]
+    elif perf.completion_tokens is not None and perf.decode_tps:
+        perf.decode_ms = (perf.completion_tokens / perf.decode_tps) * 1000.0
     choices = data["choices"]
     first_choice = choices[0]
     message = first_choice["message"]
