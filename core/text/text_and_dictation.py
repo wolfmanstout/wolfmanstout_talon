@@ -80,13 +80,13 @@ mod.setting(
 mod.setting(
     "dictation_ai_cleanup_model",
     type=str,
-    default="gemma4:26b-mlx",
+    default="mlx-community/gemma-4-26b-a4b-it-qat-4bit",
     desc="Model used for dictation cleanup.",
 )
 mod.setting(
     "dictation_ai_cleanup_backend",
     type=str,
-    default="ollama",
+    default="mlx",
     desc="LLM backend used for dictation cleanup. Supported values: 'ollama' and 'mlx'.",
 )
 mod.setting(

@@ -4,9 +4,9 @@ Requires a running local LLM server. Skipped by default.
 Run with: pytest -m ollama test/test_dictation_ai_eval.py
 
 Override the target server with environment variables, for example:
-DICTATION_AI_CLEANUP_BACKEND=ollama
-DICTATION_AI_CLEANUP_MODEL=gemma4:26b-mlx
-DICTATION_AI_CLEANUP_URL=http://127.0.0.1:11434/api/generate
+DICTATION_AI_CLEANUP_BACKEND=mlx
+DICTATION_AI_CLEANUP_MODEL=mlx-community/gemma-4-26b-a4b-it-qat-4bit
+DICTATION_AI_CLEANUP_URL=http://127.0.0.1:8080/chat/completions
 """
 
 import os
@@ -18,10 +18,12 @@ if hasattr(talon, "test_mode"):
 
     from core.text.text_and_dictation import _run_ai_cleanup
 
-    DEFAULT_BACKEND = os.getenv("DICTATION_AI_CLEANUP_BACKEND", "ollama")
-    DEFAULT_MODEL = os.getenv("DICTATION_AI_CLEANUP_MODEL", "gemma4:26b-mlx")
+    DEFAULT_BACKEND = os.getenv("DICTATION_AI_CLEANUP_BACKEND", "mlx")
+    DEFAULT_MODEL = os.getenv(
+        "DICTATION_AI_CLEANUP_MODEL", "mlx-community/gemma-4-26b-a4b-it-qat-4bit"
+    )
     DEFAULT_URL = os.getenv(
-        "DICTATION_AI_CLEANUP_URL", "http://127.0.0.1:11434/api/generate"
+        "DICTATION_AI_CLEANUP_URL", "http://127.0.0.1:8080/chat/completions"
     )
     DEFAULT_TIMEOUT = int(os.getenv("DICTATION_AI_CLEANUP_TIMEOUT_S", "10"))
 
