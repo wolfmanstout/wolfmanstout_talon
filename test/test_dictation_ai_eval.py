@@ -2,6 +2,8 @@
 
 Requires a running local LLM server. Skipped by default.
 Run with: pytest -m ollama test/test_dictation_ai_eval.py
+Run hard requirements with: pytest -m "ollama and hard" test/test_dictation_ai_eval.py
+Score ideal behavior with: pytest -m "ollama and ideal" test/test_dictation_ai_eval.py
 
 Override the target server with environment variables, for example:
 DICTATION_AI_CLEANUP_BACKEND=mlx
@@ -10,6 +12,7 @@ DICTATION_AI_CLEANUP_URL=http://127.0.0.1:8080/chat/completions
 """
 
 import os
+import re
 
 import talon
 
@@ -37,9 +40,10 @@ if hasattr(talon, "test_mode"):
             DEFAULT_BACKEND,
         )
 
-    # -- Cases where commas should be inserted (returned text != None) --
+    # -- Cases where speech-recognition errors should be corrected --
 
     @pytest.mark.ollama
+    @pytest.mark.ideal
     @pytest.mark.parametrize(
         "utterance, prior_context, expected",
         [
@@ -65,7 +69,10 @@ if hasattr(talon, "test_mode"):
             (
                 "I like cats comment dogs and birds",
                 "",
-                "I like cats, dogs and birds",
+                (
+                    "I like cats, dogs and birds",
+                    "I like cats, dogs, and birds",
+                ),
             ),
             # From real logs: "come and" in middle of sentence
             (
@@ -108,14 +115,173 @@ if hasattr(talon, "test_mode"):
             "context-come-and-leading-clause",
         ],
     )
-    def test_should_fix_comma(utterance, prior_context, expected):
+    def test_should_fix_misrecognized_comma(utterance, prior_context, expected):
         result = cleanup(utterance, prior_context)
         assert result is not None, (
             f"Expected correction but got NOCHANGE for: {utterance}"
         )
         # Strip leading/trailing whitespace for comparison
+        expected_outputs = (expected,) if isinstance(expected, str) else expected
+        assert result.strip() in expected_outputs, (
+            f"Input: {utterance!r}\nExpected: {expected!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.ideal
+    @pytest.mark.parametrize(
+        "utterance, expected",
+        [
+            (
+                "The choices are colon red green or blue",
+                (
+                    "The choices are: red, green or blue",
+                    "The choices are: red, green, or blue",
+                ),
+            ),
+            ("Set the header coal on enabled", "Set the header: enabled"),
+            ("I finished semicolon you can start", "I finished; you can start"),
+            (
+                "Keep the cache semi colon it is still valid",
+                "Keep the cache; it is still valid",
+            ),
+            ("Stop exclamation mark", "Stop!"),
+            ("That worked exclamation Marc", "That worked!"),
+            ("Are you ready question mark", "Are you ready?"),
+            ("Why did it fail question Marc", "Why did it fail?"),
+        ],
+        ids=[
+            "colon",
+            "colon-misrecognized",
+            "semicolon",
+            "semicolon-split",
+            "exclamation-mark",
+            "exclamation-mark-misrecognized",
+            "question-mark",
+            "question-mark-misrecognized",
+        ],
+    )
+    def test_should_fix_other_punctuation(utterance, expected):
+        result = cleanup(utterance)
+        assert result is not None, (
+            f"Expected correction but got NOCHANGE for: {utterance}"
+        )
+        expected_outputs = (expected,) if isinstance(expected, str) else expected
+        assert result.strip() in expected_outputs, (
+            f"Input: {utterance!r}\nExpected: {expected!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.ideal
+    @pytest.mark.parametrize(
+        "utterance, prior_context, expected",
+        [
+            ("Yes I agree", "", "Yes, I agree"),
+            ("However I would wait", "", "However, I would wait"),
+            (
+                "After reviewing the logs I changed the timeout",
+                "",
+                "After reviewing the logs, I changed the timeout",
+            ),
+            (
+                "When the server is ready run the benchmark",
+                "",
+                "When the server is ready, run the benchmark",
+            ),
+            (
+                "to be clear this is optional",
+                "The benchmark passed",
+                "to be clear, this is optional",
+            ),
+            (
+                "No don't fix the stale comment, fix the code so that it aligns with that comment",
+                "",
+                "No, don't fix the stale comment, fix the code so that it aligns with that comment",
+            ),
+            (
+                "So for this reason we should",
+                "have ideas).",
+                (
+                    "So for this reason we should",
+                    "So for this reason, we should",
+                    "So, for this reason, we should",
+                ),
+            ),
+            (
+                "I finished you can start",
+                "",
+                ("I finished you can start", "I finished, you can start"),
+            ),
+        ],
+        ids=[
+            "yes",
+            "however",
+            "introductory-phrase",
+            "introductory-clause",
+            "context-incomplete",
+            "discourse-no",
+            "for-this-reason",
+            "independent-clauses",
+        ],
+    )
+    def test_should_insert_confident_comma(utterance, prior_context, expected):
+        result = cleanup(utterance, prior_context)
+        actual = utterance if result is None else result.strip()
+        expected_outputs = (expected,) if isinstance(expected, str) else expected
+        assert actual in expected_outputs, (
+            f"Input: {utterance!r}\nExpected: {expected!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.ideal
+    @pytest.mark.parametrize(
+        "utterance, prior_context, expected",
+        [
+            ("Their going to deploy it", "", "They're going to deploy it"),
+            ("Its ready to run", "", "It's ready to run"),
+            ("The cache lost it's state", "", "The cache lost its state"),
+            ("There are two many requests", "", "There are too many requests"),
+            ("We need to right the file", "", "We need to write the file"),
+            ("Use the write configuration", "", "Use the right configuration"),
+            (
+                "There going tomorrow",
+                "The release is scheduled",
+                "They're going tomorrow",
+            ),
+            (
+                "invalidate the cash if scroll detection ever fails",
+                "we should",
+                "invalidate the cache if scroll detection ever fails",
+            ),
+        ],
+        ids=[
+            "their-theyre",
+            "its-its-contraction",
+            "its-possessive",
+            "two-too",
+            "right-write",
+            "write-right",
+            "context-theyre",
+            "cash-cache",
+        ],
+    )
+    def test_should_fix_homophone(utterance, prior_context, expected):
+        result = cleanup(utterance, prior_context)
+        assert result is not None, (
+            f"Expected correction but got NOCHANGE for: {utterance}"
+        )
         assert result.strip() == expected, (
             f"Input: {utterance!r}\nExpected: {expected!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.ideal
+    def test_should_fix_main_homophone():
+        utterance = "Commit then rebase on maine and push"
+        result = cleanup(utterance)
+        actual = utterance if result is None else result.strip()
+        words = re.findall(r"\b[\w']+\b", actual.lower())
+        assert "main" in words and "maine" not in words, (
+            f"Expected maine -> main correction, got: {result!r}"
         )
 
     # -- Cases where nothing should change (returned None) --
@@ -130,16 +296,7 @@ if hasattr(talon, "test_mode"):
             ("Switch back to main", ""),
             ("Run link talon", ""),
             ("let me know if you have ideas", "actually scrolling"),
-            ("So for this reason we should", "have ideas)."),
             # From real logs: false positive cases from earlier prompts
-            (
-                "invalidate the cash if scroll detection ever fails",
-                "we should",
-            ),
-            (
-                "update the cached viewport after a successful scroll detection",
-                "we should",
-            ),
             ("added only for that purpose", "that were"),
             (
                 "viewport frame purple if it is a cached frame",
@@ -157,15 +314,30 @@ if hasattr(talon, "test_mode"):
             ("we have a common interest in this", ""),
             # From real logs: model added a comma without any trigger word
             ("Also create", ""),
-            ("Also create clod", ""),
-            # From real logs: "comment" used with normal meaning (code comment)
-            (
-                "No don't fix the stale comment, fix the code so that it aligns with that comment",
-                "",
-            ),
-            # Prior context is read-only and should not be included or repaired.
-            ("on the issue", "please comment"),
-            ("problem", "this is a common"),
+            # Punctuation words and near-homophones used literally.
+            ("The colon absorbs water", ""),
+            ("A semicolon joins related clauses", ""),
+            ("The exclamation mark is too large", ""),
+            ("Mark asked a question", ""),
+            ("Please call on the next speaker", ""),
+            # Do not infer unspoken punctuation other than a highly confident comma.
+            ("Are you ready", ""),
+            ("This is amazing", ""),
+            ("Here are the options", ""),
+            ("We should rerun the benchmark if the flag changes", ""),
+            ("but only when requests arrive quickly", "The cache works"),
+            # Correctly used homophones must remain untouched.
+            ("Their server is fast", ""),
+            ("They're going home", ""),
+            ("The service warmed its cache", ""),
+            ("It's ready", ""),
+            ("Write the result to the right file", ""),
+            ("Two requests are too many", ""),
+            ("I know the answer is no", ""),
+            # Grammar and style are outside the allowed scope.
+            ("Me and him tested it", ""),
+            ("I wanna see how this compares", ""),
+            ("we should kind of maybe try it", ""),
         ],
         ids=[
             "simple-text",
@@ -173,9 +345,6 @@ if hasattr(talon, "test_mode"):
             "command-like",
             "run-link-talon",
             "let-me-know",
-            "for-this-reason",
-            "invalidate-cache",
-            "update-cached-viewport",
             "for-that-purpose",
             "viewport-frame",
             "adjust-prompt",
@@ -188,14 +357,83 @@ if hasattr(talon, "test_mode"):
             "actual-common-problem",
             "actual-common-interest",
             "no-trigger-also-create",
-            "no-trigger-also-create-clod",
-            "actual-stale-comment",
-            "context-comment-on",
-            "context-common-problem",
+            "literal-colon",
+            "literal-semicolon",
+            "literal-exclamation-mark",
+            "literal-question-mark-name",
+            "literal-call-on",
+            "no-unspoken-question-mark",
+            "no-unspoken-exclamation-mark",
+            "no-unspoken-colon",
+            "no-unspoken-semicolon",
+            "incomplete-clause-no-comma",
+            "correct-their",
+            "correct-theyre",
+            "correct-its-possessive",
+            "correct-its-contraction",
+            "correct-write-right",
+            "correct-two-too",
+            "correct-know-no",
+            "grammar-pronouns",
+            "style-wanna",
+            "style-fillers",
         ],
     )
+    @pytest.mark.ideal
     def test_should_not_change(utterance, prior_context):
         result = cleanup(utterance, prior_context)
         assert result is None, (
             f"Expected NOCHANGE but got correction for: {utterance!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
+    @pytest.mark.parametrize(
+        "utterance, prior_context",
+        [
+            (
+                "update the cached viewport after a successful scroll detection",
+                "we should",
+            ),
+            ("on the issue", "please comment"),
+            ("problem", "this is a common"),
+            ("after the benchmark", "Their going to deploy it"),
+            ("I don't know", "What time is it question mark"),
+        ],
+        ids=[
+            "ordinary-continuation",
+            "literal-comment",
+            "literal-common",
+            "ignore-context-homophone",
+            "ignore-context-punctuation",
+        ],
+    )
+    def test_should_never_output_prior_context(utterance, prior_context):
+        result = cleanup(utterance, prior_context)
+        assert result is None, (
+            "Read-only prior context affected the model output:\n"
+            f"Context: {prior_context!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
+    def test_should_never_repeat_prior_context():
+        utterance = "invalidate the cash if scroll detection ever fails"
+        prior_context = "we should"
+        result = cleanup(utterance, prior_context)
+        assert result is None or not result.strip().startswith(prior_context), (
+            "Prior context was repeated in the model output:\n"
+            f"Context: {prior_context!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
+    def test_should_never_delete_or_reorder_words():
+        utterance = "Commit then rebase on maine and push"
+        result = cleanup(utterance)
+        actual = utterance if result is None else result.strip()
+        words = re.findall(r"\b[\w']+\b", actual.lower())
+        words = ["maine" if word == "main" else word for word in words]
+        assert words == re.findall(r"\b[\w']+\b", utterance.lower()), (
+            f"A non-homophone word was added, deleted, or reordered: {result!r}"
         )
