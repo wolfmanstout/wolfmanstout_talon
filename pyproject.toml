@@ -2,6 +2,8 @@
 pythonpath = [".", "test/stubs"]
 markers = [
     "ollama: tests that require a running Ollama instance (deselected by default)",
+    "hard: required behavior for a dictation AI prompt",
+    "ideal: preferred behavior used to score a dictation AI prompt",
 ]
 addopts = "-m 'not ollama'"
 
