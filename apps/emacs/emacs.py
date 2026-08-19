@@ -135,6 +135,18 @@ def _read_dictation_peek_response(
         sleep_time = min(sleep_time * 2, time_left)
 
 
+def _wait_for_clipboard_text(expected_text: str, timeout: float):
+    """Wait until a clipboard write is observable before invoking Emacs."""
+    deadline = time.perf_counter() + timeout
+    sleep_time = DICTATION_PEEK_MINIMUM_SLEEP_SECONDS
+    while clip.text() != expected_text:
+        time_left = deadline - time.perf_counter()
+        if time_left <= 0:
+            raise TimeoutError("Timed out publishing Emacs dictation peek request")
+        actions.sleep(min(sleep_time, time_left))
+        sleep_time = min(sleep_time * 2, time_left)
+
+
 def _emacs_dictation_peek(
     left: bool, right: bool
 ) -> tuple[Optional[str], Optional[str]]:
@@ -154,6 +166,7 @@ def _emacs_dictation_peek(
     timeout = settings.get("user.selected_text_timeout")
     with clip.revert():
         _set_transient_clipboard_text(request)
+        _wait_for_clipboard_text(request, timeout)
         actions.user.emacs("talon-dictation-peek")
         return _read_dictation_peek_response(request_id, left, right, timeout)
 

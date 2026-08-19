@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 
 import talon
 
@@ -68,3 +69,15 @@ if hasattr(talon, "test_mode"):
         assert not emacs._is_dictation_peek_response_for_request(
             "not json", "request-1"
         )
+
+    def test_waits_for_dictation_peek_request_to_reach_clipboard():
+        clipboard_values = iter(["old clipboard", "", "request"])
+        sleeps = []
+        with (
+            patch.object(emacs, "clip") as mock_clip,
+            patch.object(emacs, "actions") as mock_actions,
+        ):
+            mock_clip.text.side_effect = clipboard_values
+            mock_actions.sleep.side_effect = sleeps.append
+            emacs._wait_for_clipboard_text("request", 1)
+        assert len(sleeps) == 2
