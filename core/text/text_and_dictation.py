@@ -821,6 +821,7 @@ def _run_ai_cleanup(
                 "prompt": prompt,
                 "stream": False,
                 "think": False,
+                "options": {"temperature": 0.0},
             }
         else:
             payload_dict = {

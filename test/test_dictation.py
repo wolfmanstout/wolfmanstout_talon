@@ -432,3 +432,37 @@ if hasattr(talon, "test_mode"):
             )
             is None
         )
+
+    def test_run_ai_cleanup_sets_ollama_temperature_to_zero(monkeypatch):
+        request = {}
+
+        class Response:
+            content = json.dumps(
+                {
+                    "response": "apples, oranges",
+                    "prompt_eval_count": 10,
+                    "prompt_eval_duration": 100_000_000,
+                    "eval_count": 2,
+                    "eval_duration": 20_000_000,
+                    "total_duration": 150_000_000,
+                    "load_duration": 10_000_000,
+                }
+            ).encode("utf-8")
+
+        def fake_post(url, **kwargs):
+            request.update(kwargs)
+            return Response()
+
+        monkeypatch.setattr(text_and_dictation.requests, "post", fake_post)
+
+        result = text_and_dictation._run_ai_cleanup(
+            "",
+            "apples comment oranges",
+            "model",
+            "http://127.0.0.1:11434/api/generate",
+            1,
+            "ollama",
+        )
+
+        assert result == "apples, oranges"
+        assert json.loads(request["data"])["options"] == {"temperature": 0.0}
