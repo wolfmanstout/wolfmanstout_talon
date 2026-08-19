@@ -314,6 +314,7 @@ if hasattr(talon, "test_mode"):
             ("we have a common interest in this", ""),
             # From real logs: model added a comma without any trigger word
             ("Also create", ""),
+            ("Hey Dan", ""),
             # Punctuation words and near-homophones used literally.
             ("The colon absorbs water", ""),
             ("A semicolon joins related clauses", ""),
@@ -357,6 +358,7 @@ if hasattr(talon, "test_mode"):
             "actual-common-problem",
             "actual-common-interest",
             "no-trigger-also-create",
+            "vocative-no-comma",
             "literal-colon",
             "literal-semicolon",
             "literal-exclamation-mark",
@@ -437,3 +439,13 @@ if hasattr(talon, "test_mode"):
         assert words == re.findall(r"\b[\w']+\b", utterance.lower()), (
             f"A non-homophone word was added, deleted, or reordered: {result!r}"
         )
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
+    def test_should_preserve_incomplete_trailing_word():
+        utterance = "she thinks Michael has it covered on"
+        result = cleanup(utterance)
+        actual = utterance if result is None else result.strip()
+        assert re.findall(r"\b[\w']+\b", actual.lower()) == re.findall(
+            r"\b[\w']+\b", utterance.lower()
+        ), f"A word was added, deleted, or reordered: {result!r}"
