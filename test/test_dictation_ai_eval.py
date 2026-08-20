@@ -449,3 +449,22 @@ if hasattr(talon, "test_mode"):
         assert re.findall(r"\b[\w']+\b", actual.lower()) == re.findall(
             r"\b[\w']+\b", utterance.lower()
         ), f"A word was added, deleted, or reordered: {result!r}"
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
+    def test_should_preserve_unfamiliar_capitalization():
+        utterance = "common Sponge is ready"
+        result = cleanup(utterance, "I checked the server")
+        actual = utterance if result is None else result.strip()
+        assert "Sponge" in re.findall(r"\b[\w']+\b", actual), (
+            f"An unfamiliar capitalized word lost its capitalization: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
+    def test_should_never_output_input_tags():
+        result = cleanup("first come and second come and third")
+        assert result is not None, "Expected punctuation correction"
+        assert not re.search(r"</?(?:utterance|prior_context)>", result), (
+            f"Input-format tags leaked into output: {result!r}"
+        )
