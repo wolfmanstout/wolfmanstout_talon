@@ -1,0 +1,5 @@
+name: nochange-incomplete-clause-no-comma
+category: restraint
+text_before: The cache works
+utterance: " but only when requests arrive quickly"
+unchanged: true

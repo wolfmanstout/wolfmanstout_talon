@@ -1,0 +1,5 @@
+name: nochange-no-unspoken-colon
+category: restraint
+text_before: ""
+utterance: Here are the options
+unchanged: true

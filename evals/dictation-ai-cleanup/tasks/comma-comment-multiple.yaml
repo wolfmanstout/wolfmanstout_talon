@@ -1,0 +1,5 @@
+name: comma-comment-multiple
+category: punctuation-name
+text_before: ""
+utterance: apples comment oranges comment bananas
+expected: apples, oranges, bananas

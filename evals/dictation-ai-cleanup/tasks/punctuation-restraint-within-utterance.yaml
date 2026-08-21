@@ -1,0 +1,5 @@
+name: punctuation-restraint-within-utterance
+category: punctuation-restraint
+text_before: ""
+utterance: When the server is ready run the benchmark
+unchanged: true

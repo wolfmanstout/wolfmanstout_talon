@@ -1,0 +1,5 @@
+name: nochange-literal-hyphen-description
+category: restraint
+text_before: ""
+utterance: A hyphen joins related words
+unchanged: true

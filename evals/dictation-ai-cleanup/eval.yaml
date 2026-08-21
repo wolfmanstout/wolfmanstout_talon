@@ -1,0 +1,4 @@
+name: dictation-ai-cleanup
+description: >-
+  Cleans narrowly scoped speech-recognition errors without changing unrelated
+  dictation. Scores correctness and independent safety/protocol criteria.

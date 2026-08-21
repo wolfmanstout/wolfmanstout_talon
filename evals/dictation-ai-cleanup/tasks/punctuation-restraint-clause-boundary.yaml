@@ -1,0 +1,5 @@
+name: punctuation-restraint-clause-boundary
+category: punctuation-restraint
+text_before: When the server is ready
+utterance: " run the benchmark"
+unchanged: true

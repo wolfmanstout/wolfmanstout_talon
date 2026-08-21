@@ -1,0 +1,5 @@
+name: comma-common-single
+category: punctuation-name
+text_before: ""
+utterance: I went to the store common bought milk common and came home
+expected: I went to the store, bought milk, and came home

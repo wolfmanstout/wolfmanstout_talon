@@ -644,13 +644,16 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "Either may be incomplete.\n"
         "When certain, (1) replace a spoken or phonetically misrecognized name of comma, colon, "
         "semicolon, exclamation mark, question mark, or hyphen with the mark, consuming the whole "
-        "name; (2) insert hyphens only where standard spelling clearly requires them; or (3) "
+        "name; (2) insert unspoken hyphens only in a compound modifier directly before its noun "
+        "where standard spelling clearly requires them; or (3) "
         "correct a wrong homophone "
         "(identical pronunciation). Outside those replacements, never add, delete, reorder, or "
         "alter words; treat capitalized words after the first word as immutable proper nouns, "
         "even if unfamiliar or apparently misspelled, unless consumed in a punctuation name; do "
-        "not proofread. Never insert unspoken punctuation except required hyphens. Never output "
-        "tags. Output corrected <utterance> only, or exactly NOCHANGE if unchanged. Trimming "
+        "not proofread. You may capitalize a lowercase name when certain, but never lowercase a "
+        "word. Never insert unspoken "
+        "punctuation except required hyphens. Never output tags. Output corrected <utterance> "
+        "only, or exactly NOCHANGE if unchanged. Trimming "
         "leading or trailing whitespace is not a change; return NOCHANGE rather than a trimmed "
         "copy.\n\n"
         "NOCHANGE examples: 'come and see this'; 'come and get it'; "
@@ -659,13 +662,16 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "'please comment on it'; 'This issue is high priority'; "
         "'When the server is ready run the benchmark'; "
         "'viewport frame purple if it is a cached frame'; "
-        "'we should kind of maybe try it'.\n"
+        "'we should kind of maybe try it'; 'We found a safe haven'; "
+        "'ask Danise whether it is ready'.\n"
         "<text_before></text_before><utterance>Hello Sarah</utterance> -> NOCHANGE\n"
         "<utterance>I can take care of</utterance> -> NOCHANGE\n"
-        "<text_before>The deploy starts</text_before>"
+        "<text_before>Their going to deploy it</text_before>"
         "<utterance> after the benchmark</utterance> -> NOCHANGE\n"
-        "<text_before>this is a common</text_before>"
-        "<utterance> problem</utterance> -> NOCHANGE\n\n"
+        "<text_before>What time is it question mark</text_before>"
+        "<utterance> I don't know</utterance> -> NOCHANGE\n"
+        "<text_before>The options are red</text_before>"
+        "<utterance> green and blue</utterance> -> NOCHANGE\n\n"
         "FIX examples:\n"
         "'first come and second come and third' -> 'first, second, third'\n"
         '"I\'m not sure come and can you help" -> "I\'m not sure, can you help"\n'
@@ -679,6 +685,7 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "'state of the art model' -> 'state-of-the-art model'\n"
         "'Their going to deploy it' -> \"They're going to deploy it\"\n"
         "'Use the write configuration' -> 'Use the right configuration'\n"
+        "'ask michael whether it is ready' -> 'ask Michael whether it is ready'\n"
         "<text_before>This is a well</text_before>"
         "<utterance> known issue</utterance> -> '-known issue'\n"
         "Remember: never insert an unspoken comma.\n"
@@ -847,6 +854,14 @@ def _starts_with_attached_punctuation(text: str) -> bool:
     return unicodedata.category(text[0]) in {"Pc", "Pd", "Pe", "Pf", "Po"}
 
 
+def _removes_capitalization(original: str, corrected: str) -> bool:
+    """Return whether an edit lowers any previously uppercase character."""
+    return any(
+        char.isupper() and (index >= len(corrected) or not corrected[index].isupper())
+        for index, char in enumerate(original)
+    )
+
+
 def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
     """Reject model edits outside the cleanup operation's structural limits."""
     # Compare words independently of punctuation, but keep their original forms
@@ -866,15 +881,24 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
         old_words = original_words[old_start:old_end]
         new_words = corrected_words[new_start:new_end]
         if operation == "equal":
-            # The case-insensitive alignment matched; require exact text as well.
-            if old_words != new_words:
+            # Adding capitalization can correct a recognized name, but removing
+            # existing capitalization may corrupt special vocabulary.
+            if any(
+                _removes_capitalization(old, new)
+                for old, new in zip(old_words, new_words, strict=True)
+            ):
                 return False
             continue
         if operation == "replace" and len(old_words) == len(new_words):
             # One equal-length replacement may be a homophone correction. A
             # capitalized word after the first is treated as a proper noun.
-            if old_start > 0 and any(word[:1].isupper() for word in old_words):
-                return False
+            for index, (old, new) in enumerate(
+                zip(old_words, new_words, strict=True), old_start
+            ):
+                if _removes_capitalization(old, new):
+                    return False
+                if index > 0 and any(char.isupper() for char in old):
+                    return False
             replacement_spans += 1
             continue
         if operation in {"delete", "replace"} and not new_words:

@@ -1,0 +1,5 @@
+name: nochange-env-variable
+category: restraint
+text_before: ""
+utterance: Set this environment variable in all contexts
+unchanged: true

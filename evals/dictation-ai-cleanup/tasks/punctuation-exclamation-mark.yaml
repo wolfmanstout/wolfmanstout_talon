@@ -1,0 +1,5 @@
+name: punctuation-exclamation-mark
+category: punctuation-name
+text_before: ""
+utterance: Stop exclamation mark
+expected: Stop!

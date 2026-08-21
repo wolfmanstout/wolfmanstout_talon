@@ -1,0 +1,5 @@
+name: nochange-literal-question-mark-name
+category: restraint
+text_before: ""
+utterance: Mark asked a question
+unchanged: true

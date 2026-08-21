@@ -1,0 +1,5 @@
+name: protocol-whitespace-adjacent-leading
+category: protocol
+text_before: The deploy starts
+utterance: " after the benchmark"
+unchanged: true

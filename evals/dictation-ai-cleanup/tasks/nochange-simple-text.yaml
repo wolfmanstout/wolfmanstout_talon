@@ -1,0 +1,5 @@
+name: nochange-simple-text
+category: restraint
+text_before: ""
+utterance: This is a test
+unchanged: true

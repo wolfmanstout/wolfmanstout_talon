@@ -1,0 +1,5 @@
+name: protocol-whitespace-trailing
+category: protocol
+text_before: ""
+utterance: "unchanged words "
+unchanged: true

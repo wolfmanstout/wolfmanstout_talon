@@ -1,0 +1,5 @@
+name: nochange-no-unspoken-exclamation-mark
+category: restraint
+text_before: ""
+utterance: This is amazing
+unchanged: true

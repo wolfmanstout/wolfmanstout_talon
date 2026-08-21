@@ -1,0 +1,5 @@
+name: comma-come-and-real-log
+category: punctuation-name
+text_before: ""
+utterance: I'm not sure come and can you help
+expected: I'm not sure, can you help

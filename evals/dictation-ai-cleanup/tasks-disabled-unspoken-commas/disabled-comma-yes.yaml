@@ -1,0 +1,5 @@
+name: disabled-comma-yes
+category: unspoken-comma
+text_before: ""
+utterance: Yes I agree
+expected: Yes, I agree

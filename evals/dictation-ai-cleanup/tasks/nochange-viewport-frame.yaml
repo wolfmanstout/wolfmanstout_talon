@@ -1,0 +1,5 @@
+name: nochange-viewport-frame
+category: restraint
+text_before: colors the
+utterance: " viewport frame purple if it is a cached frame"
+unchanged: true

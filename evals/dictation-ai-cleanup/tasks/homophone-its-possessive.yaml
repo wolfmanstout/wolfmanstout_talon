@@ -1,0 +1,5 @@
+name: homophone-its-possessive
+category: homophone
+text_before: ""
+utterance: The cache lost it's state
+expected: The cache lost its state

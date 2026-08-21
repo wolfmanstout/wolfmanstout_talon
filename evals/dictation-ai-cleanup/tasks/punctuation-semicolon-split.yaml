@@ -1,0 +1,5 @@
+name: punctuation-semicolon-split
+category: punctuation-name
+text_before: ""
+utterance: Keep the cache semi colon it is still valid
+expected: Keep the cache; it is still valid
