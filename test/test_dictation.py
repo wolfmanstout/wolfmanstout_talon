@@ -418,7 +418,7 @@ if hasattr(talon, "test_mode"):
         class Response:
             content = json.dumps(
                 {
-                    "choices": [{"message": {"content": " , however we should wait"}}],
+                    "choices": [{"message": {"content": " -known issue"}}],
                     "usage": {},
                 }
             ).encode("utf-8")
@@ -430,8 +430,8 @@ if hasattr(talon, "test_mode"):
         monkeypatch.setattr(text_and_dictation.requests, "post", fake_post)
 
         result = text_and_dictation._run_ai_cleanup(
-            "The benchmark passed",
-            " however we should wait",
+            "This is a well",
+            " known issue",
             "model",
             "http://127.0.0.1:8080/chat/completions",
             1,
@@ -439,19 +439,19 @@ if hasattr(talon, "test_mode"):
         )
 
         prompt = json.loads(request["data"])["messages"][0]["content"]
-        assert "<utterance> however we should wait</utterance>" in prompt
-        assert result == ", however we should wait"
+        assert "<utterance> known issue</utterance>" in prompt
+        assert result == "-known issue"
 
         text_and_dictation._run_ai_cleanup(
-            "An old sentence. The benchmark passed",
-            " however we should wait",
+            "An old sentence. This is a well",
+            " known issue",
             "model",
             "http://127.0.0.1:8080/chat/completions",
             1,
             "mlx",
         )
         prompt = json.loads(request["data"])["messages"][0]["content"]
-        assert "<text_before>The benchmark passed</text_before>" in prompt
+        assert "<text_before>This is a well</text_before>" in prompt
         assert "An old sentence" not in prompt
 
     def test_run_ai_cleanup_logs_one_consolidated_result_line(monkeypatch):
@@ -507,8 +507,11 @@ if hasattr(talon, "test_mode"):
 
         assert is_safe("rebase on maine", "rebase on main")
         assert is_safe("first come and second", "first, second")
-        assert is_safe("red green and blue", "red, green and blue")
-        assert is_safe("green and blue", ", green and blue", allow_leading_comma=True)
+        assert is_safe("client haven server", "client-server")
+        assert is_safe("client high fin server", "client-server")
+        assert is_safe("a well known issue", "a well-known issue")
+        assert is_safe("state of the art model", "state-of-the-art model")
+        assert not is_safe("red green and blue", "red, green and blue")
         assert not is_safe("green and blue", ", green and blue")
         assert not is_safe("she has it covered on", "she has it covered")
         assert not is_safe("I'm not sure come and can you help", ", can you help")

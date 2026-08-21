@@ -86,10 +86,7 @@ if hasattr(talon, "test_mode"):
             (
                 "I like cats comment dogs and birds",
                 "",
-                (
-                    "I like cats, dogs and birds",
-                    "I like cats, dogs, and birds",
-                ),
+                "I like cats, dogs and birds",
             ),
             # From real logs: "come and" in middle of sentence
             (
@@ -148,13 +145,7 @@ if hasattr(talon, "test_mode"):
     @pytest.mark.parametrize(
         "utterance, expected",
         [
-            (
-                "The choices are colon red green or blue",
-                (
-                    "The choices are: red, green or blue",
-                    "The choices are: red, green, or blue",
-                ),
-            ),
+            ("Configuration colon enabled", "Configuration: enabled"),
             ("Set the header coal on enabled", "Set the header: enabled"),
             ("I finished semicolon you can start", "I finished; you can start"),
             (
@@ -189,6 +180,41 @@ if hasattr(talon, "test_mode"):
 
     @pytest.mark.ollama
     @pytest.mark.ideal
+    @pytest.mark.parametrize(
+        "utterance, text_before, expected",
+        [
+            ("client hyphen server", "", "client-server"),
+            ("client haven server", "", "client-server"),
+            ("client high fin server", "", "client-server"),
+            ("a well known limitation", "", "a well-known limitation"),
+            ("a state of the art model", "", "a state-of-the-art model"),
+            ("This is a high priority issue", "", "This is a high-priority issue"),
+            (" known issue", "This is a well", "-known issue"),
+        ],
+        ids=[
+            "spoken",
+            "misrecognized-haven",
+            "misrecognized",
+            "well-known",
+            "state-of-the-art",
+            "high-priority",
+            "across-utterances",
+        ],
+    )
+    def test_should_fix_or_insert_hyphens(utterance, text_before, expected):
+        result = cleanup(utterance, text_before)
+        assert result is not None, (
+            f"Expected hyphen correction but got NOCHANGE for: {utterance!r}"
+        )
+        assert result.strip() == expected, (
+            f"Input: {utterance!r}\nExpected: {expected!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.ideal
+    @pytest.mark.skip(
+        reason="Unspoken comma insertion is disabled pending real-world evals"
+    )
     @pytest.mark.parametrize(
         "utterance, prior_context, expected",
         [
@@ -250,6 +276,9 @@ if hasattr(talon, "test_mode"):
 
     @pytest.mark.ollama
     @pytest.mark.ideal
+    @pytest.mark.skip(
+        reason="Unspoken comma insertion is disabled pending real-world evals"
+    )
     @pytest.mark.parametrize(
         "utterance, text_before, expected",
         [
@@ -386,9 +415,16 @@ if hasattr(talon, "test_mode"):
             ("The colon absorbs water", ""),
             ("A semicolon joins related clauses", ""),
             ("The exclamation mark is too large", ""),
+            ("The hyphen key is stuck", ""),
+            ("A hyphen joins related words", ""),
+            ("We had high fun at the party", ""),
+            ("We found a safe haven", ""),
+            ("The limitation is well known", ""),
+            ("The model is state of the art", ""),
+            ("This issue is high priority", ""),
             ("Mark asked a question", ""),
             ("Please call on the next speaker", ""),
-            # Do not infer unspoken punctuation other than a highly confident comma.
+            # Do not infer unspoken punctuation other than standard hyphens.
             ("Are you ready", ""),
             ("This is amazing", ""),
             ("Here are the options", ""),
@@ -428,6 +464,13 @@ if hasattr(talon, "test_mode"):
             "literal-colon",
             "literal-semicolon",
             "literal-exclamation-mark",
+            "literal-hyphen",
+            "literal-hyphen-description",
+            "literal-high-fun",
+            "literal-safe-haven",
+            "predicative-well-known",
+            "predicative-state-of-the-art",
+            "predicative-high-priority",
             "literal-question-mark-name",
             "literal-call-on",
             "no-unspoken-question-mark",
@@ -480,6 +523,47 @@ if hasattr(talon, "test_mode"):
                 for (utterance, _), result in zip(cases, results, strict=True)
             )
         )
+
+    @pytest.mark.ollama
+    @pytest.mark.ideal
+    @pytest.mark.parametrize(
+        "utterance, text_before",
+        [
+            (" unchanged words", ""),
+            ("unchanged words ", ""),
+            (" after the benchmark", "The deploy starts"),
+        ],
+        ids=["leading", "trailing", "adjacent-leading"],
+    )
+    def test_should_return_nochange_for_edge_whitespace_only(utterance, text_before):
+        result = cleanup_result(utterance, text_before)
+        assert result.model_output == "NOCHANGE", (
+            "Expected NOCHANGE instead of a whitespace-trimmed copy:\n"
+            f"Input: {utterance!r}\nOutput: {result.model_output!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
+    @pytest.mark.parametrize(
+        "utterance, text_before",
+        [
+            ("Yes I agree", ""),
+            ("When the server is ready run the benchmark", ""),
+            (" green and blue", "The options are red"),
+            (" run the benchmark", "When the server is ready"),
+            ("Hey Dan", ""),
+        ],
+        ids=[
+            "discourse",
+            "within-utterance",
+            "list-boundary",
+            "clause-boundary",
+            "greeting",
+        ],
+    )
+    def test_should_never_insert_unspoken_comma(utterance, text_before):
+        result = cleanup(utterance, text_before)
+        assert result is None, f"An unspoken comma was applied: {result!r}"
 
     @pytest.mark.ollama
     @pytest.mark.hard
