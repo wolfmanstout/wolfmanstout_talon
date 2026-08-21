@@ -643,19 +643,21 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "contents are adjacent on screen. Ignore its errors and never repeat, fix, or output it. "
         "Either may be incomplete.\n"
         "When certain, (1) replace a spoken or phonetically misrecognized name of comma, colon, "
-        "semicolon, exclamation mark, or question mark with the mark, consuming the whole name; "
-        "(2) insert an unspoken comma only to prevent a likely misreading, not merely to satisfy "
-        "grammatical convention, including at the start under the same high-confidence standard "
-        "when the adjacent inputs require it, and no other unspoken punctuation; or (3) correct a "
-        "wrong homophone "
+        "semicolon, exclamation mark, question mark, or hyphen with the mark, consuming the whole "
+        "name; (2) insert hyphens only where standard spelling clearly requires them; or (3) "
+        "correct a wrong homophone "
         "(identical pronunciation). Outside those replacements, never add, delete, reorder, or "
         "alter words; treat capitalized words after the first word as immutable proper nouns, "
         "even if unfamiliar or apparently misspelled, unless consumed in a punctuation name; do "
-        "not proofread. Never output tags. Output corrected <utterance> only, or exactly NOCHANGE "
-        "if unchanged, including edge whitespace only; never copy unchanged input.\n\n"
+        "not proofread. Never insert unspoken punctuation except required hyphens. Never output "
+        "tags. Output corrected <utterance> only, or exactly NOCHANGE if unchanged. Trimming "
+        "leading or trailing whitespace is not a change; return NOCHANGE rather than a trimmed "
+        "copy.\n\n"
         "NOCHANGE examples: 'come and see this'; 'come and get it'; "
         "'The colon absorbs water'; 'A semicolon joins clauses'; 'Are you ready'; "
-        "'Run link talon'; 'Their server is fast'; 'please comment on it'; "
+        "'The hyphen key is stuck'; 'Run link talon'; 'Their server is fast'; "
+        "'please comment on it'; 'This issue is high priority'; "
+        "'When the server is ready run the benchmark'; "
         "'viewport frame purple if it is a cached frame'; "
         "'we should kind of maybe try it'.\n"
         "<text_before></text_before><utterance>Hello Sarah</utterance> -> NOCHANGE\n"
@@ -672,13 +674,14 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "'That worked exclamation Marc' -> 'That worked!'\n"
         "'The exclamation mark is large' -> NOCHANGE\n"
         "'Why did it fail question Marc' -> 'Why did it fail?'\n"
+        "'client haven server' -> 'client-server'\n"
+        "'a high priority issue' -> 'a high-priority issue'\n"
+        "'state of the art model' -> 'state-of-the-art model'\n"
         "'Their going to deploy it' -> \"They're going to deploy it\"\n"
         "'Use the write configuration' -> 'Use the right configuration'\n"
-        "<text_before>Monitor logs</text_before>"
-        "<utterance> metrics and traces</utterance> -> ', metrics and traces'\n"
-        "<text_before>When the server is ready</text_before>"
-        "<utterance> run the benchmark</utterance> -> ', run the benchmark'\n"
-        "Remember: omit optional commas, including in short greetings.\n"
+        "<text_before>This is a well</text_before>"
+        "<utterance> known issue</utterance> -> '-known issue'\n"
+        "Remember: never insert an unspoken comma.\n"
         "Never delete words; preserve unfinished endings.\n"
         "If unchanged, output NOCHANGE, never a copy of <utterance>.\n"
         f"<text_before>{text_before}</text_before>"
@@ -844,9 +847,7 @@ def _starts_with_attached_punctuation(text: str) -> bool:
     return unicodedata.category(text[0]) in {"Pc", "Pd", "Pe", "Pf", "Po"}
 
 
-def _is_safe_ai_cleanup_edit(
-    original: str, corrected: str, allow_leading_comma: bool = False
-) -> bool:
+def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
     """Reject model edits outside the cleanup operation's structural limits."""
     # Compare words independently of punctuation, but keep their original forms
     # so an otherwise unchanged word cannot silently change capitalization.
@@ -887,25 +888,16 @@ def _is_safe_ai_cleanup_edit(
 
     # Every deleted phrase must be accounted for by newly added punctuation.
     added_marks = {
-        mark: max(0, corrected.count(mark) - original.count(mark)) for mark in ",;:!?"
+        mark: max(0, corrected.count(mark) - original.count(mark)) for mark in ",;:!?-"
     }
     # Multiple word-replacement regions are too broad to trust as homophones.
     if replacement_spans > 1:
         return False
-    # An unspoken comma may bridge text_before and the utterance only when the
-    # caller confirms that preceding text exists.
-    if (
-        corrected.startswith(",")
-        and not original.startswith(",")
-        and not deletion_spans
-        and not allow_leading_comma
-    ):
-        return False
     if deletion_spans > sum(added_marks.values()):
         return False
-    # Commas may be unspoken. Every other new mark must consume a spoken name.
+    # Hyphens may be unspoken. Every other new mark must consume a spoken name.
     return (
-        sum(count for mark, count in added_marks.items() if mark != ",")
+        sum(count for mark, count in added_marks.items() if mark != "-")
         <= deletion_spans
     )
 
@@ -1041,9 +1033,7 @@ def _run_ai_cleanup_result(
         result = DictationAiCleanupResult(None, corrected_core, "identical")
         _log_ai_cleanup_result(result, text_before, utterance_text)
         return result
-    if not _is_safe_ai_cleanup_edit(
-        utterance_core, corrected_core, allow_leading_comma=bool(text_before)
-    ):
+    if not _is_safe_ai_cleanup_edit(utterance_core, corrected_core):
         result = DictationAiCleanupResult(None, corrected_core, "unsafe")
         _log_ai_cleanup_result(result, text_before, utterance_text)
         return result
