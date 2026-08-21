@@ -11,7 +11,7 @@ This is the Talon Community repository, a comprehensive voice command set for [T
 ```bash
 uv run pytest                    # Run test suite
 uv run pytest test/specific_test.py  # Run specific test
-uv run smevals run evals/dictation-ai-cleanup -g  # Run dictation cleanup evals
+uv run smevals run .evals/dictation-ai-cleanup -g  # Run dictation cleanup evals
 ```
 
 **Code Quality:**

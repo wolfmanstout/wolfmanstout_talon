@@ -17,6 +17,6 @@ __pycache__
 # Vim (from https://github.com/github/gitignore/blob/main/Global/Vim.gitignore)
 [._]*.swp
 node_modules/
-evals/**/runs
+.evals/**/runs
 core/system_paths-jwstout*
 .claude/settings.local.json
