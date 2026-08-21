@@ -19,7 +19,7 @@ import talon
 if hasattr(talon, "test_mode"):
     import pytest
 
-    from core.text.text_and_dictation import _run_ai_cleanup
+    from core.text.text_and_dictation import _run_ai_cleanup, _run_ai_cleanup_result
 
     DEFAULT_BACKEND = os.getenv("DICTATION_AI_CLEANUP_BACKEND", "mlx")
     DEFAULT_MODEL = os.getenv(
@@ -30,8 +30,25 @@ if hasattr(talon, "test_mode"):
     )
     DEFAULT_TIMEOUT = int(os.getenv("DICTATION_AI_CLEANUP_TIMEOUT_S", "10"))
 
+    def runtime_input(utterance, text_before):
+        if text_before and utterance and not utterance[0].isspace():
+            utterance = f" {utterance}"
+        return utterance, text_before
+
     def cleanup(utterance, prior_context=""):
+        utterance, prior_context = runtime_input(utterance, prior_context)
         return _run_ai_cleanup(
+            prior_context,
+            utterance,
+            DEFAULT_MODEL,
+            DEFAULT_URL,
+            DEFAULT_TIMEOUT,
+            DEFAULT_BACKEND,
+        )
+
+    def cleanup_result(utterance, prior_context=""):
+        utterance, prior_context = runtime_input(utterance, prior_context)
+        return _run_ai_cleanup_result(
             prior_context,
             utterance,
             DEFAULT_MODEL,
@@ -188,9 +205,9 @@ if hasattr(talon, "test_mode"):
                 "When the server is ready, run the benchmark",
             ),
             (
-                "to be clear this is optional",
-                "The benchmark passed",
-                "to be clear, this is optional",
+                "To be clear this is optional",
+                "",
+                "To be clear, this is optional",
             ),
             (
                 "No don't fix the stale comment, fix the code so that it aligns with that comment",
@@ -217,7 +234,7 @@ if hasattr(talon, "test_mode"):
             "however",
             "introductory-phrase",
             "introductory-clause",
-            "context-incomplete",
+            "to-be-clear",
             "discourse-no",
             "for-this-reason",
             "independent-clauses",
@@ -234,6 +251,57 @@ if hasattr(talon, "test_mode"):
     @pytest.mark.ollama
     @pytest.mark.ideal
     @pytest.mark.parametrize(
+        "utterance, text_before, expected",
+        [
+            (
+                " oranges, bananas and pears",
+                "I bought apples",
+                ", oranges, bananas and pears",
+            ),
+            (
+                " green and blue",
+                "The options are red",
+                ", green and blue",
+            ),
+            (
+                " staging and production",
+                "Run it in development",
+                ", staging and production",
+            ),
+            (
+                " run the benchmark",
+                "When the server is ready",
+                ", run the benchmark",
+            ),
+            (
+                " we should rerun it",
+                "Although the benchmark passed",
+                ", we should rerun it",
+            ),
+        ],
+        ids=[
+            "shopping-list",
+            "color-list",
+            "environment-list",
+            "introductory-clause",
+            "concessive-clause",
+        ],
+    )
+    def test_should_insert_comma_between_text_before_and_utterance(
+        utterance, text_before, expected
+    ):
+        result = cleanup(utterance, text_before)
+        assert result is not None, (
+            "Expected a comma between adjacent text, but got NOCHANGE:\n"
+            f"Text before: {text_before!r}\nUtterance: {utterance!r}"
+        )
+        assert result.strip() == expected, (
+            f"Text before: {text_before!r}\nExpected: {expected!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.ideal
+    @pytest.mark.parametrize(
         "utterance, prior_context, expected",
         [
             ("Their going to deploy it", "", "They're going to deploy it"),
@@ -243,9 +311,9 @@ if hasattr(talon, "test_mode"):
             ("We need to right the file", "", "We need to write the file"),
             ("Use the write configuration", "", "Use the right configuration"),
             (
-                "There going tomorrow",
-                "The release is scheduled",
-                "They're going tomorrow",
+                "there going tomorrow",
+                "I heard",
+                "they're going tomorrow",
             ),
             (
                 "invalidate the cash if scroll detection ever fails",
@@ -292,10 +360,10 @@ if hasattr(talon, "test_mode"):
         [
             # Normal text, no comma words present
             ("This is a test", ""),
-            ("this is another", "This is a test"),
+            ("this is another", "I think"),
             ("Switch back to main", ""),
             ("Run link talon", ""),
-            ("let me know if you have ideas", "actually scrolling"),
+            ("let me know if you have ideas", "You can"),
             # From real logs: false positive cases from earlier prompts
             ("added only for that purpose", "that were"),
             (
@@ -304,12 +372,11 @@ if hasattr(talon, "test_mode"):
             ),
             ("Adjust the prompt", ""),
             ("Set this environment variable in all contexts", ""),
-            ("feel free to search the web", "Is there a way to cleanly delete this"),
             # Words that contain comma-like substrings but aren't mistranscriptions
             ("please comment on the issue", ""),
             ("come and see this", ""),
             ("I want to comment on that", ""),
-            ("come and get it", "Let's go"),
+            ("come and get it", "You should"),
             ("this is a common problem", ""),
             ("we have a common interest in this", ""),
             # From real logs: model added a comma without any trigger word
@@ -350,7 +417,6 @@ if hasattr(talon, "test_mode"):
             "viewport-frame",
             "adjust-prompt",
             "env-variable",
-            "search-web",
             "actual-comment-on",
             "actual-come-and-see",
             "actual-comment-on-that",
@@ -386,6 +452,33 @@ if hasattr(talon, "test_mode"):
         result = cleanup(utterance, prior_context)
         assert result is None, (
             f"Expected NOCHANGE but got correction for: {utterance!r}\nGot: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.ideal
+    def test_should_usually_prefer_nochange_over_identical_output():
+        cases = [
+            ("This is a test", ""),
+            ("Switch back to main", ""),
+            ("Hey Dan", ""),
+            (" ask Danise to review it", "Please"),
+            (" after the benchmark", "The deploy starts"),
+            ("Run link talon", ""),
+            ("Their server is fast", ""),
+            ("come and get it", "You should"),
+            ("Are you ready", ""),
+            ("we should kind of maybe try it", ""),
+        ]
+        results = [
+            cleanup_result(utterance, text_before) for utterance, text_before in cases
+        ]
+        nochange_count = sum(result.model_output == "NOCHANGE" for result in results)
+        assert nochange_count >= 7, (
+            "Expected NOCHANGE for at least seven of ten unchanged inputs; got:\n"
+            + "\n".join(
+                f"{utterance!r}: {result.model_output!r}"
+                for (utterance, _), result in zip(cases, results, strict=True)
+            )
         )
 
     @pytest.mark.ollama
@@ -452,6 +545,16 @@ if hasattr(talon, "test_mode"):
 
     @pytest.mark.ollama
     @pytest.mark.hard
+    def test_should_preserve_words_around_punctuation_replacement():
+        utterance = "I'm not sure come and can you help"
+        result = cleanup(utterance)
+        actual = utterance if result is None else result.strip()
+        assert actual.startswith("I'm not sure"), (
+            f"Words outside the punctuation name were deleted: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
     def test_should_preserve_unfamiliar_capitalization():
         utterance = "common Sponge is ready"
         result = cleanup(utterance, "I checked the server")
@@ -462,9 +565,19 @@ if hasattr(talon, "test_mode"):
 
     @pytest.mark.ollama
     @pytest.mark.hard
+    def test_should_preserve_unfamiliar_capitalized_name():
+        utterance = " ask Danise whether the benchmark is ready"
+        result = cleanup(utterance, "When you see her")
+        actual = utterance if result is None else result
+        assert "Danise" in re.findall(r"\b[\w']+\b", actual), (
+            f"An unfamiliar capitalized name was altered: {result!r}"
+        )
+
+    @pytest.mark.ollama
+    @pytest.mark.hard
     def test_should_never_output_input_tags():
         result = cleanup("first come and second come and third")
         assert result is not None, "Expected punctuation correction"
-        assert not re.search(r"</?(?:utterance|prior_context)>", result), (
+        assert not re.search(r"</?(?:utterance|text_before)>", result), (
             f"Input-format tags leaked into output: {result!r}"
         )

@@ -6,8 +6,6 @@ PHRASE_EXAMPLES = ["", "foo", "foo bar", "lorem ipsum dolor sit amet"]
 
 if hasattr(talon, "test_mode"):
     # Only include this when we're running tests
-    import logging
-
     from core.text import text_and_dictation
 
     def test_format_phrase():
@@ -390,19 +388,108 @@ if hasattr(talon, "test_mode"):
         )
         calls = []
 
-        def fake_log(level, message, *args):
-            calls.append((level, message % args))
+        def fake_log(message, *args):
+            calls.append(message % args)
 
-        monkeypatch.setattr(text_and_dictation, "log_dictation_debug", fake_log)
+        monkeypatch.setattr(text_and_dictation.logging, "debug", fake_log)
 
         text_and_dictation._log_ai_cleanup_perf(perf)
 
         assert calls == [
-            (
-                logging.DEBUG,
-                "Dictation AI cleanup perf: backend=mlx wall=422.7ms "
-                "server_call=401.2ms client_prep=21.5ms phase_rates=unavailable",
-            )
+            "Dictation AI cleanup perf: backend=mlx wall=422.7ms "
+            "server_call=401.2ms client_prep=21.5ms phase_rates=unavailable"
+        ]
+
+    def test_current_sentence_fragment_excludes_previous_sentences_and_lines():
+        fragment = text_and_dictation._current_sentence_fragment
+
+        assert fragment("The first sentence. Current fragment") == "Current fragment"
+        assert fragment("Finished.") == ""
+        assert fragment('Finished."  ') == ""
+        assert fragment("Old line\nCurrent fragment") == "Current fragment"
+        assert fragment("Old line\r\nCurrent fragment") == "Current fragment"
+        assert fragment("Version 1.2 is ready") == "Version 1.2 is ready"
+
+    def test_run_ai_cleanup_preserves_input_spacing_but_normalizes_output_spacing(
+        monkeypatch,
+    ):
+        request = {}
+
+        class Response:
+            content = json.dumps(
+                {
+                    "choices": [{"message": {"content": " , however we should wait"}}],
+                    "usage": {},
+                }
+            ).encode("utf-8")
+
+        def fake_post(url, **kwargs):
+            request.update(kwargs)
+            return Response()
+
+        monkeypatch.setattr(text_and_dictation.requests, "post", fake_post)
+
+        result = text_and_dictation._run_ai_cleanup(
+            "The benchmark passed",
+            " however we should wait",
+            "model",
+            "http://127.0.0.1:8080/chat/completions",
+            1,
+            "mlx",
+        )
+
+        prompt = json.loads(request["data"])["messages"][0]["content"]
+        assert "<utterance> however we should wait</utterance>" in prompt
+        assert result == ", however we should wait"
+
+        text_and_dictation._run_ai_cleanup(
+            "An old sentence. The benchmark passed",
+            " however we should wait",
+            "model",
+            "http://127.0.0.1:8080/chat/completions",
+            1,
+            "mlx",
+        )
+        prompt = json.loads(request["data"])["messages"][0]["content"]
+        assert "<text_before>The benchmark passed</text_before>" in prompt
+        assert "An old sentence" not in prompt
+
+    def test_run_ai_cleanup_logs_one_consolidated_result_line(monkeypatch):
+        calls = []
+
+        class Response:
+            content = json.dumps(
+                {
+                    "choices": [{"message": {"content": "NOCHANGE"}}],
+                    "usage": {},
+                }
+            ).encode("utf-8")
+
+        monkeypatch.setattr(
+            text_and_dictation.requests, "post", lambda *args, **kwargs: Response()
+        )
+        monkeypatch.setattr(
+            text_and_dictation, "_log_ai_cleanup_perf", lambda *args: None
+        )
+        monkeypatch.setattr(
+            text_and_dictation.logging,
+            "debug",
+            lambda message, *args: calls.append(message % args),
+        )
+
+        result = text_and_dictation._run_ai_cleanup(
+            "Earlier text",
+            " unchanged words",
+            "model",
+            "http://127.0.0.1:8080/chat/completions",
+            1,
+            "mlx",
+        )
+
+        assert result is None
+        assert calls == [
+            "Dictation AI cleanup: outcome=nochange text_before='Earlier text' "
+            "input=' unchanged words' output='NOCHANGE'"
         ]
 
     def test_strip_ai_cleanup_output_guards_preserves_leading_comma():
@@ -414,6 +501,19 @@ if hasattr(talon, "test_mode"):
             text_and_dictation._strip_ai_cleanup_output_guards('"corrected text"')
             == "corrected text"
         )
+
+    def test_ai_cleanup_edit_safety_is_structural():
+        is_safe = text_and_dictation._is_safe_ai_cleanup_edit
+
+        assert is_safe("rebase on maine", "rebase on main")
+        assert is_safe("first come and second", "first, second")
+        assert is_safe("red green and blue", "red, green and blue")
+        assert is_safe("green and blue", ", green and blue", allow_leading_comma=True)
+        assert not is_safe("green and blue", ", green and blue")
+        assert not is_safe("she has it covered on", "she has it covered")
+        assert not is_safe("I'm not sure come and can you help", ", can you help")
+        assert not is_safe("I don't know", "? I don't know")
+        assert not is_safe("Ask Danise", "Ask Denise")
 
     def test_run_ai_cleanup_handles_requests_failure(monkeypatch):
         def raise_timeout(*args, **kwargs):
