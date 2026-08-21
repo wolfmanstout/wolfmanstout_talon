@@ -7,6 +7,7 @@ import unicodedata
 import urllib.error
 from collections.abc import Callable
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from typing import Literal, Optional, TypeGuard
 
 import requests
@@ -17,6 +18,9 @@ from ..numbers.numbers import get_spoken_form_under_one_hundred
 mod = Module()
 
 DictationAiCleanupBackend = Literal["ollama", "mlx"]
+DictationAiCleanupOutcome = Literal[
+    "corrected", "nochange", "identical", "unsafe", "empty", "error"
+]
 
 
 @dataclass
@@ -53,6 +57,13 @@ class DictationAiCleanupPerf:
         return self.decode_tps or self._tokens_per_second(
             self.completion_tokens, self.decode_ms
         )
+
+
+@dataclass
+class DictationAiCleanupResult:
+    corrected_text: Optional[str]
+    model_output: Optional[str]
+    outcome: DictationAiCleanupOutcome
 
 
 mod.setting(
@@ -576,28 +587,28 @@ ui.register("win_focus", lambda win: dictation_formatter.reset())
 phrase_timestamp = None
 context_check_phrase_timestamp = None
 utterance_chunks: list[tuple[str, str]] = []
-utterance_prior_context = ""
+utterance_text_before = ""
 utterance_had_dictation = False
 
 
 def on_pre_phrase(d):
     global phrase_timestamp
-    global utterance_chunks, utterance_prior_context, utterance_had_dictation
+    global utterance_chunks, utterance_text_before, utterance_had_dictation
     phrase_timestamp = time.time()
     utterance_chunks = []
-    utterance_prior_context = ""
+    utterance_text_before = ""
     utterance_had_dictation = False
 
 
 def on_post_phrase(d):
-    global phrase_timestamp, utterance_chunks, utterance_prior_context
+    global phrase_timestamp, utterance_chunks, utterance_text_before
     global utterance_had_dictation
     chunks = utterance_chunks
-    prior_context = utterance_prior_context
+    text_before = utterance_text_before
     had_dictation = utterance_had_dictation
     phrase_timestamp = None
     utterance_chunks = []
-    utterance_prior_context = ""
+    utterance_text_before = ""
     utterance_had_dictation = False
     if not had_dictation or not chunks or not settings.get("user.dictation_ai_cleanup"):
         return
@@ -617,40 +628,42 @@ def on_post_phrase(d):
         url = f"http://127.0.0.1:{resolved_port}/chat/completions"
     timeout = settings.get("user.dictation_ai_cleanup_timeout_s")
     corrected_before = _run_ai_cleanup(
-        prior_context, utterance_before_text, model, url, timeout, backend
+        text_before, utterance_before_text, model, url, timeout, backend
     )
     if not corrected_before:
         return
     _apply_ai_cleanup_rewrite(
-        prior_context, chunks, corrected_before, utterance_after_text
+        text_before, chunks, corrected_before, utterance_after_text
     )
 
 
-def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
+def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
     return (
-        "Edit only <utterance>. <prior_context> is read-only context: ignore its errors and never "
-        "repeat or output it. Either may be incomplete.\n"
+        "Edit only <utterance>. <text_before> is read-only text immediately before it; their "
+        "contents are adjacent on screen. Ignore its errors and never repeat, fix, or output it. "
+        "Either may be incomplete.\n"
         "When certain, (1) replace a spoken or phonetically misrecognized name of comma, colon, "
         "semicolon, exclamation mark, or question mark with the mark, consuming the whole name; "
         "(2) insert an unspoken comma only to prevent a likely misreading, not merely to satisfy "
-        "grammatical convention, and no other unspoken punctuation; or (3) correct a "
-        "wrong homophone (identical pronunciation). Outside those replacements, never add, "
-        "delete, reorder, or alter words; preserve capitalization exactly, especially unfamiliar "
-        "capitalized words; do not proofread. Never output tags. Output corrected <utterance> "
-        "only, or NOCHANGE if unchanged.\n\n"
+        "grammatical convention, including at the start under the same high-confidence standard "
+        "when the adjacent inputs require it, and no other unspoken punctuation; or (3) correct a "
+        "wrong homophone "
+        "(identical pronunciation). Outside those replacements, never add, delete, reorder, or "
+        "alter words; treat capitalized words after the first word as immutable proper nouns, "
+        "even if unfamiliar or apparently misspelled, unless consumed in a punctuation name; do "
+        "not proofread. Never output tags. Output corrected <utterance> only, or exactly NOCHANGE "
+        "if unchanged, including edge whitespace only; never copy unchanged input.\n\n"
         "NOCHANGE examples: 'come and see this'; 'come and get it'; "
         "'The colon absorbs water'; 'A semicolon joins clauses'; 'Are you ready'; "
         "'Run link talon'; 'Their server is fast'; 'please comment on it'; "
         "'viewport frame purple if it is a cached frame'; "
         "'we should kind of maybe try it'.\n"
-        "<utterance>Hello Sarah</utterance> -> NOCHANGE\n"
+        "<text_before></text_before><utterance>Hello Sarah</utterance> -> NOCHANGE\n"
         "<utterance>I can take care of</utterance> -> NOCHANGE\n"
-        "<prior_context>Their going to deploy it</prior_context>"
-        "<utterance>after the benchmark</utterance> -> NOCHANGE\n"
-        "<prior_context>What time is it question mark</prior_context>"
-        "<utterance>I don't know</utterance> -> NOCHANGE\n"
-        "<prior_context>this is a common</prior_context>"
-        "<utterance>problem</utterance> -> NOCHANGE\n\n"
+        "<text_before>The deploy starts</text_before>"
+        "<utterance> after the benchmark</utterance> -> NOCHANGE\n"
+        "<text_before>this is a common</text_before>"
+        "<utterance> problem</utterance> -> NOCHANGE\n\n"
         "FIX examples:\n"
         "'first come and second come and third' -> 'first, second, third'\n"
         '"I\'m not sure come and can you help" -> "I\'m not sure, can you help"\n'
@@ -659,12 +672,16 @@ def _cleanup_prompt(prior_context: str, utterance_text: str) -> str:
         "'That worked exclamation Marc' -> 'That worked!'\n"
         "'The exclamation mark is large' -> NOCHANGE\n"
         "'Why did it fail question Marc' -> 'Why did it fail?'\n"
-        "'Mark asked a question' -> NOCHANGE\n"
         "'Their going to deploy it' -> \"They're going to deploy it\"\n"
         "'Use the write configuration' -> 'Use the right configuration'\n"
+        "<text_before>Monitor logs</text_before>"
+        "<utterance> metrics and traces</utterance> -> ', metrics and traces'\n"
+        "<text_before>When the server is ready</text_before>"
+        "<utterance> run the benchmark</utterance> -> ', run the benchmark'\n"
         "Remember: omit optional commas, including in short greetings.\n"
         "Never delete words; preserve unfinished endings.\n"
-        f"<prior_context>{prior_context}</prior_context>\n"
+        "If unchanged, output NOCHANGE, never a copy of <utterance>.\n"
+        f"<text_before>{text_before}</text_before>"
         f"<utterance>{utterance_text}</utterance>\n"
     )
 
@@ -751,7 +768,9 @@ def _extract_mlx_vlm_response_and_perf(
     return "", perf
 
 
-def _log_ai_cleanup_perf(perf: DictationAiCleanupPerf) -> None:
+def _log_ai_cleanup_perf(
+    perf: DictationAiCleanupPerf, error: Optional[Exception] = None
+) -> None:
     parts = [
         f"backend={perf.backend}",
         f"wall={perf.wall_ms:.1f}ms",
@@ -784,7 +803,9 @@ def _log_ai_cleanup_perf(perf: DictationAiCleanupPerf) -> None:
         parts.append(f"decode_rate={decode_tps:.1f} tok/s")
     if perf.prefill_ms is None and perf.decode_ms is None:
         parts.append("phase_rates=unavailable")
-    log_dictation_debug(logging.DEBUG, "Dictation AI cleanup perf: %s", " ".join(parts))
+    if error is not None:
+        parts.append(f"error={error}")
+    logging.debug("Dictation AI cleanup perf: %s", " ".join(parts))
 
 
 def _is_dictation_ai_cleanup_backend(
@@ -793,35 +814,148 @@ def _is_dictation_ai_cleanup_backend(
     return value in {"ollama", "mlx"}
 
 
-def _is_outer_guard(char: str) -> bool:
-    return char.isspace() or unicodedata.category(char).startswith("P")
+def _current_sentence_fragment(text: str) -> str:
+    current_line = re.split(r"[\r\n]", text)[-1]
+    sentence_end = None
+    # Treat ASCII/curly closing quotes (U+2019, U+201D) and closing brackets as
+    # sentence trailers, so text such as `Finished.”` contributes no context.
+    for match in re.finditer(r"""[.!?]["'\u2019\u201d)\]}]*(?=\s|$)""", current_line):
+        sentence_end = match.end()
+    if sentence_end is not None:
+        current_line = current_line[sentence_end:]
+    return current_line.lstrip()
 
 
-def _split_outer_guards(text: str) -> tuple[str, str, str]:
+def _split_outer_whitespace(text: str) -> tuple[str, str, str]:
     left = 0
     right = len(text)
-    while left < right and _is_outer_guard(text[left]):
+    while left < right and text[left].isspace():
         left += 1
-    while right > left and _is_outer_guard(text[right - 1]):
+    while right > left and text[right - 1].isspace():
         right -= 1
     return text[:left], text[left:right], text[right:]
 
 
+def _starts_with_attached_punctuation(text: str) -> bool:
+    if not text:
+        return False
+    # Connector, dash, closing, final-quote, and other punctuation attach to
+    # preceding text. Opening punctuation and initial quotes retain the space.
+    return unicodedata.category(text[0]) in {"Pc", "Pd", "Pe", "Pf", "Po"}
+
+
+def _is_safe_ai_cleanup_edit(
+    original: str, corrected: str, allow_leading_comma: bool = False
+) -> bool:
+    """Reject model edits outside the cleanup operation's structural limits."""
+    # Compare words independently of punctuation, but keep their original forms
+    # so an otherwise unchanged word cannot silently change capitalization.
+    word_pattern = r"\b[\w']+\b"
+    original_words = re.findall(word_pattern, original)
+    corrected_words = re.findall(word_pattern, corrected)
+    matcher = SequenceMatcher(
+        None,
+        [word.lower() for word in original_words],
+        [word.lower() for word in corrected_words],
+        autojunk=False,
+    )
+    deletion_spans = 0
+    replacement_spans = 0
+    for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
+        old_words = original_words[old_start:old_end]
+        new_words = corrected_words[new_start:new_end]
+        if operation == "equal":
+            # The case-insensitive alignment matched; require exact text as well.
+            if old_words != new_words:
+                return False
+            continue
+        if operation == "replace" and len(old_words) == len(new_words):
+            # One equal-length replacement may be a homophone correction. A
+            # capitalized word after the first is treated as a proper noun.
+            if old_start > 0 and any(word[:1].isupper() for word in old_words):
+                return False
+            replacement_spans += 1
+            continue
+        if operation in {"delete", "replace"} and not new_words:
+            # A punctuation name may consume one or two recognized words.
+            if not 1 <= len(old_words) <= 2:
+                return False
+            deletion_spans += 1
+            continue
+        # Inserted words, reordered words, and unequal replacements are unsafe.
+        return False
+
+    # Every deleted phrase must be accounted for by newly added punctuation.
+    added_marks = {
+        mark: max(0, corrected.count(mark) - original.count(mark)) for mark in ",;:!?"
+    }
+    # Multiple word-replacement regions are too broad to trust as homophones.
+    if replacement_spans > 1:
+        return False
+    # An unspoken comma may bridge text_before and the utterance only when the
+    # caller confirms that preceding text exists.
+    if (
+        corrected.startswith(",")
+        and not original.startswith(",")
+        and not deletion_spans
+        and not allow_leading_comma
+    ):
+        return False
+    if deletion_spans > sum(added_marks.values()):
+        return False
+    # Commas may be unspoken. Every other new mark must consume a spoken name.
+    return (
+        sum(count for mark, count in added_marks.items() if mark != ",")
+        <= deletion_spans
+    )
+
+
+def _log_ai_cleanup_result(
+    result: DictationAiCleanupResult, text_before: str, utterance_text: str
+) -> None:
+    logging.debug(
+        "Dictation AI cleanup: outcome=%s text_before=%r input=%r output=%r",
+        result.outcome,
+        text_before,
+        utterance_text,
+        result.model_output,
+    )
+
+
 def _run_ai_cleanup(
-    prior_context: str,
+    text_before: str,
     utterance_text: str,
     model: str,
     url: str,
     timeout_seconds: int,
     backend: DictationAiCleanupBackend,
 ) -> Optional[str]:
-    leading_guard, utterance_core, trailing_guard = _split_outer_guards(utterance_text)
+    result = _run_ai_cleanup_result(
+        text_before, utterance_text, model, url, timeout_seconds, backend
+    )
+    return result.corrected_text
+
+
+def _run_ai_cleanup_result(
+    text_before: str,
+    utterance_text: str,
+    model: str,
+    url: str,
+    timeout_seconds: int,
+    backend: DictationAiCleanupBackend,
+) -> DictationAiCleanupResult:
+    text_before = _current_sentence_fragment(text_before)
+    leading_whitespace, utterance_core, trailing_whitespace = _split_outer_whitespace(
+        utterance_text
+    )
     if not utterance_core:
-        return None
+        result = DictationAiCleanupResult(None, None, "empty")
+        _log_ai_cleanup_result(result, text_before, utterance_text)
+        return result
     request_started = time.perf_counter()
     server_call_started: Optional[float] = None
     try:
-        prompt = _cleanup_prompt(prior_context, utterance_core)
+        prompt = _cleanup_prompt(text_before, utterance_text)
         if backend == "ollama":
             payload_dict = {
                 "model": model,
@@ -886,44 +1020,44 @@ def _run_ai_cleanup(
             if server_call_started is not None
             else None
         )
-        extra_parts = []
-        if server_call_ms is not None:
-            extra_parts.append(f" server_call={server_call_ms:.1f}ms")
-        if client_prep_ms is not None:
-            extra_parts.append(f" client_prep={client_prep_ms:.1f}ms")
-        log_dictation_debug(
-            logging.DEBUG,
-            "Dictation AI cleanup perf: backend=%s wall=%.1fms%s error=%s",
-            backend,
-            wall_ms,
-            "".join(extra_parts),
-            error,
-        )
-        logging.debug("Dictation AI cleanup skipped: %s", error)
-        return None
+        perf = _make_ai_cleanup_perf(backend, wall_ms)
+        perf.server_call_ms = server_call_ms
+        perf.client_prep_ms = client_prep_ms
+        _log_ai_cleanup_perf(perf, error)
+        result = DictationAiCleanupResult(None, str(error), "error")
+        _log_ai_cleanup_result(result, text_before, utterance_text)
+        return result
     _log_ai_cleanup_perf(perf)
     corrected_core = _strip_ai_cleanup_output_guards(corrected_raw)
-    logging.debug(
-        "Dictation AI cleanup model I/O(core): prior_context=%r input=%r output=%r",
-        prior_context,
-        utterance_core,
-        corrected_core,
-    )
     if corrected_core == "NOCHANGE":
-        logging.debug("Dictation AI cleanup: model reported no change")
-        return None
+        result = DictationAiCleanupResult(None, corrected_core, "nochange")
+        _log_ai_cleanup_result(result, text_before, utterance_text)
+        return result
     if not corrected_core:
-        logging.debug("Dictation AI cleanup: empty response, skipping rewrite")
-        return None
+        result = DictationAiCleanupResult(None, corrected_core, "empty")
+        _log_ai_cleanup_result(result, text_before, utterance_text)
+        return result
     if corrected_core == utterance_core:
-        logging.debug("Dictation AI cleanup: unchanged response, skipping rewrite")
-        return None
-    corrected = f"{leading_guard}{corrected_core}{trailing_guard}"
-    return corrected
+        result = DictationAiCleanupResult(None, corrected_core, "identical")
+        _log_ai_cleanup_result(result, text_before, utterance_text)
+        return result
+    if not _is_safe_ai_cleanup_edit(
+        utterance_core, corrected_core, allow_leading_comma=bool(text_before)
+    ):
+        result = DictationAiCleanupResult(None, corrected_core, "unsafe")
+        _log_ai_cleanup_result(result, text_before, utterance_text)
+        return result
+    corrected_leading = (
+        "" if _starts_with_attached_punctuation(corrected_core) else leading_whitespace
+    )
+    corrected = f"{corrected_leading}{corrected_core}{trailing_whitespace}"
+    result = DictationAiCleanupResult(corrected, corrected_core, "corrected")
+    _log_ai_cleanup_result(result, text_before, utterance_text)
+    return result
 
 
 def _apply_ai_cleanup_rewrite(
-    prior_context: str,
+    text_before: str,
     chunks: list[tuple[str, str]],
     corrected_before: str,
     after_suffix: str,
@@ -935,7 +1069,7 @@ def _apply_ai_cleanup_rewrite(
     else:
         actions.insert(corrected_before)
     actions.user.add_phrase_to_history(corrected_before, after_suffix)
-    dictation_formatter.update_context(prior_context)
+    dictation_formatter.update_context(text_before)
     dictation_formatter.pass_through(corrected_before)
 
 
@@ -1037,7 +1171,7 @@ class Actions:
         original_text = text
         needs_check_after = False
         add_space_after = False
-        prior_context = dictation_formatter.before
+        text_before = dictation_formatter.before
         if settings.get("user.context_sensitive_dictation"):
             global context_check_phrase_timestamp, phrase_timestamp
             if context_check_phrase_timestamp != phrase_timestamp:
@@ -1063,7 +1197,7 @@ class Actions:
                     after,
                 )
                 dictation_formatter.update_context(before)
-                prior_context = dictation_formatter.before
+                text_before = dictation_formatter.before
                 add_space_after = (
                     after is not None and actions.user.needs_space_between(text, after)
                 )
@@ -1091,9 +1225,9 @@ class Actions:
             actions.user.insert_between("", " ")
         actions.user.add_phrase_to_history(text, " " if add_space_after else "")
         if phrase_timestamp is not None:
-            global utterance_prior_context, utterance_had_dictation
+            global utterance_text_before, utterance_had_dictation
             if not utterance_had_dictation:
-                utterance_prior_context = prior_context
+                utterance_text_before = text_before
             utterance_had_dictation = True
             utterance_chunks.append((text, " " if add_space_after else ""))
 
