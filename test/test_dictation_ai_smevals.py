@@ -6,7 +6,7 @@ import yaml
 
 CHECKER_PATH = (
     Path(__file__).parents[1]
-    / "evals"
+    / ".evals"
     / "dictation-ai-cleanup"
     / "checkers"
     / "criterion.py"

@@ -27,8 +27,8 @@ the custom checker changes, increment its `version` in `graders/default.yaml`;
 Run the default MLX configuration:
 
 ```bash
-uv run smevals run evals/dictation-ai-cleanup -g
-uv run smevals report evals/dictation-ai-cleanup --by-task
+uv run smevals run .evals/dictation-ai-cleanup -g
+uv run smevals report .evals/dictation-ai-cleanup --by-task
 ```
 
 The runner honors `DICTATION_AI_CLEANUP_BACKEND`,
