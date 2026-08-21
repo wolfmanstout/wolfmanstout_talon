@@ -1,0 +1,5 @@
+name: disabled-boundary-comma-shopping-list
+category: unspoken-comma
+text_before: I bought apples
+utterance: " oranges, bananas and pears"
+expected: ", oranges, bananas and pears"

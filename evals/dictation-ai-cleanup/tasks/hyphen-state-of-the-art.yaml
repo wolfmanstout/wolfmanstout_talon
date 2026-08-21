@@ -1,0 +1,5 @@
+name: hyphen-state-of-the-art
+category: hyphenation
+text_before: ""
+utterance: a state of the art model
+expected: a state-of-the-art model

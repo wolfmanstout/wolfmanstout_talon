@@ -1,0 +1,5 @@
+name: homophone-right-write
+category: homophone
+text_before: ""
+utterance: We need to right the file
+expected: We need to write the file

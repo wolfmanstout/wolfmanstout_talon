@@ -1,0 +1,5 @@
+name: disabled-comma-introductory-phrase
+category: unspoken-comma
+text_before: ""
+utterance: After reviewing the logs I changed the timeout
+expected: After reviewing the logs, I changed the timeout

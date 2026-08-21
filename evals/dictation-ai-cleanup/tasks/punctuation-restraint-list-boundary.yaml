@@ -1,0 +1,5 @@
+name: punctuation-restraint-list-boundary
+category: punctuation-restraint
+text_before: The options are red
+utterance: " green and blue"
+unchanged: true

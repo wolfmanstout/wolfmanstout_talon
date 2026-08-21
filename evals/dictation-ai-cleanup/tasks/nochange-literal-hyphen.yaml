@@ -1,0 +1,5 @@
+name: nochange-literal-hyphen
+category: restraint
+text_before: ""
+utterance: The hyphen key is stuck
+unchanged: true

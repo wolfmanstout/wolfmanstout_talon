@@ -1,0 +1,5 @@
+name: hyphen-across-utterances
+category: hyphenation
+text_before: This is a well
+utterance: " known issue"
+expected: -known issue

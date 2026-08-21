@@ -1,0 +1,5 @@
+name: disabled-boundary-comma-concessive-clause
+category: unspoken-comma
+text_before: Although the benchmark passed
+utterance: " we should rerun it"
+expected: ", we should rerun it"

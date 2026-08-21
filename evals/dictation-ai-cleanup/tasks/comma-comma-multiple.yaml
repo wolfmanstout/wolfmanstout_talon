@@ -1,0 +1,5 @@
+name: comma-comma-multiple
+category: punctuation-name
+text_before: ""
+utterance: red comma green comma blue
+expected: red, green, blue

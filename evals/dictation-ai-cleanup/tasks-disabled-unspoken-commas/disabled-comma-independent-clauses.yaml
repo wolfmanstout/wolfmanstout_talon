@@ -1,0 +1,5 @@
+name: disabled-comma-independent-clauses
+category: unspoken-comma
+text_before: ""
+utterance: I finished you can start
+expected: I finished, you can start

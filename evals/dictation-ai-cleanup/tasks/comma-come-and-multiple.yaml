@@ -1,0 +1,5 @@
+name: comma-come-and-multiple
+category: punctuation-name
+text_before: ""
+utterance: first come and second come and third
+expected: first, second, third

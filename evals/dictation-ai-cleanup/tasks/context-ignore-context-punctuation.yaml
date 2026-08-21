@@ -1,0 +1,5 @@
+name: context-ignore-context-punctuation
+category: context
+text_before: What time is it question mark
+utterance: " I don't know"
+unchanged: true

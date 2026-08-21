@@ -1,0 +1,5 @@
+name: hyphen-high-priority
+category: hyphenation
+text_before: ""
+utterance: This is a high priority issue
+expected: This is a high-priority issue

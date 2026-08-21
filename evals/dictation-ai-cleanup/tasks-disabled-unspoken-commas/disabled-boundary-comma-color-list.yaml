@@ -1,0 +1,5 @@
+name: disabled-boundary-comma-color-list
+category: unspoken-comma
+text_before: The options are red
+utterance: " green and blue"
+expected: ", green and blue"

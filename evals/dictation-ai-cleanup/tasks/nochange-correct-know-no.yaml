@@ -1,0 +1,5 @@
+name: nochange-correct-know-no
+category: restraint
+text_before: ""
+utterance: I know the answer is no
+unchanged: true

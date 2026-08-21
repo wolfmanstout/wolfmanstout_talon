@@ -1,0 +1,5 @@
+name: capitalization-sponge
+category: capitalization
+text_before: I checked the server
+utterance: " common Sponge is ready"
+expected: ", Sponge is ready"
