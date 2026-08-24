@@ -512,6 +512,7 @@ if hasattr(talon, "test_mode"):
         assert is_safe("a well known issue", "a well-known issue")
         assert is_safe("state of the art model", "state-of-the-art model")
         assert is_safe("ask michael", "ask Michael")
+        assert is_safe("The cache lost it's state", "The cache lost its state")
         assert not is_safe("red green and blue", "red, green and blue")
         assert not is_safe("green and blue", ", green and blue")
         assert not is_safe("she has it covered on", "she has it covered")
@@ -519,6 +520,8 @@ if hasattr(talon, "test_mode"):
         assert not is_safe("I don't know", "? I don't know")
         assert not is_safe("Ask Danise", "Ask Denise")
         assert not is_safe("ask Sponge", "ask sponge")
+        assert not is_safe("cached and uncached)", "cached and uncached")
+        assert not is_safe("keep this, exactly", "keep this exactly")
 
     def test_run_ai_cleanup_handles_requests_failure(monkeypatch):
         def raise_timeout(*args, **kwargs):

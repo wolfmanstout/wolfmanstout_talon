@@ -1,4 +1,4 @@
 name: default
 checks:
   - checker: ../checkers/criterion.py
-    version: 4
+    version: 5

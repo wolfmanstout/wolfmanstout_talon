@@ -1,0 +1,5 @@
+name: punctuation-preserve-closing-paren-comma-fix
+category: punctuation-preservation
+text_before: This includes (
+utterance: apples comment oranges comment bananas)
+expected: apples, oranges, bananas)

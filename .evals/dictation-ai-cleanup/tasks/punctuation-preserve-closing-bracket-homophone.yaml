@@ -1,0 +1,5 @@
+name: punctuation-preserve-closing-bracket-homophone
+category: punctuation-preservation
+text_before: The selected setting is [
+utterance: the write configuration]
+expected: the right configuration]

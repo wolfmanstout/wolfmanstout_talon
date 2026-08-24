@@ -5,6 +5,7 @@ import re
 import time
 import unicodedata
 import urllib.error
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
 from difflib import SequenceMatcher
@@ -689,6 +690,7 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "<text_before>This is a well</text_before>"
         "<utterance> known issue</utterance> -> '-known issue'\n"
         "Remember: never insert an unspoken comma.\n"
+        "Preserve every existing punctuation character, including closing delimiters.\n"
         "Never delete words; preserve unfinished endings.\n"
         "If unchanged, output NOCHANGE, never a copy of <utterance>.\n"
         f"<text_before>{text_before}</text_before>"
@@ -877,6 +879,7 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
     )
     deletion_spans = 0
     replacement_spans = 0
+    allowed_removed_punctuation: Counter[str] = Counter()
     for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
         old_words = original_words[old_start:old_end]
         new_words = corrected_words[new_start:new_end]
@@ -899,6 +902,12 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
                     return False
                 if index > 0 and any(char.isupper() for char in old):
                     return False
+                # Apostrophe removal can itself be a homophone correction, as
+                # in `it's` -> `its`. No other existing punctuation is editable.
+                if old.replace("'", "").casefold() == new.replace("'", "").casefold():
+                    removed_apostrophes = old.count("'") - new.count("'")
+                    if removed_apostrophes > 0:
+                        allowed_removed_punctuation["'"] += removed_apostrophes
             replacement_spans += 1
             continue
         if operation in {"delete", "replace"} and not new_words:
@@ -908,6 +917,16 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
             deletion_spans += 1
             continue
         # Inserted words, reordered words, and unequal replacements are unsafe.
+        return False
+
+    original_punctuation = Counter(
+        char for char in original if unicodedata.category(char).startswith("P")
+    )
+    corrected_punctuation = Counter(
+        char for char in corrected if unicodedata.category(char).startswith("P")
+    )
+    removed_punctuation = original_punctuation - corrected_punctuation
+    if removed_punctuation - allowed_removed_punctuation:
         return False
 
     # Every deleted phrase must be accounted for by newly added punctuation.

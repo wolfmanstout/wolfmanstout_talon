@@ -1,0 +1,5 @@
+name: punctuation-preserve-closing-paren-question-fix
+category: punctuation-preservation
+text_before: The status is (
+utterance: ready question mark)
+expected: ready?)
