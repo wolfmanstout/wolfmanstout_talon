@@ -1,0 +1,5 @@
+name: punctuation-preserve-closing-paren-nochange
+category: punctuation-preservation
+text_before: This applies to both modes (
+utterance: cached and uncached)
+unchanged: true

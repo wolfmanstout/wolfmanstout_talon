@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import unicodedata
 from collections import Counter
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -13,10 +14,12 @@ CRITERION_SEVERITY = {
     "preferred_output": "advisory",
     "word_edit_shape_valid": "required",
     "capitalization_not_removed": "required",
+    "punctuation_not_removed": "required",
     "capitalization_matches_preferred": "advisory",
     "punctuation_scope": "advisory",
     "proposal_word_edit_shape_valid": "required",
     "proposal_capitalization_not_removed": "required",
+    "proposal_punctuation_not_removed": "required",
     "proposal_capitalization_matches_preferred": "advisory",
     "proposal_punctuation_scope": "advisory",
     "context_not_output": "required",
@@ -103,6 +106,43 @@ def punctuation_additions(original, candidate):
     old = Counter(char for char in original if char in PUNCTUATION)
     new = Counter(char for char in candidate if char in PUNCTUATION)
     return Counter({char: max(0, new[char] - old[char]) for char in PUNCTUATION})
+
+
+def punctuation_removals(original, candidate):
+    old = Counter(
+        char for char in original if unicodedata.category(char).startswith("P")
+    )
+    new = Counter(
+        char for char in candidate if unicodedata.category(char).startswith("P")
+    )
+    removed = old - new
+
+    old_words = words(original)
+    new_words = words(candidate)
+    matcher = SequenceMatcher(
+        None,
+        [word.casefold() for word in old_words],
+        [word.casefold() for word in new_words],
+        autojunk=False,
+    )
+    allowed = Counter()
+    for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
+        if operation != "replace" or old_end - old_start != new_end - new_start:
+            continue
+        for old_word, new_word in zip(
+            old_words[old_start:old_end],
+            new_words[new_start:new_end],
+            strict=True,
+        ):
+            if (
+                old_word.replace("'", "").casefold()
+                != new_word.replace("'", "").casefold()
+            ):
+                continue
+            removed_apostrophes = old_word.count("'") - new_word.count("'")
+            if removed_apostrophes > 0:
+                allowed["'"] += removed_apostrophes
+    return removed - allowed
 
 
 def word_edit_shape(original, candidate):
@@ -196,6 +236,10 @@ def evaluate(criterion, task, result):
     elif criterion == "capitalization_not_removed":
         passed = preserves_existing_capitalization(original, actual)
         details = {"actual": actual}
+    elif criterion == "punctuation_not_removed":
+        removals = punctuation_removals(original, actual)
+        passed = not removals
+        details = {"removed_punctuation": dict(removals)}
     elif criterion == "capitalization_matches_preferred":
         actual_edits = capitalization_edits(original, actual)
         expected_edits = capitalization_edits(original, expected)
@@ -215,6 +259,10 @@ def evaluate(criterion, task, result):
     elif criterion == "proposal_capitalization_not_removed":
         passed = preserves_existing_capitalization(original, proposal)
         details = {"proposal": proposal}
+    elif criterion == "proposal_punctuation_not_removed":
+        removals = punctuation_removals(original, proposal)
+        passed = not removals
+        details = {"removed_punctuation": dict(removals)}
     elif criterion == "proposal_capitalization_matches_preferred":
         proposal_edits = capitalization_edits(original, proposal)
         expected_edits = capitalization_edits(original, expected)

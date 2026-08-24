@@ -4,7 +4,7 @@ This eval runs the production cleanup harness and retains both the raw model
 response and the post-processed result. Each task is graded independently on:
 
 - expected user-visible behavior;
-- word preservation and directional capitalization safety;
+- word, punctuation, and directional capitalization preservation;
 - allowed punctuation scope;
 - read-only context isolation;
 - input-tag leakage;
@@ -12,9 +12,9 @@ response and the post-processed result. Each task is graded independently on:
 - efficient use of `NOCHANGE`.
 
 Severity belongs to criteria, not tasks. Required criteria cover clear
-instruction violations: invalid word edits, removal of existing capitalization,
-changes to protected capitalized words, read-only context leakage, and tag
-leakage. Advisory criteria cover judgment and efficiency: the preferred
+instruction violations: invalid word edits, removal of existing punctuation or
+capitalization, changes to protected capitalized words, read-only context
+leakage, and tag leakage. Advisory criteria cover judgment and efficiency: the preferred
 correction, capitalization additions, punctuation scope, raw proposal
 acceptance, and `NOCHANGE` use. Every applicable criterion contributes equally
 to the score, while any required failure independently fails the grade. The
@@ -50,3 +50,8 @@ severities are defined centrally by the checker rather than repeated in every
 task. The historical unspoken-comma cases live in
 `tasks-disabled-unspoken-commas/`, which `smevals` intentionally does not
 discover.
+
+`text_before` and `utterance` must preserve their exact on-screen boundary;
+the eval runner does not add or remove spacing. An utterance commonly starts
+with a separating space after ordinary text, but not after an opening delimiter:
+`text (` plus `inside)` represents `text (inside)`, not `text ( inside)`.

@@ -57,7 +57,21 @@ if hasattr(talon, "test_mode"):
             checker.CRITERION_SEVERITY["proposal_word_edit_shape_valid"] == "required"
         )
         assert checker.CRITERION_SEVERITY["proposal_punctuation_scope"] == "advisory"
+        assert (
+            checker.CRITERION_SEVERITY["proposal_punctuation_not_removed"] == "required"
+        )
         assert checker.CRITERION_SEVERITY["preferred_output"] == "advisory"
+
+    def test_punctuation_removal_allows_only_internal_apostrophe_corrections():
+        assert not checker.punctuation_removals(
+            "The cache lost it's state", "The cache lost its state"
+        )
+        assert checker.punctuation_removals(
+            "cached and uncached)", "cached and uncached"
+        ) == {")": 1}
+        assert checker.punctuation_removals(
+            "keep this, exactly", "keep this exactly"
+        ) == {",": 1}
 
     def test_tasks_define_exactly_one_explicit_expectation():
         eval_root = CHECKER_PATH.parents[1]
@@ -72,6 +86,9 @@ if hasattr(talon, "test_mode"):
                 assert ("expected" in task) != ("unchanged" in task), task_path
                 if "unchanged" in task:
                     assert task["unchanged"] is True, task_path
+                # Opening delimiters attach directly to the following text on screen.
+                if task.get("text_before", "").rstrip().endswith(("(", "[", "{")):
+                    assert not task["utterance"][:1].isspace(), task_path
 
     def test_advisory_failure_does_not_block_grade(capsys):
         task = {"category": "homophone", "expected": "cache is warm"}
