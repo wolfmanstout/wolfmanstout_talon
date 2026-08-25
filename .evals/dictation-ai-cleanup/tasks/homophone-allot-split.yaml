@@ -1,0 +1,5 @@
+name: homophone-allot-split
+category: homophone
+text_before: ""
+utterance: That takes allot of time
+expected: That takes a lot of time

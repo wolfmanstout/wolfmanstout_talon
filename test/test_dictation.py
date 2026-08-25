@@ -506,6 +506,15 @@ if hasattr(talon, "test_mode"):
         is_safe = text_and_dictation._is_safe_ai_cleanup_edit
 
         assert is_safe("rebase on maine", "rebase on main")
+        assert is_safe("Plan a head:", "Plan ahead:")
+        assert is_safe("That sounds all right", "That sounds alright")
+        assert is_safe("That sounds alright", "That sounds all right")
+        assert is_safe(
+            "We should a lot two hours for testing",
+            "We should allot two hours for testing",
+        )
+        assert is_safe("That takes allot of time", "That takes a lot of time")
+        assert is_safe("I'm bit on the fence", "I'm a bit on the fence")
         assert is_safe("first come and second", "first, second")
         assert is_safe("client haven server", "client-server")
         assert is_safe("client high fin server", "client-server")
@@ -519,7 +528,10 @@ if hasattr(talon, "test_mode"):
         assert not is_safe("I'm not sure come and can you help", ", can you help")
         assert not is_safe("I don't know", "? I don't know")
         assert not is_safe("Ask Danise", "Ask Denise")
+        assert not is_safe("Ask Sponge Bob", "Ask SpongeBob")
         assert not is_safe("ask Sponge", "ask sponge")
+        assert not is_safe("I'm bit unsure", "I'm maybe a bit unsure")
+        assert not is_safe("Plan a head:", "Plan ahead")
         assert not is_safe("cached and uncached)", "cached and uncached")
         assert not is_safe("keep this, exactly", "keep this exactly")
 
