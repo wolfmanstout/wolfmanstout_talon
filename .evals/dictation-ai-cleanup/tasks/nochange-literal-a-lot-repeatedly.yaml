@@ -1,0 +1,5 @@
+name: nochange-literal-a-lot-repeatedly
+category: restraint
+text_before: ""
+utterance: We run this benchmark a lot
+unchanged: true
