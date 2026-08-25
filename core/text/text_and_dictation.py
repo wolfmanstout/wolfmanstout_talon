@@ -646,9 +646,9 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "When certain, (1) replace a spoken or phonetically misrecognized name of comma, colon, "
         "semicolon, exclamation mark, question mark, or hyphen with the mark, consuming the whole "
         "name; (2) insert unspoken hyphens only in a compound modifier directly before its noun "
-        "where standard spelling clearly requires them; or (3) "
-        "correct a wrong homophone "
-        "(identical pronunciation). Outside those replacements, never add, delete, reorder, or "
+        "where standard spelling clearly requires them; or (3) correct a wrong homophone or word "
+        "boundary, or restore one clearly omitted word. Outside those replacements, never add, "
+        "delete, reorder, or "
         "alter words; treat capitalized words after the first word as immutable proper nouns, "
         "even if unfamiliar or apparently misspelled, unless consumed in a punctuation name; do "
         "not proofread. You may capitalize a lowercase name when certain, but never lowercase a "
@@ -685,13 +685,13 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "'a high priority issue' -> 'a high-priority issue'\n"
         "'state of the art model' -> 'state-of-the-art model'\n"
         "'Their going to deploy it' -> \"They're going to deploy it\"\n"
-        "'Use the write configuration' -> 'Use the right configuration'\n"
+        "'We should a lot two hours' -> 'We should allot two hours'\n"
         "'ask michael whether it is ready' -> 'ask Michael whether it is ready'\n"
         "<text_before>This is a well</text_before>"
         "<utterance> known issue</utterance> -> '-known issue'\n"
         "Remember: never insert an unspoken comma.\n"
         "Preserve every existing punctuation character, including closing delimiters.\n"
-        "Never delete words; preserve unfinished endings.\n"
+        "Never delete spoken content; preserve unfinished endings.\n"
         "If unchanged, output NOCHANGE, never a copy of <utterance>.\n"
         f"<text_before>{text_before}</text_before>"
         f"<utterance>{utterance_text}</utterance>\n"
@@ -864,6 +864,18 @@ def _removes_capitalization(original: str, corrected: str) -> bool:
     )
 
 
+def _is_allowed_ai_cleanup_word_replacement(
+    original_words: list[str], corrected_words: list[str]
+) -> bool:
+    """Allow equal-count homophones or one localized split/merge."""
+    return len(original_words) == len(corrected_words) or (
+        bool(original_words)
+        and bool(corrected_words)
+        and len(original_words) <= 2
+        and len(corrected_words) <= 2
+    )
+
+
 def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
     """Reject model edits outside the cleanup operation's structural limits."""
     # Compare words independently of punctuation, but keep their original forms
@@ -878,7 +890,7 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
         autojunk=False,
     )
     deletion_spans = 0
-    replacement_spans = 0
+    lexical_edit_spans = 0
     allowed_removed_punctuation: Counter[str] = Counter()
     for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
         old_words = original_words[old_start:old_end]
@@ -892,23 +904,35 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
             ):
                 return False
             continue
-        if operation == "replace" and len(old_words) == len(new_words):
-            # One equal-length replacement may be a homophone correction. A
-            # capitalized word after the first is treated as a proper noun.
-            for index, (old, new) in enumerate(
-                zip(old_words, new_words, strict=True), old_start
+        if operation == "replace" and _is_allowed_ai_cleanup_word_replacement(
+            old_words, new_words
+        ):
+            # One replacement may correct a homophone or a localized word
+            # boundary. Capitalized words after the first are proper nouns.
+            if _removes_capitalization("".join(old_words), "".join(new_words)):
+                return False
+            if any(
+                index > 0 and any(char.isupper() for char in old)
+                for index, old in enumerate(old_words, old_start)
             ):
-                if _removes_capitalization(old, new):
-                    return False
-                if index > 0 and any(char.isupper() for char in old):
-                    return False
+                return False
+            if len(old_words) == len(new_words):
                 # Apostrophe removal can itself be a homophone correction, as
                 # in `it's` -> `its`. No other existing punctuation is editable.
-                if old.replace("'", "").casefold() == new.replace("'", "").casefold():
-                    removed_apostrophes = old.count("'") - new.count("'")
-                    if removed_apostrophes > 0:
-                        allowed_removed_punctuation["'"] += removed_apostrophes
-            replacement_spans += 1
+                for old, new in zip(old_words, new_words, strict=True):
+                    if (
+                        old.replace("'", "").casefold()
+                        == new.replace("'", "").casefold()
+                    ):
+                        removed_apostrophes = old.count("'") - new.count("'")
+                        if removed_apostrophes > 0:
+                            allowed_removed_punctuation["'"] += removed_apostrophes
+            lexical_edit_spans += 1
+            continue
+        if operation == "insert" and len(new_words) == 1:
+            # Permit one model-restored recognition omission. The prompt must
+            # supply the semantic judgment; this guard limits its blast radius.
+            lexical_edit_spans += 1
             continue
         if operation in {"delete", "replace"} and not new_words:
             # A punctuation name may consume one or two recognized words.
@@ -916,7 +940,7 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
                 return False
             deletion_spans += 1
             continue
-        # Inserted words, reordered words, and unequal replacements are unsafe.
+        # Broader insertions, reordered words, and broad replacements are unsafe.
         return False
 
     original_punctuation = Counter(
@@ -933,8 +957,8 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
     added_marks = {
         mark: max(0, corrected.count(mark) - original.count(mark)) for mark in ",;:!?-"
     }
-    # Multiple word-replacement regions are too broad to trust as homophones.
-    if replacement_spans > 1:
+    # Multiple independent lexical edits are too broad to accept automatically.
+    if lexical_edit_spans > 1:
         return False
     if deletion_spans > sum(added_marks.values()):
         return False

@@ -20,6 +20,11 @@ acceptance, and `NOCHANGE` use. Every applicable criterion contributes equally
 to the score, while any required failure independently fails the grade. The
 checker still reports every applicable metric after a required failure.
 
+The required word-shape criteria allow one localized one-to-two-word split or
+merge, or one restored recognition omission. Whether that edit was warranted
+is advisory. Standalone word deletion, multiple lexical edit regions, broad
+rewrites, and punctuation safety violations remain required failures.
+
 Each run also stores the exact prompt and a hash of the runtime source. When
 the custom checker changes, increment its `version` in `graders/default.yaml`;
 `smevals` snapshots grader configuration but does not hash checker source.

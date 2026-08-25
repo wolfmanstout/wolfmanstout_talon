@@ -30,13 +30,53 @@ if hasattr(talon, "test_mode"):
         deletion, _, _ = checker.word_edit_shape(
             original, "Commit rebase on main and push"
         )
-        insertion, _, _ = checker.word_edit_shape(
+        second_lexical_edit, _, _ = checker.word_edit_shape(
             original, "Commit then definitely rebase on main and push"
+        )
+        broad_insertion, _, _ = checker.word_edit_shape(
+            original, "Commit then very definitely rebase on main and push"
         )
 
         assert replacement
         assert not deletion
-        assert not insertion
+        assert not second_lexical_edit
+        assert not broad_insertion
+
+    def test_word_edit_shape_allows_localized_split_or_merge():
+        valid, changes, reason = checker.word_edit_shape("Plan a head:", "Plan ahead:")
+
+        assert valid
+        assert changes == [
+            {
+                "operation": "replace",
+                "old_words": ["a", "head"],
+                "new_words": ["ahead"],
+            }
+        ]
+        assert reason is None
+
+        split, _, _ = checker.word_edit_shape(
+            "That sounds alright", "That sounds all right"
+        )
+        assert split
+        nonidentical_merge, _, _ = checker.word_edit_shape(
+            "We should a lot two hours for testing",
+            "We should allot two hours for testing",
+        )
+        nonidentical_split, _, _ = checker.word_edit_shape(
+            "That takes allot of time", "That takes a lot of time"
+        )
+        assert nonidentical_merge
+        assert nonidentical_split
+
+    def test_word_edit_shape_allows_one_restored_word():
+        valid, changes, reason = checker.word_edit_shape(
+            "I'm bit on the fence", "I'm a bit on the fence"
+        )
+
+        assert valid
+        assert changes == [{"operation": "insert", "old_words": [], "new_words": ["a"]}]
+        assert reason is None
 
     def test_punctuation_scope_rejects_an_unspoken_comma():
         passed, _, _ = checker.stays_within_punctuation_scope(

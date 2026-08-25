@@ -1,0 +1,5 @@
+name: homophone-allot-merge
+category: homophone
+text_before: ""
+utterance: We should a lot two hours for testing
+expected: We should allot two hours for testing

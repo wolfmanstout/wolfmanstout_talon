@@ -41,6 +41,15 @@ def removes_capitalization(original, candidate):
     )
 
 
+def is_allowed_word_replacement(original_words, candidate_words):
+    return len(original_words) == len(candidate_words) or (
+        bool(original_words)
+        and bool(candidate_words)
+        and len(original_words) <= 2
+        and len(candidate_words) <= 2
+    )
+
+
 def preserves_existing_capitalization(original, candidate):
     old_words = words(original)
     new_words = words(candidate)
@@ -61,17 +70,17 @@ def preserves_existing_capitalization(original, candidate):
         ):
             return False
         if operation == "replace":
-            for index, (old, new) in enumerate(
-                zip(
-                    old_words[old_start:old_end],
-                    new_words[new_start:new_end],
-                    strict=False,
-                ),
-                old_start,
+            old_span = old_words[old_start:old_end]
+            new_span = new_words[new_start:new_end]
+            if removes_capitalization("".join(old_span), "".join(new_span)):
+                return False
+            if any(
+                index > 0 and any(char.isupper() for char in old)
+                for index, old in enumerate(old_span, old_start)
             ):
+                return False
+            for old, new in zip(old_span, new_span, strict=False):
                 if removes_capitalization(old, new):
-                    return False
-                if index > 0 and any(char.isupper() for char in old):
                     return False
     return True
 
@@ -156,7 +165,7 @@ def word_edit_shape(original, candidate):
     )
     changes = []
     deletion_spans = 0
-    replacement_spans = 0
+    lexical_edit_spans = 0
     reason = None
     for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
         if operation == "equal":
@@ -170,8 +179,11 @@ def word_edit_shape(original, candidate):
                 "new_words": new,
             }
         )
-        if operation == "replace" and len(old) == len(new):
-            replacement_spans += 1
+        if operation == "replace" and is_allowed_word_replacement(old, new):
+            lexical_edit_spans += 1
+            continue
+        if operation == "insert" and len(new) == 1:
+            lexical_edit_spans += 1
             continue
         if operation in {"delete", "replace"} and not new:
             if not 1 <= len(old) <= 2:
@@ -182,8 +194,8 @@ def word_edit_shape(original, candidate):
         reason = "words were inserted, reordered, or replaced unevenly"
         break
 
-    if reason is None and replacement_spans > 1:
-        reason = "more than one word-replacement span"
+    if reason is None and lexical_edit_spans > 1:
+        reason = "more than one lexical edit span"
     added_marks = punctuation_additions(original, candidate)
     if reason is None and deletion_spans > sum(added_marks.values()):
         reason = "deleted words were not replaced by punctuation"
