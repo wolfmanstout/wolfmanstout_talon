@@ -1,0 +1,5 @@
+name: nochange-literal-question-clause
+category: restraint
+text_before: ""
+utterance: The question is whether this works
+unchanged: true

@@ -85,6 +85,29 @@ if hasattr(talon, "test_mode"):
 
         assert not passed
 
+    def test_word_edit_shape_requires_a_complete_multiword_punctuation_name():
+        complete_question, _, _ = checker.word_edit_shape(
+            "Are you ready question mark", "Are you ready?"
+        )
+        partial_question, _, question_reason = checker.word_edit_shape(
+            "I have a question", "I have a?"
+        )
+        complete_exclamation, _, _ = checker.word_edit_shape(
+            "That worked exclamation Marc", "That worked!"
+        )
+        partial_exclamation, _, exclamation_reason = checker.word_edit_shape(
+            "That was an exclamation", "That was an!"
+        )
+
+        assert complete_question
+        assert complete_exclamation
+        assert not partial_question
+        assert not partial_exclamation
+        assert question_reason == "a multiword punctuation name was not fully consumed"
+        assert (
+            exclamation_reason == "a multiword punctuation name was not fully consumed"
+        )
+
     def test_capitalization_additions_are_advisory_but_removals_are_rejected():
         assert checker.preserves_existing_capitalization("ask michael", "ask Michael")
         assert not checker.preserves_existing_capitalization("ask Sponge", "ask sponge")

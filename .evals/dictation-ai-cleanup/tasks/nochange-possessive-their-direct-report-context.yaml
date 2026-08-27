@@ -1,0 +1,5 @@
+name: nochange-possessive-their-direct-report-context
+category: restraint
+text_before: Ask
+utterance: " whether their direct report was"
+unchanged: true
