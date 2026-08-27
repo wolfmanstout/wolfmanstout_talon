@@ -654,7 +654,7 @@ def _cleanup_prompt(preceding_text: str, utterance_text: str) -> str:
         "contents are adjacent on screen. Ignore its errors and never repeat, fix, or output it. "
         "Either may be incomplete.\n"
         "When certain, (1) replace a spoken or phonetically misrecognized complete name of comma, "
-        "colon, semicolon, exclamation mark, question mark, or hyphen with the mark, consuming the "
+        "colon, semicolon, exclamation mark, question mark, or hyphen with the mark itself, consuming the "
         "whole name; never replace only part of a multiword name; (2) insert unspoken hyphens only "
         "in a compound modifier directly before its noun "
         "where standard spelling clearly requires them; or (3) correct a homophone only when it "
