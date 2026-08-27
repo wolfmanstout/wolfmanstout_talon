@@ -632,14 +632,20 @@ def on_post_phrase(d):
         resolved_port = port if port > 0 else 8080
         url = f"http://127.0.0.1:{resolved_port}/chat/completions"
     timeout = settings.get("user.dictation_ai_cleanup_timeout_s")
-    corrected_utterance_text = _run_ai_cleanup(
-        preceding_text, utterance_text, model, url, timeout, backend
-    )
-    if not corrected_utterance_text:
-        return
-    _apply_ai_cleanup_rewrite(
-        preceding_text, insertions, corrected_utterance_text, utterance_suffix
-    )
+    actions.user.dictation_mode_set_processing(True)
+    try:
+        corrected_utterance_text = _run_ai_cleanup(
+            preceding_text, utterance_text, model, url, timeout, backend
+        )
+        if corrected_utterance_text:
+            _apply_ai_cleanup_rewrite(
+                preceding_text,
+                insertions,
+                corrected_utterance_text,
+                utterance_suffix,
+            )
+    finally:
+        actions.user.dictation_mode_set_processing(False)
 
 
 def _cleanup_prompt(preceding_text: str, utterance_text: str) -> str:

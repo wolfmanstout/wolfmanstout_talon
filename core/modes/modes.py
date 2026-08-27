@@ -21,6 +21,38 @@ ctx_awake.matches = r"""
 not mode: sleep
 """
 
+DICTATION_CURSOR_READY_COLOR = "FF0000"
+DICTATION_CURSOR_PROCESSING_COLOR = "FFBF00"
+
+
+def _create_dictation_mode_region(color: str):
+    rect = ui.main_screen().rect
+    region = actions.user.hud_create_screen_region(
+        "mode",
+        color,
+        "",
+        "Dictation",
+        -1,
+        rect.x,
+        rect.y,
+        rect.width,
+        rect.height,
+    )
+    region.text_colour = "FFFFFF"
+    region.vertical_centered = False
+    return region
+
+
+def _publish_dictation_cursor(processing: bool):
+    color = (
+        DICTATION_CURSOR_PROCESSING_COLOR
+        if processing
+        else DICTATION_CURSOR_READY_COLOR
+    )
+    actions.user.hud_publish_screen_regions(
+        "cursor", [_create_dictation_mode_region(color)], True
+    )
+
 
 @ctx_sleep.action_class("speech")
 class ActionsSleepMode:
@@ -54,24 +86,13 @@ class Actions:
         actions.user.code_clear_language_mode()
         actions.user.gdb_disable()
         actions.user.dictation_format_reset()
-        rect = ui.main_screen().rect
-        regions = [
-            actions.user.hud_create_screen_region(
-                "mode",
-                "FF0000",
-                "",
-                "Dictation",
-                -1,
-                rect.x,
-                rect.y,
-                rect.width,
-                rect.height,
-            )
-        ]
-        regions[0].text_colour = "FFFFFF"
-        regions[0].vertical_centered = False
+        regions = [_create_dictation_mode_region(DICTATION_CURSOR_READY_COLOR)]
         actions.user.hud_publish_screen_regions("overlay", regions, True)
         actions.user.hud_publish_screen_regions("cursor", regions, True)
+
+    def dictation_mode_set_processing(processing: bool):
+        """Changes the dictation cursor indicator while an utterance is processed."""
+        _publish_dictation_cursor(processing)
 
     def talon_mode():
         """For windows and Mac with Dragon, enables Talon commands and Dragon's command mode."""

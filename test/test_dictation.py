@@ -1,5 +1,6 @@
 import json
 
+import pytest
 import talon
 
 PHRASE_EXAMPLES = ["", "foo", "foo bar", "lorem ipsum dolor sit amet"]
@@ -115,6 +116,74 @@ if hasattr(talon, "test_mode"):
             else:
                 text_and_dictation.settings.get = previous_settings_get
             talon.actions.reset_test_actions()
+
+    def test_ai_cleanup_sets_processing_indicator_until_finished(monkeypatch):
+        events = []
+        setting_values = {
+            "user.dictation_ai_cleanup": True,
+            "user.dictation_ai_cleanup_backend": "mlx",
+            "user.dictation_ai_cleanup_model": "model",
+            "user.dictation_ai_cleanup_port": 0,
+            "user.dictation_ai_cleanup_timeout_s": 30,
+        }
+        monkeypatch.setattr(
+            text_and_dictation.settings, "get", setting_values.__getitem__
+        )
+        monkeypatch.setattr(
+            text_and_dictation,
+            "_run_ai_cleanup",
+            lambda *args: events.append("cleanup") or None,
+        )
+        talon.actions.register_test_action(
+            "user",
+            "dictation_mode_set_processing",
+            lambda processing: events.append(processing),
+        )
+        text_and_dictation.utterance_insertions = [(" dictated text", "")]
+        text_and_dictation.utterance_preceding_text = "Earlier text"
+        text_and_dictation.utterance_had_dictation = True
+
+        try:
+            text_and_dictation.on_post_phrase(None)
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert events == [True, "cleanup", False]
+
+    def test_ai_cleanup_restores_ready_indicator_after_error(monkeypatch):
+        events = []
+        setting_values = {
+            "user.dictation_ai_cleanup": True,
+            "user.dictation_ai_cleanup_backend": "mlx",
+            "user.dictation_ai_cleanup_model": "model",
+            "user.dictation_ai_cleanup_port": 0,
+            "user.dictation_ai_cleanup_timeout_s": 30,
+        }
+        monkeypatch.setattr(
+            text_and_dictation.settings, "get", setting_values.__getitem__
+        )
+
+        def fail_cleanup(*args):
+            events.append("cleanup")
+            raise RuntimeError("cleanup failed")
+
+        monkeypatch.setattr(text_and_dictation, "_run_ai_cleanup", fail_cleanup)
+        talon.actions.register_test_action(
+            "user",
+            "dictation_mode_set_processing",
+            lambda processing: events.append(processing),
+        )
+        text_and_dictation.utterance_insertions = [(" dictated text", "")]
+        text_and_dictation.utterance_preceding_text = "Earlier text"
+        text_and_dictation.utterance_had_dictation = True
+
+        try:
+            with pytest.raises(RuntimeError, match="cleanup failed"):
+                text_and_dictation.on_post_phrase(None)
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert events == [True, "cleanup", False]
 
     def test_prose_number_with_suffixes():
         assert text_and_dictation.prose_number(["numeral", "5", "K"]) == "5K"
