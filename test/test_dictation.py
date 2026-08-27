@@ -1,11 +1,12 @@
 import json
 
-import pytest
 import talon
 
 PHRASE_EXAMPLES = ["", "foo", "foo bar", "lorem ipsum dolor sit amet"]
 
 if hasattr(talon, "test_mode"):
+    import pytest
+
     # Only include this when we're running tests
     from core.text import text_and_dictation
 
