@@ -488,7 +488,7 @@ if hasattr(talon, "test_mode"):
 
         assert result is None
         assert calls == [
-            "Dictation AI cleanup: outcome=nochange text_before='Earlier text' "
+            "Dictation AI cleanup: outcome=nochange preceding_text='Earlier text' "
             "input=' unchanged words' output='NOCHANGE'"
         ]
 

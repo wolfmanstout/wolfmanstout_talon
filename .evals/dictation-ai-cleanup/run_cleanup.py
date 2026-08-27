@@ -22,11 +22,11 @@ def main() -> int:
         if backend == "ollama"
         else "http://127.0.0.1:8080/chat/completions"
     )
-    text_before = os.environ.get("SMEVALS_TASK_TEXT_BEFORE", "")
+    preceding_text = os.environ.get("SMEVALS_TASK_TEXT_BEFORE", "")
     utterance = os.environ["SMEVALS_TASK_UTTERANCE"]
 
     result = _run_ai_cleanup_result(
-        text_before,
+        preceding_text,
         utterance,
         os.environ["SMEVALS_MODEL"],
         os.getenv("DICTATION_AI_CLEANUP_URL", default_url),
@@ -44,7 +44,7 @@ def main() -> int:
         "outcome": result.outcome,
     }
     run_dir = Path(os.environ["SMEVALS_RUN_DIR"])
-    prompt = _cleanup_prompt(_current_sentence_fragment(text_before), utterance)
+    prompt = _cleanup_prompt(_current_sentence_fragment(preceding_text), utterance)
     source = REPO_ROOT / "core" / "text" / "text_and_dictation.py"
     artifact["harness_sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
     (run_dir / "result.json").write_text(json.dumps(artifact, indent=2) + "\n")
