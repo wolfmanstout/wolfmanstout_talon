@@ -165,6 +165,7 @@ def word_edit_shape(original, candidate):
     )
     changes = []
     deletion_spans = 0
+    deleted_word_count = 0
     lexical_edit_spans = 0
     reason = None
     for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
@@ -190,6 +191,7 @@ def word_edit_shape(original, candidate):
                 reason = "a punctuation name may consume only one or two words"
                 break
             deletion_spans += 1
+            deleted_word_count += len(old)
             continue
         reason = "words were inserted, reordered, or replaced unevenly"
         break
@@ -199,6 +201,13 @@ def word_edit_shape(original, candidate):
     added_marks = punctuation_additions(original, candidate)
     if reason is None and deletion_spans > sum(added_marks.values()):
         reason = "deleted words were not replaced by punctuation"
+    required_deleted_words = (
+        sum(count for mark, count in added_marks.items() if mark != "-")
+        + added_marks["?"]
+        + added_marks["!"]
+    )
+    if reason is None and deleted_word_count < required_deleted_words:
+        reason = "a multiword punctuation name was not fully consumed"
     return reason is None, changes, reason
 
 

@@ -643,10 +643,12 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "Edit only <utterance>. <text_before> is read-only text immediately before it; their "
         "contents are adjacent on screen. Ignore its errors and never repeat, fix, or output it. "
         "Either may be incomplete.\n"
-        "When certain, (1) replace a spoken or phonetically misrecognized name of comma, colon, "
-        "semicolon, exclamation mark, question mark, or hyphen with the mark, consuming the whole "
-        "name; (2) insert unspoken hyphens only in a compound modifier directly before its noun "
-        "where standard spelling clearly requires them; or (3) correct a wrong homophone or "
+        "When certain, (1) replace a spoken or phonetically misrecognized complete name of comma, "
+        "colon, semicolon, exclamation mark, question mark, or hyphen with the mark, consuming the "
+        "whole name; never replace only part of a multiword name; (2) insert unspoken hyphens only "
+        "in a compound modifier directly before its noun "
+        "where standard spelling clearly requires them; or (3) correct a homophone only when it "
+        "is clearly wrong in context, or correct a "
         "clearly invalid word boundary, or restore one clearly omitted word. Outside those "
         "replacements, never add, "
         "delete, reorder, or "
@@ -659,8 +661,8 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "leading or trailing whitespace is not a change; return NOCHANGE rather than a trimmed "
         "copy.\n\n"
         "NOCHANGE examples: 'come and see this'; 'come and get it'; "
-        "'The colon absorbs water'; 'A semicolon joins clauses'; 'Are you ready'; "
-        "'The hyphen key is stuck'; 'Run link talon'; 'Their server is fast'; "
+        "'The colon absorbs water'; 'A semicolon joins clauses'; 'I have a question'; "
+        "'The hyphen key is stuck'; 'Run link talon'; 'whether their report was'; "
         "'please comment on it'; 'This issue is high priority'; "
         "'When the server is ready run the benchmark'; "
         "'viewport frame purple if it is a cached frame'; "
@@ -681,19 +683,20 @@ def _cleanup_prompt(text_before: str, utterance_text: str) -> str:
         "'Set the header coal on enabled' -> 'Set the header: enabled'\n"
         "'That worked exclamation Marc' -> 'That worked!'\n"
         "'The exclamation mark is large' -> NOCHANGE\n"
-        "'Why did it fail question Marc' -> 'Why did it fail?'\n"
+        "'Why did it fail question more' -> 'Why did it fail?'\n"
         "'client haven server' -> 'client-server'\n"
         "'a high priority issue' -> 'a high-priority issue'\n"
         "'state of the art model' -> 'state-of-the-art model'\n"
         "'Their going to deploy it' -> \"They're going to deploy it\"\n"
-        "'We should a lot two hours' -> 'We should allot two hours'\n"
+        "'There are two many requests' -> 'There are too many requests'\n"
         "'ask michael whether it is ready' -> 'ask Michael whether it is ready'\n"
         "<text_before>This is a well</text_before>"
         "<utterance> known issue</utterance> -> '-known issue'\n"
         "Remember: never insert an unspoken comma.\n"
         "Preserve every existing punctuation character, including closing delimiters.\n"
         "Never delete spoken content; preserve unfinished endings.\n"
-        "If unchanged, output NOCHANGE, never a copy of <utterance>.\n"
+        "If changed, repeat the entire utterance with only the correction; otherwise output "
+        "NOCHANGE.\n"
         f"<text_before>{text_before}</text_before>"
         f"<utterance>{utterance_text}</utterance>\n"
     )
@@ -891,6 +894,7 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
         autojunk=False,
     )
     deletion_spans = 0
+    deleted_word_count = 0
     lexical_edit_spans = 0
     allowed_removed_punctuation: Counter[str] = Counter()
     for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
@@ -940,6 +944,7 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
             if not 1 <= len(old_words) <= 2:
                 return False
             deletion_spans += 1
+            deleted_word_count += len(old_words)
             continue
         # Broader insertions, reordered words, and broad replacements are unsafe.
         return False
@@ -962,6 +967,16 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
     if lexical_edit_spans > 1:
         return False
     if deletion_spans > sum(added_marks.values()):
+        return False
+    # A complete question-mark or exclamation-mark name requires two spoken
+    # words. This prevents a literal `question` or `exclamation` from becoming
+    # punctuation while still allowing phonetic variants of the complete name.
+    required_deleted_words = (
+        sum(count for mark, count in added_marks.items() if mark != "-")
+        + added_marks["?"]
+        + added_marks["!"]
+    )
+    if deleted_word_count < required_deleted_words:
         return False
     # Hyphens may be unspoken. Every other new mark must consume a spoken name.
     return (
