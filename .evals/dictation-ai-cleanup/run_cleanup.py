@@ -10,7 +10,8 @@ sys.path[:0] = [str(REPO_ROOT / "test" / "stubs"), str(REPO_ROOT)]
 
 from core.text.text_and_dictation import (  # noqa: E402
     _cleanup_prompt,
-    _current_sentence_fragment,
+    _current_sentence_text_after,
+    _current_sentence_text_before,
     _run_ai_cleanup_result,
 )
 
@@ -22,12 +23,14 @@ def main() -> int:
         if backend == "ollama"
         else "http://127.0.0.1:8080/chat/completions"
     )
-    preceding_text = os.environ.get("SMEVALS_TASK_TEXT_BEFORE", "")
+    text_before = os.environ.get("SMEVALS_TASK_TEXT_BEFORE", "")
     utterance = os.environ["SMEVALS_TASK_UTTERANCE"]
+    text_after = os.environ.get("SMEVALS_TASK_TEXT_AFTER", "")
 
     result = _run_ai_cleanup_result(
-        preceding_text,
+        text_before,
         utterance,
+        text_after,
         os.environ["SMEVALS_MODEL"],
         os.getenv("DICTATION_AI_CLEANUP_URL", default_url),
         int(os.getenv("DICTATION_AI_CLEANUP_TIMEOUT_S", "30")),
@@ -37,14 +40,20 @@ def main() -> int:
         utterance if result.corrected_text is None else result.corrected_text
     )
     artifact = {
+        "text_before": text_before,
         "utterance": utterance,
+        "text_after": text_after,
         "model_output": result.model_output,
         "corrected_text": result.corrected_text,
         "effective_output": effective_output,
         "outcome": result.outcome,
     }
     run_dir = Path(os.environ["SMEVALS_RUN_DIR"])
-    prompt = _cleanup_prompt(_current_sentence_fragment(preceding_text), utterance)
+    prompt = _cleanup_prompt(
+        _current_sentence_text_before(text_before),
+        utterance,
+        _current_sentence_text_after(text_after),
+    )
     source = REPO_ROOT / "core" / "text" / "text_and_dictation.py"
     artifact["harness_sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
     (run_dir / "result.json").write_text(json.dumps(artifact, indent=2) + "\n")

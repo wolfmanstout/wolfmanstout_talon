@@ -1,5 +1,4 @@
 name: hyphen-misrecognized-haven
 category: hyphenation
-text_before: ""
 utterance: client haven server
 expected: client-server

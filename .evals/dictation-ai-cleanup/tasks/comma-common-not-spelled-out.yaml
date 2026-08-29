@@ -1,5 +1,4 @@
 name: comma-common-not-spelled-out
 category: punctuation-name
-text_before: ""
 utterance: I think this is ready common but we should verify it
 expected: I think this is ready, but we should verify it

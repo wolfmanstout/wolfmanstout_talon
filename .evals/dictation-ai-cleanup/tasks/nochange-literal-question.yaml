@@ -1,5 +1,4 @@
 name: nochange-literal-question
 category: restraint
-text_before: ""
 utterance: I have a question
 unchanged: true

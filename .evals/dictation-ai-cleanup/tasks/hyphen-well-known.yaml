@@ -1,5 +1,4 @@
 name: hyphen-well-known
 category: hyphenation
-text_before: ""
 utterance: a well known limitation
 expected: a well-known limitation

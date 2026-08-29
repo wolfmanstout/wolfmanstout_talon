@@ -1,5 +1,4 @@
 name: omission-missing-article-bit
 category: omitted-word
-text_before: ""
 utterance: "I'm bit on the fence"
 expected: "I'm a bit on the fence"

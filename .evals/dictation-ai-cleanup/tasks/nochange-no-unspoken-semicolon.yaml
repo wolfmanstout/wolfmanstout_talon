@@ -1,5 +1,4 @@
 name: nochange-no-unspoken-semicolon
 category: restraint
-text_before: ""
 utterance: We should rerun the benchmark if the flag changes
 unchanged: true

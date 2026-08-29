@@ -1,5 +1,4 @@
 name: disabled-comma-to-be-clear
 category: unspoken-comma
-text_before: ""
 utterance: To be clear this is optional
 expected: To be clear, this is optional

@@ -1,5 +1,4 @@
 name: nochange-adjust-prompt
 category: restraint
-text_before: ""
 utterance: Adjust the prompt
 unchanged: true

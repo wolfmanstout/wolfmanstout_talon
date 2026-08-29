@@ -1,5 +1,4 @@
 name: homophone-write-right
 category: homophone
-text_before: ""
 utterance: Use the write configuration
 expected: Use the right configuration

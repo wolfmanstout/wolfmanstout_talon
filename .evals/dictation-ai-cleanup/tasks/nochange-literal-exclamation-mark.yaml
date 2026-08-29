@@ -1,5 +1,4 @@
 name: nochange-literal-exclamation-mark
 category: restraint
-text_before: ""
 utterance: The exclamation mark is too large
 unchanged: true

@@ -1,5 +1,4 @@
 name: disabled-comma-however
 category: unspoken-comma
-text_before: ""
 utterance: However I would wait
 expected: However, I would wait

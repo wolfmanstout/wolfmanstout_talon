@@ -301,16 +301,23 @@ def evaluate(criterion, task, result):
             "expected_additions": dict(expected_additions),
         }
     elif criterion == "context_not_output":
-        text_before = task.get("text_before", "").strip()
-        applicable = bool(text_before)
+        context = {
+            "text_before": task.get("text_before", "").strip(),
+            "text_after": task.get("text_after", "").strip(),
+        }
+        populated_context = {name: value for name, value in context.items() if value}
+        applicable = bool(populated_context)
         passed = (
             not applicable
             or raw == "NOCHANGE"
-            or text_before.casefold() not in raw.casefold()
+            or all(
+                value.casefold() not in raw.casefold()
+                for value in populated_context.values()
+            )
         )
-        details = {"text_before": text_before, "raw_output": raw}
+        details = {"context": populated_context, "raw_output": raw}
     elif criterion == "tags_absent":
-        passed = not re.search(r"</?(?:utterance|text_before)>", raw)
+        passed = not re.search(r"</?(?:utterance|text_before|text_after)>", raw)
         details = {"raw_output": raw}
     elif criterion == "proposal_accepted":
         passed = result["outcome"] != "unsafe"

@@ -1,5 +1,4 @@
 name: nochange-literal-call-on
 category: restraint
-text_before: ""
 utterance: Please call on the next speaker
 unchanged: true
