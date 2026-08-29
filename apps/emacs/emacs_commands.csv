@@ -22,8 +22,6 @@ bury-buffer,, bur
 byte-compile-file,, by-c
 byte-recompile-directory
 byte-recompile-file
-cider-load-buffer, ctrl-c ctrl-k
-cider-repl-set-ns, ctrl-c meta-n
 clang-include-fixer-at-point
 clear-rectangle, ctrl-x r c
 clone-indirect-buffer,, clo-i
@@ -71,8 +69,6 @@ emacs-lisp-mode
 end-of-buffer, meta->
 enlarge-window, ctrl-x ^
 enlarge-window-horizontally, ctrl-x }
-er/contract-region, ctrl-+
-er/expand-region, ctrl-=
 eval-defun, meta-ctrl-x
 eval-expression, meta-:
 eval-print-last-sexp,, ev-p
@@ -147,7 +143,6 @@ kmacro-start-macro, ctrl-x (
 lisp-interaction-mode
 list-bookmarks, ctrl-x r l
 list-packages
-magit-status, ctrl-c m
 make-frame-command, ctrl-x 5 2
 man
 mark-paragraph, meta-h
@@ -272,6 +267,7 @@ scroll-other-window, meta-pagedown
 scroll-other-window-down, meta-pageup
 server-edit, ctrl-x #
 set-mark-command, ctrl-@
+sgml-close-tag, ctrl-c ctrl-e /
 sh-mode
 shell
 shell-command, meta-!
@@ -279,9 +275,6 @@ shell-command-on-region, meta-|
 shell-script-mode
 shrink-window-horizontally, ctrl-x {
 shrink-window-if-larger-than-buffer, ctrl-x -
-smartscan-symbol-go-backward, meta-p
-smartscan-symbol-go-forward, meta-n
-smartscan-symbol-replace, meta-'
 smerge-combine-with-next
 smerge-diff-base-lower
 smerge-diff-base-upper
@@ -300,11 +293,6 @@ smerge-resolve, ctrl-c ^ r
 smex, meta-x
 sort-lines
 sort-words
-sp-backward-sexp, meta-ctrl-b
-sp-backward-up-sexp, meta-ctrl-u
-sp-down-sexp, meta-ctrl-d
-sp-forward-sexp, meta-ctrl-f
-sp-kill-sexp, meta-ctrl-k
 split-window-below, ctrl-x 2
 split-window-right, ctrl-x 3
 subword-mode
@@ -349,7 +337,6 @@ visit-directory-shell, ctrl-c c $
 visit-tags-table,, v-t-t
 visit-vc-directory-shell, ctrl-c c v
 visual-line-mode,, visu-l-m
-web-mode-element-close, ctrl-c ctrl-e /
 whitespace-cleanup,, wh-cl
 whitespace-mode,, white-m
 widen, ctrl-x n w
@@ -368,6 +355,3 @@ xref-go-back,"meta-,"
 yank, ctrl-y
 yank-pop, meta-y
 yank-rectangle, ctrl-x r y
-yas-new-snippet, ctrl-c & ctrl-n
-yas-reload-all
-yas-visit-snippet-file, ctrl-c & ctrl-v

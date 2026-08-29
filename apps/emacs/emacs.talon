@@ -325,7 +325,7 @@ term up: user.emacs("backward-up-list")
 term end: user.emacs("up-list")
 term down: user.emacs("down-list")
 term kill: user.emacs("kill-sexp")
-layer kill: user.emacs("sp-kill-sexp")
+layer kill: user.emacs("kill-sexp")
 term wipe: user.emacs("kill-sexp", -1)
 term (mark | select) | layer select: user.emacs("mark-sexp")
 term copy:
@@ -338,10 +338,10 @@ term [auto] indent:
     user.emacs("mark-sexp")
     user.emacs("indent-region")
 
-layer (last | preev): user.emacs("sp-backward-sexp")
-layer next: user.emacs("sp-forward-sexp")
-layer down: user.emacs("sp-down-sexp")
-layer up: user.emacs("sp-backward-up-sexp")
+layer (last | preev): user.emacs("backward-sexp")
+layer next: user.emacs("forward-sexp")
+layer down: user.emacs("down-list")
+layer up: user.emacs("backward-up-list")
 exper (last | preev): user.emacs("backward-cc-expression")
 exper next: user.emacs("forward-cc-expression")
 
@@ -362,8 +362,6 @@ graph cut:
 
 ahead: user.emacs("forward-word")
 behind: user.emacs("backward-word")
-word (last | preev): user.emacs("smartscan-symbol-go-backward")
-word next: user.emacs("smartscan-symbol-go-forward")
 aheads delete | clear ahead: user.emacs("kill-word")
 behinds delete | clear behind: user.emacs("backward-kill-word")
 aheads | select ahead:
@@ -381,10 +379,7 @@ line <number_small> open:
     user.jump_modulo_line(number_small)
     user.emacs("vi-open-line-above")
 (this | here) comment: user.emacs("comment-dwim")
-symbol replace: user.emacs("smartscan-symbol-replace")
 paste (other | last | preev): user.emacs("yank-pop")
-select more: user.emacs("er/expand-region")
-select less: user.emacs("er/contract-region")
 this parens: user.emacs("insert-parentheses")
 
 <number_small> (through | until) [<number_small>] [select]:
@@ -444,11 +439,6 @@ rectangle (yank | paste): user.emacs("yank-rectangle")
 rectangle copy: user.emacs("copy-rectangle-as-kill")
 rectangle number lines: user.emacs("rectangle-number-lines")
 
-# ----- TEMPLATES ----- #
-(snippet | template) open: user.emacs("yas-visit-snippet-file")
-(snippet | template) new: user.emacs("yas-new-snippet")
-(snippets | templates) reload: user.emacs("yas-reload-all")
-
 # ----- XREF SUPPORT ----- #
 [xref] find definition | def open: user.emacs("xref-find-definitions")
 [xref] find definition other window: user.emacs("xref-find-definitions-other-window")
@@ -485,15 +475,14 @@ project (switch [project] | open): user.emacs("project-switch-project")
 
 # ----- VC/GIT SUPPORT ----- #
 vc (annotate | blame): user.emacs("vc-annotate")
-magit open: user.emacs("magit-status")
 diff open: user.emacs("vc-diff")
 VC open:
     user.emacs("vc-dir")
     key(enter)
 
 # ----- MAJOR & MINOR MODES ----- #
-# web-mode #
-tag close: user.emacs("web-mode-element-close")
+# html-mode #
+tag close: user.emacs("sgml-close-tag")
 
 # c++-mode #
 header open: user.emacs("ff-find-other-file")
@@ -516,10 +505,6 @@ python [shell] send (function | defun): user.emacs("python-shell-send-defun")
 python [shell] send statement: user.emacs("python-shell-send-statement")
 python (shell switch | switch [to] shell): user.emacs("python-shell-switch-to-shell")
 pie flakes: user.emacs("python-check")
-
-# clojure-mode #
-closure compile: user.emacs("cider-load-buffer")
-closure namespace: user.emacs("cider-repl-set-ns")
 
 # lisp-mode #
 function run: user.emacs("eval-defun")
