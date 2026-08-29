@@ -1,0 +1,5 @@
+name: homophone-context-hear
+category: homophone
+text_before: I can
+utterance: " here the fan"
+expected: " hear the fan"

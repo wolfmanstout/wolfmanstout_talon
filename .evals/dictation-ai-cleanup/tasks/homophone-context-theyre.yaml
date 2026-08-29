@@ -2,4 +2,4 @@ name: homophone-context-theyre
 category: homophone
 text_before: I heard
 utterance: " there going tomorrow"
-expected: they're going tomorrow
+expected: " they're going tomorrow"
