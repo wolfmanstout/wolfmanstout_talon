@@ -609,7 +609,7 @@ if hasattr(talon, "test_mode"):
         )
         prompt = json.loads(request["data"])["messages"][0]["content"]
         assert "<text_before>This is a well</text_before>" in prompt
-        assert "<text_after>" not in prompt
+        assert "<text_after></text_after>" in prompt
         assert "An old sentence" not in prompt
 
     def test_run_ai_cleanup_logs_one_consolidated_result_line(monkeypatch):
