@@ -1,5 +1,4 @@
 name: nochange-correct-two-too
 category: restraint
-text_before: ""
 utterance: Two requests are too many
 unchanged: true

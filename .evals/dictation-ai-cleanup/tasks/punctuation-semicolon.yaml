@@ -1,5 +1,4 @@
 name: punctuation-semicolon
 category: punctuation-name
-text_before: ""
 utterance: I finished semicolon you can start
 expected: I finished; you can start

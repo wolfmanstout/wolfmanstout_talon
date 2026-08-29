@@ -1,5 +1,4 @@
 name: punctuation-question-mark-misrecognized
 category: punctuation-name
-text_before: ""
 utterance: Why did it fail question Marc
 expected: Why did it fail?

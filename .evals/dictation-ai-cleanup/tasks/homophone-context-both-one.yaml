@@ -1,0 +1,6 @@
+name: homophone-context-both-one
+category: homophone
+text_before: I picked
+utterance: " won"
+text_after: " option from each group"
+expected: " one"

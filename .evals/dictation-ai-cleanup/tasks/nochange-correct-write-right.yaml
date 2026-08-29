@@ -1,5 +1,4 @@
 name: nochange-correct-write-right
 category: restraint
-text_before: ""
 utterance: Write the result to the right file
 unchanged: true

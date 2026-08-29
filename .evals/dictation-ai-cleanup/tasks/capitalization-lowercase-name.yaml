@@ -1,5 +1,4 @@
 name: capitalization-lowercase-name
 category: capitalization
-text_before: ""
 utterance: ask michael whether it is ready
 expected: ask Michael whether it is ready

@@ -1,5 +1,4 @@
 name: comma-comment-single
 category: punctuation-name
-text_before: ""
 utterance: I like cats comment dogs and birds
 expected: I like cats, dogs and birds

@@ -133,7 +133,9 @@ if hasattr(talon, "test_mode"):
         monkeypatch.setattr(
             text_and_dictation,
             "_run_ai_cleanup",
-            lambda *args: events.append("cleanup") or None,
+            lambda before, utterance, after, *args: (
+                events.append(("cleanup", before, utterance, after)) or None
+            ),
         )
         talon.actions.register_test_action(
             "user",
@@ -141,7 +143,8 @@ if hasattr(talon, "test_mode"):
             lambda processing: events.append(processing),
         )
         text_and_dictation.utterance_insertions = [(" dictated text", "")]
-        text_and_dictation.utterance_preceding_text = "Earlier text"
+        text_and_dictation.utterance_text_before = "Earlier text"
+        text_and_dictation.utterance_text_after = " after text"
         text_and_dictation.utterance_had_dictation = True
 
         try:
@@ -149,7 +152,11 @@ if hasattr(talon, "test_mode"):
         finally:
             talon.actions.reset_test_actions()
 
-        assert events == [True, "cleanup", False]
+        assert events == [
+            True,
+            ("cleanup", "Earlier text", " dictated text", " after text"),
+            False,
+        ]
 
     def test_ai_cleanup_restores_ready_indicator_after_error(monkeypatch):
         events = []
@@ -175,7 +182,8 @@ if hasattr(talon, "test_mode"):
             lambda processing: events.append(processing),
         )
         text_and_dictation.utterance_insertions = [(" dictated text", "")]
-        text_and_dictation.utterance_preceding_text = "Earlier text"
+        text_and_dictation.utterance_text_before = "Earlier text"
+        text_and_dictation.utterance_text_after = ""
         text_and_dictation.utterance_had_dictation = True
 
         try:
@@ -185,6 +193,72 @@ if hasattr(talon, "test_mode"):
             talon.actions.reset_test_actions()
 
         assert events == [True, "cleanup", False]
+
+    def test_dictation_insert_reuses_spacing_peek_for_text_after(monkeypatch):
+        peeks = []
+        setting_values = {
+            "user.context_sensitive_dictation": True,
+            "user.dictation_debug_mode": False,
+            "user.peek_right_after_insertion": False,
+        }
+        monkeypatch.setattr(
+            text_and_dictation.settings, "get", setting_values.__getitem__
+        )
+        talon.actions.register_test_action(
+            "user",
+            "dictation_peek",
+            lambda left, right: peeks.append((left, right)) or ("Before", "after"),
+        )
+        talon.actions.register_test_action(
+            "user", "add_phrase_to_history", lambda *args: None
+        )
+        talon.actions.register_test_action("user", "insert_between", lambda *args: None)
+        text_and_dictation.dictation_formatter.reset()
+        text_and_dictation.context_check_phrase_timestamp = None
+        text_and_dictation.on_pre_phrase(None)
+
+        try:
+            text_and_dictation.Actions.dictation_insert("word")
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert peeks == [(True, True)]
+        assert text_and_dictation.utterance_text_after == " after"
+
+    def test_dictation_insert_reuses_post_insertion_peek_for_text_after(
+        monkeypatch,
+    ):
+        peeks = []
+        setting_values = {
+            "user.context_sensitive_dictation": True,
+            "user.dictation_debug_mode": False,
+            "user.peek_right_after_insertion": True,
+        }
+        monkeypatch.setattr(
+            text_and_dictation.settings, "get", setting_values.__getitem__
+        )
+        monkeypatch.setattr(text_and_dictation.time, "sleep", lambda *args: None)
+
+        def peek(left, right):
+            peeks.append((left, right))
+            return ("Before", None) if left else (None, "after")
+
+        talon.actions.register_test_action("user", "dictation_peek", peek)
+        talon.actions.register_test_action(
+            "user", "add_phrase_to_history", lambda *args: None
+        )
+        talon.actions.register_test_action("user", "insert_between", lambda *args: None)
+        text_and_dictation.dictation_formatter.reset()
+        text_and_dictation.context_check_phrase_timestamp = None
+        text_and_dictation.on_pre_phrase(None)
+
+        try:
+            text_and_dictation.Actions.dictation_insert("word")
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert peeks == [(True, False), (False, True)]
+        assert text_and_dictation.utterance_text_after == " after"
 
     def test_prose_number_with_suffixes():
         assert text_and_dictation.prose_number(["numeral", "5", "K"]) == "5K"
@@ -470,15 +544,25 @@ if hasattr(talon, "test_mode"):
             "server_call=401.2ms client_prep=21.5ms phase_rates=unavailable"
         ]
 
-    def test_current_sentence_fragment_excludes_previous_sentences_and_lines():
-        fragment = text_and_dictation._current_sentence_fragment
+    def test_current_sentence_context_excludes_other_sentences_and_lines():
+        text_before = text_and_dictation._current_sentence_text_before
+        text_after = text_and_dictation._current_sentence_text_after
 
-        assert fragment("The first sentence. Current fragment") == "Current fragment"
-        assert fragment("Finished.") == ""
-        assert fragment('Finished."  ') == ""
-        assert fragment("Old line\nCurrent fragment") == "Current fragment"
-        assert fragment("Old line\r\nCurrent fragment") == "Current fragment"
-        assert fragment("Version 1.2 is ready") == "Version 1.2 is ready"
+        assert text_before("The first sentence. Current fragment") == "Current fragment"
+        assert text_before("Finished.") == ""
+        assert text_before('Finished."  ') == ""
+        assert text_before("Old line\nCurrent fragment") == "Current fragment"
+        assert text_before("Old line\r\nCurrent fragment") == "Current fragment"
+        assert text_before("Version 1.2 is ready") == "Version 1.2 is ready"
+
+        assert text_after(" current fragment. Next sentence") == " current fragment."
+        assert text_after(" current fragment\nNext line") == " current fragment"
+        assert text_after(" current fragment\r\nNext line") == " current fragment"
+        assert text_after(" version 1.2 is ready") == " version 1.2 is ready"
+
+    def test_cleanup_prompt_requires_both_context_arguments():
+        with pytest.raises(TypeError):
+            text_and_dictation._cleanup_prompt("", "utterance")
 
     def test_run_ai_cleanup_preserves_input_spacing_but_normalizes_output_spacing(
         monkeypatch,
@@ -502,6 +586,7 @@ if hasattr(talon, "test_mode"):
         result = text_and_dictation._run_ai_cleanup(
             "This is a well",
             " known issue",
+            " after deployment",
             "model",
             "http://127.0.0.1:8080/chat/completions",
             1,
@@ -510,11 +595,13 @@ if hasattr(talon, "test_mode"):
 
         prompt = json.loads(request["data"])["messages"][0]["content"]
         assert "<utterance> known issue</utterance>" in prompt
+        assert "<text_after> after deployment</text_after>" in prompt
         assert result == "-known issue"
 
         text_and_dictation._run_ai_cleanup(
             "An old sentence. This is a well",
             " known issue",
+            "",
             "model",
             "http://127.0.0.1:8080/chat/completions",
             1,
@@ -522,6 +609,7 @@ if hasattr(talon, "test_mode"):
         )
         prompt = json.loads(request["data"])["messages"][0]["content"]
         assert "<text_before>This is a well</text_before>" in prompt
+        assert "<text_after>" not in prompt
         assert "An old sentence" not in prompt
 
     def test_run_ai_cleanup_logs_one_consolidated_result_line(monkeypatch):
@@ -550,6 +638,7 @@ if hasattr(talon, "test_mode"):
         result = text_and_dictation._run_ai_cleanup(
             "Earlier text",
             " unchanged words",
+            " after text",
             "model",
             "http://127.0.0.1:8080/chat/completions",
             1,
@@ -558,8 +647,8 @@ if hasattr(talon, "test_mode"):
 
         assert result is None
         assert calls == [
-            "Dictation AI cleanup: outcome=nochange preceding_text='Earlier text' "
-            "input=' unchanged words' output='NOCHANGE'"
+            "Dictation AI cleanup: outcome=nochange text_before='Earlier text' "
+            "utterance=' unchanged words' text_after=' after text' output='NOCHANGE'"
         ]
 
     def test_strip_ai_cleanup_output_guards_preserves_leading_comma():
@@ -619,6 +708,7 @@ if hasattr(talon, "test_mode"):
             text_and_dictation._run_ai_cleanup(
                 "",
                 "apples comment oranges",
+                "",
                 "model",
                 "http://127.0.0.1:8080/chat/completions",
                 1,
@@ -652,6 +742,7 @@ if hasattr(talon, "test_mode"):
         result = text_and_dictation._run_ai_cleanup(
             "",
             "apples comment oranges",
+            "",
             "model",
             "http://127.0.0.1:11434/api/generate",
             1,

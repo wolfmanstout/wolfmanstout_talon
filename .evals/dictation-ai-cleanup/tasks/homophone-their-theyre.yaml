@@ -1,5 +1,4 @@
 name: homophone-their-theyre
 category: homophone
-text_before: ""
 utterance: Their going to deploy it
 expected: They're going to deploy it

@@ -1,0 +1,5 @@
+name: homophone-context-after-theyre
+category: homophone
+utterance: Their
+text_after: " going to deploy tomorrow"
+expected: They're

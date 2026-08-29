@@ -1,5 +1,4 @@
 name: disabled-comma-introductory-clause
 category: unspoken-comma
-text_before: ""
 utterance: When the server is ready run the benchmark
 expected: When the server is ready, run the benchmark

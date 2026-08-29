@@ -1,5 +1,4 @@
 name: hyphen-misrecognized
 category: hyphenation
-text_before: ""
 utterance: client high fin server
 expected: client-server

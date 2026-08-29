@@ -1,5 +1,4 @@
 name: nochange-literal-colon
 category: restraint
-text_before: ""
 utterance: The colon absorbs water
 unchanged: true

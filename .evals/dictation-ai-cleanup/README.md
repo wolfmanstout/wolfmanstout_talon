@@ -48,7 +48,9 @@ as `SMEVALS_CONFIG_<KEY>` variables and preserve the resolved Config in
 `run.yaml`. We could then keep all harness settings in the Config YAML instead
 of splitting them between YAML and environment variables.
 
-Each `tasks/*.yaml` file contains the adjacent text, utterance, and category.
+Each `tasks/*.yaml` file contains the adjacent text before and after the
+utterance, the utterance itself, and its category. `text_before` and
+`text_after` may each be omitted when unavailable or empty.
 Changed cases define one preferred `expected` output; unchanged cases instead
 say `unchanged: true`, avoiding a duplicated utterance. All criteria and their
 severities are defined centrally by the checker rather than repeated in every
@@ -56,7 +58,9 @@ task. The historical unspoken-comma cases live in
 `tasks-disabled-unspoken-commas/`, which `smevals` intentionally does not
 discover.
 
-`text_before` and `utterance` must preserve their exact on-screen boundary;
-the eval runner does not add or remove spacing. An utterance commonly starts
-with a separating space after ordinary text, but not after an opening delimiter:
-`text (` plus `inside)` represents `text (inside)`, not `text ( inside)`.
+`text_before`, `utterance`, and `text_after` must preserve their exact on-screen
+boundaries; the eval runner does not add or remove spacing. An utterance commonly
+starts with a separating space after ordinary text, but not after an opening
+delimiter: `text (` plus `inside)` represents `text (inside)`, not
+`text ( inside)`. Likewise, word text after a word-ending utterance generally
+starts with a space.

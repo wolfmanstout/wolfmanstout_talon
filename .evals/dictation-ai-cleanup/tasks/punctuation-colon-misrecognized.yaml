@@ -1,5 +1,4 @@
 name: punctuation-colon-misrecognized
 category: punctuation-name
-text_before: ""
 utterance: Set the header coal on enabled
 expected: "Set the header: enabled"

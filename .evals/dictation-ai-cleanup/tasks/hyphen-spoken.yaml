@@ -1,5 +1,4 @@
 name: hyphen-spoken
 category: hyphenation
-text_before: ""
 utterance: client hyphen server
 expected: client-server

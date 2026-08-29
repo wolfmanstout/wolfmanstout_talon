@@ -1,5 +1,4 @@
 name: nochange-correct-its-possessive
 category: restraint
-text_before: ""
 utterance: The service warmed its cache
 unchanged: true

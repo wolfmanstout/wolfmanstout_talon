@@ -1,5 +1,4 @@
 name: nochange-command-like
 category: restraint
-text_before: ""
 utterance: Switch back to main
 unchanged: true

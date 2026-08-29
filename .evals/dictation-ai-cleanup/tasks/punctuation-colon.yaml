@@ -1,5 +1,4 @@
 name: punctuation-colon
 category: punctuation-name
-text_before: ""
 utterance: Configuration colon enabled
 expected: "Configuration: enabled"

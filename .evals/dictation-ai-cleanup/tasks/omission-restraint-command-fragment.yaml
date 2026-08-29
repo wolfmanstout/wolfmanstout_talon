@@ -1,5 +1,4 @@
 name: omission-restraint-command-fragment
 category: restraint
-text_before: ""
 utterance: Set status ready
 unchanged: true

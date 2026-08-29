@@ -588,28 +588,33 @@ ui.register("win_focus", lambda win: dictation_formatter.reset())
 phrase_timestamp = None
 context_check_phrase_timestamp = None
 utterance_insertions: list[tuple[str, str]] = []
-utterance_preceding_text = ""
+utterance_text_before = ""
+utterance_text_after = ""
 utterance_had_dictation = False
 
 
 def on_pre_phrase(d):
     global phrase_timestamp
-    global utterance_insertions, utterance_preceding_text, utterance_had_dictation
+    global utterance_insertions, utterance_text_before, utterance_text_after
+    global utterance_had_dictation
     phrase_timestamp = time.time()
     utterance_insertions = []
-    utterance_preceding_text = ""
+    utterance_text_before = ""
+    utterance_text_after = ""
     utterance_had_dictation = False
 
 
 def on_post_phrase(d):
-    global phrase_timestamp, utterance_insertions, utterance_preceding_text
-    global utterance_had_dictation
+    global phrase_timestamp, utterance_insertions, utterance_text_before
+    global utterance_text_after, utterance_had_dictation
     insertions = utterance_insertions
-    preceding_text = utterance_preceding_text
+    text_before = utterance_text_before
+    text_after = utterance_text_after
     had_dictation = utterance_had_dictation
     phrase_timestamp = None
     utterance_insertions = []
-    utterance_preceding_text = ""
+    utterance_text_before = ""
+    utterance_text_after = ""
     utterance_had_dictation = False
     if (
         not had_dictation
@@ -635,11 +640,17 @@ def on_post_phrase(d):
     actions.user.dictation_mode_set_processing(True)
     try:
         corrected_utterance_text = _run_ai_cleanup(
-            preceding_text, utterance_text, model, url, timeout, backend
+            text_before,
+            utterance_text,
+            text_after,
+            model,
+            url,
+            timeout,
+            backend,
         )
         if corrected_utterance_text:
             _apply_ai_cleanup_rewrite(
-                preceding_text,
+                text_before,
                 insertions,
                 corrected_utterance_text,
                 utterance_suffix,
@@ -648,78 +659,116 @@ def on_post_phrase(d):
         actions.user.dictation_mode_set_processing(False)
 
 
-def _cleanup_prompt(preceding_text: str, utterance_text: str) -> str:
+def _cleanup_prompt(text_before: str, utterance_text: str, text_after: str) -> str:
+    if text_after:
+        context_instruction = (
+            "Edit only <utterance>. Read <text_before>, <utterance>, and <text_after> together as "
+            "adjacent text to judge corrections. The context tags are read-only: ignore their errors "
+            "and never repeat, fix, or output them. Any part may be incomplete.\n"
+        )
+        context_examples = (
+            "CONTEXT examples (the same utterance can require a different result):\n"
+            "<text_before>I picked</text_before><utterance> won</utterance>"
+            "<text_after> option from each group</text_after> -> ' one'\n"
+            "<text_before>Our team</text_before><utterance> won</utterance>"
+            "<text_after> again yesterday</text_after> -> NOCHANGE\n"
+            "<text_before></text_before><utterance>Their</utterance>"
+            '<text_after> going tomorrow</text_after> -> "They\'re"\n'
+            "<text_before></text_before><utterance>Their</utterance>"
+            "<text_after> deployment starts tomorrow</text_after> -> NOCHANGE\n"
+        )
+        context_input = (
+            f"<text_before>{text_before}</text_before>"
+            f"<utterance>{utterance_text}</utterance>"
+            f"<text_after>{text_after}</text_after>\n"
+        )
+    else:
+        # Keep the established two-part prompt unchanged when text_after is empty;
+        # the full eval regressed when an empty third tag changed this prompt.
+        context_instruction = (
+            "Edit only <utterance>. Read <text_before> and <utterance> together as adjacent text to "
+            "judge corrections. <text_before> is read-only: ignore its errors and never repeat, fix, "
+            "or output it. Either may be incomplete.\n"
+        )
+        context_examples = (
+            "CONTEXT examples (the same utterance can require a different result):\n"
+            "<text_before>Run it</text_before>"
+            "<utterance> won more time</utterance> -> ' one more time'\n"
+            "<text_before>The team</text_before>"
+            "<utterance> won more time</utterance> -> NOCHANGE\n"
+            "<text_before>There are</text_before>"
+            "<utterance> for tests</utterance> -> ' four tests'\n"
+            "<text_before>We waited</text_before>"
+            "<utterance> for tests</utterance> -> NOCHANGE\n"
+        )
+        context_input = (
+            f"<text_before>{text_before}</text_before>"
+            f"<utterance>{utterance_text}</utterance>\n"
+        )
     return (
-        "Edit only <utterance>. Read <text_before> and <utterance> together as adjacent text to "
-        "judge corrections. <text_before> is read-only: ignore its errors and never repeat, fix, "
-        "or output it. Either may be incomplete.\n"
-        "When certain, (1) replace a spoken or phonetically misrecognized complete name of comma, "
-        "colon, semicolon, exclamation mark, question mark, or hyphen with the mark itself, consuming the "
-        "whole name; never replace only part of a multiword name; (2) insert unspoken hyphens only "
-        "in a compound modifier directly before its noun "
-        "where standard spelling clearly requires them; or (3) correct a homophone only when it "
-        "is clearly wrong in context, or correct a "
-        "clearly invalid word boundary, or restore one clearly omitted word. Outside those "
-        "replacements, never add, "
-        "delete, reorder, or "
-        "alter words; treat capitalized words after the first word as immutable proper nouns, "
-        "even if unfamiliar or apparently misspelled, unless consumed in a punctuation name; do "
-        "not proofread. You may capitalize a lowercase name when certain, but never lowercase a "
-        "word. Never insert unspoken "
-        "punctuation except required hyphens. Never output tags. Output the entire corrected "
-        "<utterance>, never only the changed span, or exactly NOCHANGE if unchanged. Trimming "
-        "leading or trailing whitespace is not a change; return NOCHANGE rather than a trimmed "
-        "copy.\n\n"
-        "NOCHANGE examples: 'come and see this'; 'come and get it'; "
-        "'The colon absorbs water'; 'A semicolon joins clauses'; 'I have a question'; "
-        "'The hyphen key is stuck'; 'Run link talon'; 'whether their report was'; "
-        "'please comment on it'; 'This issue is high priority'; "
-        "'When the server is ready run the benchmark'; "
-        "'viewport frame purple if it is a cached frame'; "
-        "'I use it a lot'; 'We found a safe haven'; "
-        "'ask Danise whether it is ready'.\n"
-        "<text_before></text_before><utterance>Hello Sarah</utterance> -> NOCHANGE\n"
-        "<utterance>I can take care of</utterance> -> NOCHANGE\n"
-        "<text_before>Their going to deploy it</text_before>"
-        "<utterance> after the benchmark</utterance> -> NOCHANGE\n"
-        "<text_before>What time is it question mark</text_before>"
-        "<utterance> I don't know</utterance> -> NOCHANGE\n"
-        "<text_before>The options are red</text_before>"
-        "<utterance> green and blue</utterance> -> NOCHANGE\n\n"
-        "FIX examples:\n"
-        "'first come and second come and third' -> 'first, second, third'\n"
-        '"I\'m not sure come and can you help" -> "I\'m not sure, can you help"\n'
-        "'giraffe common elephant common lion' -> 'giraffe, elephant, lion'\n"
-        "'Set the header coal on enabled' -> 'Set the header: enabled'\n"
-        "'That worked exclamation Marc' -> 'That worked!'\n"
-        "'The exclamation mark is large' -> NOCHANGE\n"
-        "'Why did it fail question more' -> 'Why did it fail?'\n"
-        "'client haven server' -> 'client-server'\n"
-        "'a high priority issue' -> 'a high-priority issue'\n"
-        "'state of the art model' -> 'state-of-the-art model'\n"
-        "'Their going to deploy it' -> \"They're going to deploy it\"\n"
-        "'There are two many requests' -> 'There are too many requests'\n"
-        "'ask michael whether it is ready' -> 'ask Michael whether it is ready'\n"
-        "CONTEXT examples (the same utterance can require a different result):\n"
-        "<text_before>Run it</text_before>"
-        "<utterance> won more time</utterance> -> ' one more time'\n"
-        "<text_before>The team</text_before>"
-        "<utterance> won more time</utterance> -> NOCHANGE\n"
-        "<text_before>There are</text_before>"
-        "<utterance> for tests</utterance> -> ' four tests'\n"
-        "<text_before>We waited</text_before>"
-        "<utterance> for tests</utterance> -> NOCHANGE\n"
-        "<text_before>We should</text_before>"
-        "<utterance> invalidate the cash</utterance> -> ' invalidate the cache'\n"
-        "<text_before>This is a well</text_before>"
-        "<utterance> known issue</utterance> -> '-known issue'\n"
-        "Remember: never insert an unspoken comma.\n"
-        "Preserve every existing punctuation character, including closing delimiters.\n"
-        "Never delete spoken content; preserve unfinished endings.\n"
-        "If changed, repeat the entire utterance with only the correction; otherwise output "
-        "NOCHANGE.\n"
-        f"<text_before>{preceding_text}</text_before>"
-        f"<utterance>{utterance_text}</utterance>\n"
+        context_instruction
+        + (
+            "When certain, (1) replace a spoken or phonetically misrecognized complete name of comma, "
+            "colon, semicolon, exclamation mark, question mark, or hyphen with the mark itself, consuming the "
+            "whole name; never replace only part of a multiword name; (2) insert unspoken hyphens only "
+            "in a compound modifier directly before its noun "
+            "where standard spelling clearly requires them; or (3) correct a homophone only when it "
+            "is clearly wrong in context, or correct a "
+            "clearly invalid word boundary, or restore one clearly omitted word. Outside those "
+            "replacements, never add, "
+            "delete, reorder, or "
+            "alter words; treat capitalized words after the first word as immutable proper nouns, "
+            "even if unfamiliar or apparently misspelled, unless consumed in a punctuation name; do "
+            "not proofread. You may capitalize a lowercase name when certain, but never lowercase a "
+            "word. Never insert unspoken "
+            "punctuation except required hyphens. Never output tags. Output the entire corrected "
+            "<utterance>, never only the changed span, or exactly NOCHANGE if unchanged. Trimming "
+            "leading or trailing whitespace is not a change; return NOCHANGE rather than a trimmed "
+            "copy.\n\n"
+            "NOCHANGE examples: 'come and see this'; 'come and get it'; "
+            "'The colon absorbs water'; 'A semicolon joins clauses'; 'I have a question'; "
+            "'The hyphen key is stuck'; 'Run link talon'; 'whether their report was'; "
+            "'please comment on it'; 'This issue is high priority'; "
+            "'When the server is ready run the benchmark'; "
+            "'viewport frame purple if it is a cached frame'; "
+            "'I use it a lot'; 'We found a safe haven'; "
+            "'ask Danise whether it is ready'.\n"
+            "<text_before></text_before><utterance>Hello Sarah</utterance> -> NOCHANGE\n"
+            "<utterance>I can take care of</utterance> -> NOCHANGE\n"
+            "<text_before>Their going to deploy it</text_before>"
+            "<utterance> after the benchmark</utterance> -> NOCHANGE\n"
+            "<text_before>What time is it question mark</text_before>"
+            "<utterance> I don't know</utterance> -> NOCHANGE\n"
+            "<text_before>The options are red</text_before>"
+            "<utterance> green and blue</utterance> -> NOCHANGE\n\n"
+            "FIX examples:\n"
+            "'first come and second come and third' -> 'first, second, third'\n"
+            '"I\'m not sure come and can you help" -> "I\'m not sure, can you help"\n'
+            "'giraffe common elephant common lion' -> 'giraffe, elephant, lion'\n"
+            "'Set the header coal on enabled' -> 'Set the header: enabled'\n"
+            "'That worked exclamation Marc' -> 'That worked!'\n"
+            "'The exclamation mark is large' -> NOCHANGE\n"
+            "'Why did it fail question more' -> 'Why did it fail?'\n"
+            "'client haven server' -> 'client-server'\n"
+            "'a high priority issue' -> 'a high-priority issue'\n"
+            "'state of the art model' -> 'state-of-the-art model'\n"
+            "'Their going to deploy it' -> \"They're going to deploy it\"\n"
+            "'There are two many requests' -> 'There are too many requests'\n"
+            "'ask michael whether it is ready' -> 'ask Michael whether it is ready'\n"
+        )
+        + context_examples
+        + (
+            "<text_before>We should</text_before>"
+            "<utterance> invalidate the cash</utterance> -> ' invalidate the cache'\n"
+            "<text_before>This is a well</text_before>"
+            "<utterance> known issue</utterance> -> '-known issue'\n"
+            "Remember: never insert an unspoken comma.\n"
+            "Preserve every existing punctuation character, including closing delimiters.\n"
+            "Never delete spoken content; preserve unfinished endings.\n"
+            "If changed, repeat the entire utterance with only the correction; otherwise output "
+            "NOCHANGE.\n"
+        )
+        + context_input
     )
 
 
@@ -851,7 +900,7 @@ def _is_dictation_ai_cleanup_backend(
     return value in {"ollama", "mlx"}
 
 
-def _current_sentence_fragment(text: str) -> str:
+def _current_sentence_text_before(text: str) -> str:
     current_line = re.split(r"[\r\n]", text)[-1]
     sentence_end = None
     # Treat ASCII/curly closing quotes (U+2019, U+201D) and closing brackets as
@@ -861,6 +910,16 @@ def _current_sentence_fragment(text: str) -> str:
     if sentence_end is not None:
         current_line = current_line[sentence_end:]
     return current_line.lstrip()
+
+
+def _current_sentence_text_after(text: str) -> str:
+    current_line = re.split(r"[\r\n]", text)[0]
+    # Apply the same sentence boundary as text_before in the forward direction,
+    # retaining the terminator because it is adjacent to the utterance.
+    sentence_end = re.search(r"""[.!?]["'\u2019\u201d)\]}]*(?=\s|$)""", current_line)
+    if sentence_end is not None:
+        current_line = current_line[: sentence_end.end()]
+    return current_line.rstrip()
 
 
 def _split_outer_whitespace(text: str) -> tuple[str, str, str]:
@@ -1007,51 +1066,64 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
 
 
 def _log_ai_cleanup_result(
-    result: DictationAiCleanupResult, preceding_text: str, utterance_text: str
+    result: DictationAiCleanupResult,
+    text_before: str,
+    utterance_text: str,
+    text_after: str,
 ) -> None:
     logging.debug(
-        "Dictation AI cleanup: outcome=%s preceding_text=%r input=%r output=%r",
+        "Dictation AI cleanup: outcome=%s text_before=%r utterance=%r text_after=%r output=%r",
         result.outcome,
-        preceding_text,
+        text_before,
         utterance_text,
+        text_after,
         result.model_output,
     )
 
 
 def _run_ai_cleanup(
-    preceding_text: str,
+    text_before: str,
     utterance_text: str,
+    text_after: str,
     model: str,
     url: str,
     timeout_seconds: int,
     backend: DictationAiCleanupBackend,
 ) -> Optional[str]:
     result = _run_ai_cleanup_result(
-        preceding_text, utterance_text, model, url, timeout_seconds, backend
+        text_before,
+        utterance_text,
+        text_after,
+        model,
+        url,
+        timeout_seconds,
+        backend,
     )
     return result.corrected_text
 
 
 def _run_ai_cleanup_result(
-    preceding_text: str,
+    text_before: str,
     utterance_text: str,
+    text_after: str,
     model: str,
     url: str,
     timeout_seconds: int,
     backend: DictationAiCleanupBackend,
 ) -> DictationAiCleanupResult:
-    preceding_text = _current_sentence_fragment(preceding_text)
+    text_before = _current_sentence_text_before(text_before)
+    text_after = _current_sentence_text_after(text_after)
     leading_whitespace, utterance_core, trailing_whitespace = _split_outer_whitespace(
         utterance_text
     )
     if not utterance_core:
         result = DictationAiCleanupResult(None, None, "empty")
-        _log_ai_cleanup_result(result, preceding_text, utterance_text)
+        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
         return result
     request_started = time.perf_counter()
     server_call_started: Optional[float] = None
     try:
-        prompt = _cleanup_prompt(preceding_text, utterance_text)
+        prompt = _cleanup_prompt(text_before, utterance_text, text_after)
         if backend == "ollama":
             payload_dict = {
                 "model": model,
@@ -1121,37 +1193,37 @@ def _run_ai_cleanup_result(
         perf.client_prep_ms = client_prep_ms
         _log_ai_cleanup_perf(perf, error)
         result = DictationAiCleanupResult(None, str(error), "error")
-        _log_ai_cleanup_result(result, preceding_text, utterance_text)
+        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
         return result
     _log_ai_cleanup_perf(perf)
     corrected_core = _strip_ai_cleanup_output_guards(corrected_raw)
     if corrected_core == "NOCHANGE":
         result = DictationAiCleanupResult(None, corrected_core, "nochange")
-        _log_ai_cleanup_result(result, preceding_text, utterance_text)
+        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
         return result
     if not corrected_core:
         result = DictationAiCleanupResult(None, corrected_core, "empty")
-        _log_ai_cleanup_result(result, preceding_text, utterance_text)
+        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
         return result
     if corrected_core == utterance_core:
         result = DictationAiCleanupResult(None, corrected_core, "identical")
-        _log_ai_cleanup_result(result, preceding_text, utterance_text)
+        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
         return result
     if not _is_safe_ai_cleanup_edit(utterance_core, corrected_core):
         result = DictationAiCleanupResult(None, corrected_core, "unsafe")
-        _log_ai_cleanup_result(result, preceding_text, utterance_text)
+        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
         return result
     corrected_leading = (
         "" if _starts_with_attached_punctuation(corrected_core) else leading_whitespace
     )
     corrected = f"{corrected_leading}{corrected_core}{trailing_whitespace}"
     result = DictationAiCleanupResult(corrected, corrected_core, "corrected")
-    _log_ai_cleanup_result(result, preceding_text, utterance_text)
+    _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
     return result
 
 
 def _apply_ai_cleanup_rewrite(
-    preceding_text: str,
+    text_before: str,
     insertions: list[tuple[str, str]],
     corrected_utterance_text: str,
     utterance_suffix: str,
@@ -1163,7 +1235,9 @@ def _apply_ai_cleanup_rewrite(
     else:
         actions.insert(corrected_utterance_text)
     actions.user.add_phrase_to_history(corrected_utterance_text, utterance_suffix)
-    dictation_formatter.update_context(preceding_text)
+    # DictationFormat is a left-to-right state machine; text_after informs the
+    # model but does not participate in formatter state restoration.
+    dictation_formatter.update_context(text_before)
     dictation_formatter.pass_through(corrected_utterance_text)
 
 
@@ -1265,7 +1339,10 @@ class Actions:
         original_text = text
         needs_check_after = False
         add_space_after = False
-        preceding_text = dictation_formatter.before
+        after: Optional[str] = None
+        # The formatter retains left context across insertions. There is no
+        # corresponding right-context cache, so text_after requires a right peek.
+        text_before = dictation_formatter.before
         if settings.get("user.context_sensitive_dictation"):
             global context_check_phrase_timestamp, phrase_timestamp
             if context_check_phrase_timestamp != phrase_timestamp:
@@ -1291,7 +1368,7 @@ class Actions:
                     after,
                 )
                 dictation_formatter.update_context(before)
-                preceding_text = dictation_formatter.before
+                text_before = dictation_formatter.before
                 add_space_after = (
                     after is not None and actions.user.needs_space_between(text, after)
                 )
@@ -1319,9 +1396,14 @@ class Actions:
             actions.user.insert_between("", " ")
         actions.user.add_phrase_to_history(text, " " if add_space_after else "")
         if phrase_timestamp is not None:
-            global utterance_preceding_text, utterance_had_dictation
+            global utterance_text_before, utterance_text_after
+            global utterance_had_dictation
             if not utterance_had_dictation:
-                utterance_preceding_text = preceding_text
+                utterance_text_before = text_before
+                separator = " " if add_space_after else ""
+                utterance_text_after = (
+                    f"{separator}{after}" if after is not None else ""
+                )
             utterance_had_dictation = True
             utterance_insertions.append((text, " " if add_space_after else ""))
 

@@ -1,5 +1,4 @@
 name: comma-common-multiple
 category: punctuation-name
-text_before: ""
 utterance: giraffe common elephant common lion
 expected: giraffe, elephant, lion

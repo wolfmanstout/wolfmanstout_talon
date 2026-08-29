@@ -1,6 +1,5 @@
 name: disabled-comma-discourse-no
 category: unspoken-comma
-text_before: ""
 utterance: No don't fix the stale comment, fix the code so that it aligns with that
   comment
 expected: No, don't fix the stale comment, fix the code so that it aligns with that

@@ -149,11 +149,21 @@ if hasattr(talon, "test_mode"):
                 assert ("expected" in task) != ("unchanged" in task), task_path
                 if "unchanged" in task:
                     assert task["unchanged"] is True, task_path
+                for context_key in ("text_before", "text_after"):
+                    if context_key in task:
+                        assert task[context_key] != "", task_path
                 # Opening delimiters attach directly to the following text on screen.
                 if task.get("text_before", "").rstrip().endswith(("(", "[", "{")):
                     assert not task["utterance"][:1].isspace(), task_path
                 elif task.get("text_before"):
                     assert task["utterance"][:1].isspace(), task_path
+                text_after = task.get("text_after", "")
+                if (
+                    text_after.lstrip()[:1].isalnum()
+                    and task["utterance"].rstrip()
+                    and not task["utterance"].rstrip().endswith(("(", "[", "{"))
+                ):
+                    assert text_after[:1].isspace(), task_path
                 # Word-starting corrections retain the utterance's on-screen separator.
                 expected = task.get("expected", "")
                 if task["utterance"][:1].isspace() and expected.lstrip()[:1].isalnum():
@@ -207,3 +217,28 @@ if hasattr(talon, "test_mode"):
 
         assert applicable
         assert not passed
+
+    def test_following_context_is_read_only_and_its_tags_cannot_leak():
+        task = {
+            "unchanged": True,
+            "text_after": " deployment starts tomorrow",
+        }
+        repeated_context = {
+            "utterance": "Their",
+            "effective_output": "Their",
+            "model_output": "Their deployment starts tomorrow",
+            "outcome": "unsafe",
+        }
+        tagged_output = {
+            **repeated_context,
+            "model_output": "<text_after> deployment starts tomorrow</text_after>",
+        }
+
+        applicable, context_passed, _ = checker.evaluate(
+            "context_not_output", task, repeated_context
+        )
+        _, tags_passed, _ = checker.evaluate("tags_absent", task, tagged_output)
+
+        assert applicable
+        assert not context_passed
+        assert not tags_passed
