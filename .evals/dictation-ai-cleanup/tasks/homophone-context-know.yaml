@@ -1,0 +1,5 @@
+name: homophone-context-know
+category: homophone
+text_before: Let me
+utterance: " no when it finishes"
+expected: " know when it finishes"

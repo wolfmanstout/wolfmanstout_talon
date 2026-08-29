@@ -2,4 +2,4 @@ name: disabled-comma-for-this-reason
 category: unspoken-comma
 text_before: have ideas).
 utterance: " So for this reason we should"
-expected: So for this reason, we should
+expected: " So for this reason, we should"

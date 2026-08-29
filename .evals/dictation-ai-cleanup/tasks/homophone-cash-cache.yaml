@@ -2,4 +2,4 @@ name: homophone-cash-cache
 category: homophone
 text_before: we should
 utterance: " invalidate the cash if scroll detection ever fails"
-expected: invalidate the cache if scroll detection ever fails
+expected: " invalidate the cache if scroll detection ever fails"

@@ -152,6 +152,12 @@ if hasattr(talon, "test_mode"):
                 # Opening delimiters attach directly to the following text on screen.
                 if task.get("text_before", "").rstrip().endswith(("(", "[", "{")):
                     assert not task["utterance"][:1].isspace(), task_path
+                elif task.get("text_before"):
+                    assert task["utterance"][:1].isspace(), task_path
+                # Word-starting corrections retain the utterance's on-screen separator.
+                expected = task.get("expected", "")
+                if task["utterance"][:1].isspace() and expected.lstrip()[:1].isalnum():
+                    assert expected[:1].isspace(), task_path
 
     def test_advisory_failure_does_not_block_grade(capsys):
         task = {"category": "homophone", "expected": "cache is warm"}
