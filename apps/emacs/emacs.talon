@@ -246,7 +246,7 @@ mark save: user.emacs("push-mark-no-activate")
 go mark: user.emacs("jump-to-mark")
 go mark switch: user.emacs("exchange-point-and-mark-no-activate")
 go change: user.emacs("goto-last-change")
-go symbol: user.emacs("ido-goto-symbol")
+go symbol: user.emacs("imenu")
 delete: user.emacs("delete-region")
 
 start: user.emacs("back-to-indentation")

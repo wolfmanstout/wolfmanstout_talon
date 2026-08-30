@@ -106,9 +106,9 @@ highlight-regexp, meta-s h r
 hl-line-mode,, hl-l-m
 html-mode
 ido-fallback-command, ctrl-f
-ido-goto-symbol
 ido-recentf-open, ctrl-x ctrl-r
 ido-reread-directory, ctrl-l
+imenu, meta-g i
 indent-region, meta-ctrl-\
 indent-rigidly, ctrl-x tab
 indent-sexp, meta-ctrl-q
