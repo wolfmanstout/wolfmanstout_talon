@@ -65,9 +65,6 @@ other go directory: user.emacs("dired-jump-other-window")
 [toggle] word wrap: user.emacs("toggle-word-wrap")
 
 manual: user.emacs("man")
-manual <user.text>:
-    user.emacs("man")
-    user.insert_formatted(text, "DASH_SEPARATED")
 
 # BUFFER SWITCHING #
 switch | buff open: user.emacs("switch-to-buffer")
