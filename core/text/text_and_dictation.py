@@ -1320,18 +1320,26 @@ class Actions:
         if settings.get("user.context_sensitive_dictation"):
             global context_check_phrase_timestamp, phrase_timestamp
             if context_check_phrase_timestamp != phrase_timestamp:
+                cleanup_enabled = settings.get("user.dictation_ai_cleanup")
                 # Peek left if we might need leading space or auto-capitalization;
-                # peek right if we might need trailing space. NB. We peek right
-                # BEFORE insertion to avoid breaking the undo-chain between the
-                # inserted text and the trailing space.
-                need_left = not actions.user.omit_space_before(text) or (
-                    auto_cap and text != auto_capitalize(text, "sentence start")[0]
+                # peek right if we might need trailing space. AI cleanup always
+                # receives both sides when available, regardless of formatting.
+                # NB. We normally peek right BEFORE insertion to avoid breaking
+                # the undo-chain between the inserted text and the trailing space.
+                need_left = (
+                    cleanup_enabled
+                    or not actions.user.omit_space_before(text)
+                    or (auto_cap and text != auto_capitalize(text, "sentence start")[0])
                 )
                 if settings.get("user.peek_right_after_insertion"):
                     need_right = False
-                    needs_check_after = not actions.user.omit_space_after(text)
+                    needs_check_after = (
+                        cleanup_enabled or not actions.user.omit_space_after(text)
+                    )
                 else:
-                    need_right = not actions.user.omit_space_after(text)
+                    need_right = cleanup_enabled or not actions.user.omit_space_after(
+                        text
+                    )
                 before, after = actions.user.dictation_peek(need_left, need_right)
                 log_dictation_debug(
                     logging.INFO,
