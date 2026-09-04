@@ -198,6 +198,7 @@ if hasattr(talon, "test_mode"):
         peeks = []
         setting_values = {
             "user.context_sensitive_dictation": True,
+            "user.dictation_ai_cleanup": False,
             "user.dictation_debug_mode": False,
             "user.peek_right_after_insertion": False,
         }
@@ -231,6 +232,7 @@ if hasattr(talon, "test_mode"):
         peeks = []
         setting_values = {
             "user.context_sensitive_dictation": True,
+            "user.dictation_ai_cleanup": False,
             "user.dictation_debug_mode": False,
             "user.peek_right_after_insertion": True,
         }
@@ -258,6 +260,110 @@ if hasattr(talon, "test_mode"):
             talon.actions.reset_test_actions()
 
         assert peeks == [(True, False), (False, True)]
+        assert text_and_dictation.utterance_text_after == " after"
+
+    def test_ai_cleanup_peeks_both_sides_for_punctuation(monkeypatch):
+        peeks = []
+        setting_values = {
+            "user.context_sensitive_dictation": True,
+            "user.dictation_ai_cleanup": True,
+            "user.dictation_debug_mode": False,
+            "user.peek_right_after_insertion": False,
+        }
+        monkeypatch.setattr(
+            text_and_dictation.settings, "get", setting_values.__getitem__
+        )
+        talon.actions.register_test_action(
+            "user",
+            "dictation_peek",
+            lambda left, right: peeks.append((left, right)) or ("Before", "after"),
+        )
+        talon.actions.register_test_action(
+            "user", "add_phrase_to_history", lambda *args: None
+        )
+        talon.actions.register_test_action("user", "insert_between", lambda *args: None)
+        text_and_dictation.dictation_formatter.reset()
+        text_and_dictation.context_check_phrase_timestamp = None
+        text_and_dictation.on_pre_phrase(None)
+
+        try:
+            text_and_dictation.Actions.dictation_insert(".")
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert peeks == [(True, True)]
+        assert text_and_dictation.utterance_text_before == "Before"
+        assert text_and_dictation.utterance_text_after == " after"
+
+    def test_ai_cleanup_reuses_boundary_context_for_multiple_insertions(monkeypatch):
+        peeks = []
+        setting_values = {
+            "user.context_sensitive_dictation": True,
+            "user.dictation_ai_cleanup": True,
+            "user.dictation_debug_mode": False,
+            "user.peek_right_after_insertion": False,
+        }
+        monkeypatch.setattr(
+            text_and_dictation.settings, "get", setting_values.__getitem__
+        )
+        talon.actions.register_test_action(
+            "user",
+            "dictation_peek",
+            lambda left, right: peeks.append((left, right)) or ("Before", "after"),
+        )
+        talon.actions.register_test_action(
+            "user", "add_phrase_to_history", lambda *args: None
+        )
+        talon.actions.register_test_action("user", "insert_between", lambda *args: None)
+        text_and_dictation.dictation_formatter.reset()
+        text_and_dictation.context_check_phrase_timestamp = None
+        text_and_dictation.on_pre_phrase(None)
+
+        try:
+            text_and_dictation.Actions.dictation_insert("first")
+            text_and_dictation.Actions.dictation_insert("second")
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert peeks == [(True, True)]
+        assert text_and_dictation.utterance_text_before == "Before"
+        assert text_and_dictation.utterance_text_after == " after"
+
+    def test_ai_cleanup_gets_right_context_after_insertion_when_configured(
+        monkeypatch,
+    ):
+        peeks = []
+        setting_values = {
+            "user.context_sensitive_dictation": True,
+            "user.dictation_ai_cleanup": True,
+            "user.dictation_debug_mode": False,
+            "user.peek_right_after_insertion": True,
+        }
+        monkeypatch.setattr(
+            text_and_dictation.settings, "get", setting_values.__getitem__
+        )
+        monkeypatch.setattr(text_and_dictation.time, "sleep", lambda *args: None)
+
+        def peek(left, right):
+            peeks.append((left, right))
+            return ("Before", None) if left else (None, "after")
+
+        talon.actions.register_test_action("user", "dictation_peek", peek)
+        talon.actions.register_test_action(
+            "user", "add_phrase_to_history", lambda *args: None
+        )
+        talon.actions.register_test_action("user", "insert_between", lambda *args: None)
+        text_and_dictation.dictation_formatter.reset()
+        text_and_dictation.context_check_phrase_timestamp = None
+        text_and_dictation.on_pre_phrase(None)
+
+        try:
+            text_and_dictation.Actions.dictation_insert(".")
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert peeks == [(True, False), (False, True)]
+        assert text_and_dictation.utterance_text_before == "Before"
         assert text_and_dictation.utterance_text_after == " after"
 
     def test_prose_number_with_suffixes():
