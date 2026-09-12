@@ -66,7 +66,7 @@ currency_symbols = [
 
 symbols = [
     Symbol("`", None, ["back tick", "grave"]),
-    Symbol(",", ["comma", "coma", "come a", "kama"]),
+    Symbol(",", ["comma", "coma", "come a", "kama", "trauma"]),
     Symbol(".", ["period", "buried"], ["dot", "point"]),
     Symbol(";", ["semicolon", "semi colon", "semi corn", "semi cohen"], ["semi"]),
     Symbol(":", ["colon", "corn", "cohen"]),
