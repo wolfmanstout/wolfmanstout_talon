@@ -8,7 +8,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(REPO_ROOT / "test" / "stubs"), str(REPO_ROOT)]
 
-from core.text.text_and_dictation import (  # noqa: E402
+from core.text.dictation_ai_cleanup import (  # noqa: E402
     _cleanup_prompt,
     _current_sentence_text_after,
     _current_sentence_text_before,
@@ -54,7 +54,7 @@ def main() -> int:
         utterance,
         _current_sentence_text_after(text_after),
     )
-    source = REPO_ROOT / "core" / "text" / "text_and_dictation.py"
+    source = REPO_ROOT / "core" / "text" / "dictation_ai_cleanup.py"
     artifact["harness_sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
     (run_dir / "result.json").write_text(json.dumps(artifact, indent=2) + "\n")
     (run_dir / "prompt.txt").write_text(prompt)
