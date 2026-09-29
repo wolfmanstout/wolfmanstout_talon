@@ -143,7 +143,6 @@ if hasattr(talon, "test_mode"):
         text_and_dictation.utterance_insertions = [(" dictated text", "")]
         text_and_dictation.utterance_text_before = "Earlier text"
         text_and_dictation.utterance_text_after = " after text"
-        text_and_dictation.utterance_had_dictation = True
 
         try:
             text_and_dictation.on_post_phrase(None)
@@ -182,7 +181,6 @@ if hasattr(talon, "test_mode"):
         text_and_dictation.utterance_insertions = [(" dictated text", "")]
         text_and_dictation.utterance_text_before = "Earlier text"
         text_and_dictation.utterance_text_after = ""
-        text_and_dictation.utterance_had_dictation = True
 
         try:
             with pytest.raises(RuntimeError, match="cleanup failed"):
@@ -248,7 +246,6 @@ if hasattr(talon, "test_mode"):
         ]
         text_and_dictation.utterance_text_before = "Before"
         text_and_dictation.utterance_text_after = " after"
-        text_and_dictation.utterance_had_dictation = True
         try:
             text_and_dictation.on_post_phrase(None)
         finally:

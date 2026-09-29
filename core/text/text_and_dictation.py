@@ -504,37 +504,28 @@ context_check_phrase_timestamp = None
 utterance_insertions: list[tuple[str, str]] = []
 utterance_text_before = ""
 utterance_text_after = ""
-utterance_had_dictation = False
 
 
 def on_pre_phrase(d):
     global phrase_timestamp
     global utterance_insertions, utterance_text_before, utterance_text_after
-    global utterance_had_dictation
     phrase_timestamp = time.time()
     utterance_insertions = []
     utterance_text_before = ""
     utterance_text_after = ""
-    utterance_had_dictation = False
 
 
 def on_post_phrase(d):
     global phrase_timestamp, utterance_insertions, utterance_text_before
-    global utterance_text_after, utterance_had_dictation
+    global utterance_text_after
     insertions = utterance_insertions
     text_before = utterance_text_before
     text_after = utterance_text_after
-    had_dictation = utterance_had_dictation
     phrase_timestamp = None
     utterance_insertions = []
     utterance_text_before = ""
     utterance_text_after = ""
-    utterance_had_dictation = False
-    if (
-        not had_dictation
-        or not insertions
-        or not settings.get("user.dictation_ai_cleanup")
-    ):
+    if not insertions or not settings.get("user.dictation_ai_cleanup"):
         return
     utterance_text = "".join(inserted_text for inserted_text, _ in insertions)
     utterance_suffix = "".join(suffix for _, suffix in reversed(insertions))
@@ -712,14 +703,12 @@ class Actions:
         actions.user.add_phrase_to_history(text, " " if add_space_after else "")
         if phrase_timestamp is not None:
             global utterance_text_before, utterance_text_after
-            global utterance_had_dictation
-            if not utterance_had_dictation:
+            if not utterance_insertions:
                 utterance_text_before = text_before
                 separator = " " if add_space_after else ""
                 utterance_text_after = (
                     f"{separator}{after}" if after is not None else ""
                 )
-            utterance_had_dictation = True
             utterance_insertions.append((text, " " if add_space_after else ""))
 
     def dictation_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
