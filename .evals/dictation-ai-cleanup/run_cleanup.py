@@ -18,11 +18,12 @@ from core.text.dictation_ai_cleanup import (  # noqa: E402
 
 def main() -> int:
     backend = os.getenv("DICTATION_AI_CLEANUP_BACKEND", "mlx")
-    default_url = (
-        "http://127.0.0.1:11434/api/generate"
-        if backend == "ollama"
-        else "http://127.0.0.1:8080/chat/completions"
-    )
+    if backend == "ollama":
+        default_url = "http://127.0.0.1:11434/api/generate"
+    elif backend == "mlx":
+        default_url = "http://127.0.0.1:8080/chat/completions"
+    else:
+        raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
     text_before = os.environ.get("SMEVALS_TASK_TEXT_BEFORE", "")
     utterance = os.environ["SMEVALS_TASK_UTTERANCE"]
     text_after = os.environ.get("SMEVALS_TASK_TEXT_AFTER", "")

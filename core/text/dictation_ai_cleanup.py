@@ -544,13 +544,15 @@ def _run_ai_cleanup_result(
                 "think": False,
                 "options": {"temperature": 0.0},
             }
-        else:
+        elif backend == "mlx":
             payload_dict = {
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
                 "stream": False,
                 "temperature": 0.0,
             }
+        else:
+            raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
         payload = json.dumps(payload_dict).encode("utf-8")
         server_call_started = time.perf_counter()
         response = requests.post(
@@ -576,10 +578,12 @@ def _run_ai_cleanup_result(
             corrected_raw, perf = _extract_ollama_response_and_perf(
                 response_body, wall_ms
             )
-        else:
+        elif backend == "mlx":
             corrected_raw, perf = _extract_mlx_vlm_response_and_perf(
                 response_body, wall_ms
             )
+        else:
+            raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
         perf.server_call_ms = server_call_ms
         perf.client_prep_ms = client_prep_ms
     except (
@@ -659,9 +663,11 @@ class Actions:
         if backend == "ollama":
             resolved_port = port if port > 0 else 11434
             url = f"http://127.0.0.1:{resolved_port}/api/generate"
-        else:
+        elif backend == "mlx":
             resolved_port = port if port > 0 else 8080
             url = f"http://127.0.0.1:{resolved_port}/chat/completions"
+        else:
+            raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
         timeout = settings.get("user.dictation_ai_cleanup_timeout_s")
         actions.user.dictation_mode_set_processing(True)
         try:
