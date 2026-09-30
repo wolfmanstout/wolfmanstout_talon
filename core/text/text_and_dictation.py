@@ -504,28 +504,34 @@ context_check_phrase_timestamp = None
 utterance_insertions: list[tuple[str, str]] = []
 utterance_text_before = ""
 utterance_text_after = ""
+# Retyping a cleaned-up utterance would drop rich text formatting and links.
+utterance_has_rich_text = False
 
 
 def on_pre_phrase(d):
     global phrase_timestamp
     global utterance_insertions, utterance_text_before, utterance_text_after
+    global utterance_has_rich_text
     phrase_timestamp = time.time()
     utterance_insertions = []
     utterance_text_before = ""
     utterance_text_after = ""
+    utterance_has_rich_text = False
 
 
 def on_post_phrase(d):
     global phrase_timestamp, utterance_insertions, utterance_text_before
-    global utterance_text_after
+    global utterance_text_after, utterance_has_rich_text
     insertions = utterance_insertions
     text_before = utterance_text_before
     text_after = utterance_text_after
+    has_rich_text = utterance_has_rich_text
     phrase_timestamp = None
     utterance_insertions = []
     utterance_text_before = ""
     utterance_text_after = ""
-    if not insertions or not settings.get("user.dictation_ai_cleanup"):
+    utterance_has_rich_text = False
+    if not insertions or has_rich_text or not settings.get("user.dictation_ai_cleanup"):
         return
     utterance_text = "".join(inserted_text for inserted_text, _ in insertions)
     utterance_suffix = "".join(suffix for _, suffix in reversed(insertions))
@@ -609,6 +615,9 @@ class Actions:
     def dictation_insert_rich_text(text: str, formats: list[str]):
         """Inserts dictated text, then applies rich text formats to it."""
         actions.user.dictation_insert(text)
+        if phrase_timestamp is not None:
+            global utterance_has_rich_text
+            utterance_has_rich_text = True
         actions.user.select_last_phrase(skip_whitespace=True)
         text_toggles = []
         for format in formats:

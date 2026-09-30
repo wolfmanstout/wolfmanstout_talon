@@ -450,6 +450,11 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
     removed_punctuation = original_punctuation - corrected_punctuation
     if removed_punctuation - allowed_removed_punctuation:
         return False
+    # Only spoken marks, unspoken hyphens, and homophone apostrophes may be
+    # added. This rejects, for example, an unspoken sentence-final period.
+    added_punctuation = corrected_punctuation - original_punctuation
+    if any(mark not in ",;:!?-'" for mark in added_punctuation):
+        return False
 
     # Every deleted phrase must be accounted for by newly added punctuation.
     added_marks = {
@@ -561,6 +566,7 @@ def _run_ai_cleanup_result(
             headers={"Content-Type": "application/json"},
             timeout=timeout_seconds,
         )
+        response.raise_for_status()
         response_body = response.content
         response_received = time.perf_counter()
         wall_ms = (response_received - request_started) * 1000.0
@@ -590,7 +596,11 @@ def _run_ai_cleanup_result(
         requests.exceptions.RequestException,
         urllib.error.URLError,
         TimeoutError,
-        json.JSONDecodeError,
+        # Includes JSONDecodeError; the others cover unexpected response shapes.
+        ValueError,
+        KeyError,
+        IndexError,
+        TypeError,
     ) as error:
         failed_at = time.perf_counter()
         wall_ms = (failed_at - request_started) * 1000.0
@@ -608,7 +618,9 @@ def _run_ai_cleanup_result(
         perf.server_call_ms = server_call_ms
         perf.client_prep_ms = client_prep_ms
         _log_ai_cleanup_perf(perf, error)
-        result = DictationAiCleanupResult(None, str(error), "error")
+        error_message = f"{type(error).__name__}: {error}"
+        logging.warning("Dictation AI cleanup failed: %s", error_message)
+        result = DictationAiCleanupResult(None, error_message, "error")
         _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
         return result
     _log_ai_cleanup_perf(perf)
