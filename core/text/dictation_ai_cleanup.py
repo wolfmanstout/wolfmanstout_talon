@@ -597,7 +597,7 @@ def _request_ai_cleanup(
             perf, request_started, server_call_started, time.perf_counter()
         )
         _log_ai_cleanup_perf(perf, error)
-        error_message = f"{type(error).__name__}: {error}"
+        error_message = repr(error)
         logging.warning("Dictation AI cleanup failed: %s", error_message)
         return DictationAiCleanupResult(None, error_message, "error")
     _log_ai_cleanup_perf(perf)
