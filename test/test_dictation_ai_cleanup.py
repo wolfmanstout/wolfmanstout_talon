@@ -259,6 +259,9 @@ if hasattr(talon, "test_mode"):
         request = {}
 
         class Response:
+            def raise_for_status(self):
+                pass
+
             content = json.dumps(
                 {
                     "choices": [{"message": {"content": " -known issue"}}],
@@ -305,6 +308,9 @@ if hasattr(talon, "test_mode"):
         calls = []
 
         class Response:
+            def raise_for_status(self):
+                pass
+
             content = json.dumps(
                 {
                     "choices": [{"message": {"content": "NOCHANGE"}}],
@@ -386,6 +392,10 @@ if hasattr(talon, "test_mode"):
         assert not is_safe("Plan a head:", "Plan ahead")
         assert not is_safe("cached and uncached)", "cached and uncached")
         assert not is_safe("keep this, exactly", "keep this exactly")
+        assert is_safe("Their going to deploy it", "They're going to deploy it")
+        assert not is_safe("hello world", "hello world.")
+        assert not is_safe("I said hello", 'I said "hello"')
+        assert not is_safe("red comment blue", "red, blue.")
 
     def test_run_ai_cleanup_handles_requests_failure(monkeypatch):
         def raise_timeout(*args, **kwargs):
@@ -406,10 +416,60 @@ if hasattr(talon, "test_mode"):
             is None
         )
 
+    @pytest.mark.parametrize(
+        "status_error, body",
+        [
+            (
+                dictation_ai_cleanup.requests.exceptions.HTTPError("404 Not Found"),
+                {"error": "model not found"},
+            ),
+            (None, {"error": "model not found"}),
+            (None, {"usage": {}, "choices": []}),
+        ],
+    )
+    def test_run_ai_cleanup_reports_bad_responses_as_errors(
+        monkeypatch, status_error, body
+    ):
+        warnings = []
+
+        class Response:
+            content = json.dumps(body).encode("utf-8")
+
+            def raise_for_status(self):
+                if status_error is not None:
+                    raise status_error
+
+        monkeypatch.setattr(
+            dictation_ai_cleanup.requests, "post", lambda *args, **kwargs: Response()
+        )
+        monkeypatch.setattr(
+            dictation_ai_cleanup.logging,
+            "warning",
+            lambda message, *args: warnings.append(message % args),
+        )
+
+        result = dictation_ai_cleanup._run_ai_cleanup_result(
+            "",
+            "apples comment oranges",
+            "",
+            "model",
+            "http://127.0.0.1:8080/chat/completions",
+            1,
+            "mlx",
+        )
+
+        assert result.outcome == "error"
+        assert result.corrected_text is None
+        assert len(warnings) == 1
+        assert warnings[0].startswith("Dictation AI cleanup failed: ")
+
     def test_run_ai_cleanup_sets_ollama_temperature_to_zero(monkeypatch):
         request = {}
 
         class Response:
+            def raise_for_status(self):
+                pass
+
             content = json.dumps(
                 {
                     "response": "apples, oranges",

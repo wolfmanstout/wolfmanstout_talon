@@ -269,6 +269,44 @@ if hasattr(talon, "test_mode"):
         assert text_and_dictation.utterance_insertions == []
         assert text_and_dictation.phrase_timestamp is None
 
+    def test_ai_cleanup_skips_utterance_with_rich_text(monkeypatch):
+        setting_values = {
+            "user.context_sensitive_dictation": False,
+            "user.dictation_ai_cleanup": True,
+        }
+        monkeypatch.setattr(
+            text_and_dictation.settings, "get", setting_values.__getitem__
+        )
+        cleanup_calls = []
+        for namespace, name in [
+            ("user", "add_phrase_to_history"),
+            ("user", "select_last_phrase"),
+            ("user", "bold"),
+            ("user", "dictation_ai_cleanup_rewrite"),
+            ("edit", "right"),
+            ("", "insert"),
+        ]:
+            talon.actions.register_test_action(
+                namespace,
+                name,
+                lambda *args, name=name, **kwargs: (
+                    cleanup_calls.append(args)
+                    if name == "dictation_ai_cleanup_rewrite"
+                    else None
+                ),
+            )
+        text_and_dictation.dictation_formatter.reset()
+        text_and_dictation.on_pre_phrase(None)
+        try:
+            text_and_dictation.Actions.dictation_insert("plain comment text")
+            text_and_dictation.Actions.dictation_insert_rich_text("bold", ["bold"])
+            text_and_dictation.on_post_phrase(None)
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert cleanup_calls == []
+        assert text_and_dictation.utterance_has_rich_text is False
+
     def test_dictation_insert_reuses_spacing_peek_for_text_after(monkeypatch):
         peeks = []
         setting_values = {
