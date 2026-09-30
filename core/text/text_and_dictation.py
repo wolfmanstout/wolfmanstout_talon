@@ -508,29 +508,29 @@ utterance_text_after = ""
 utterance_has_rich_text = False
 
 
-def on_pre_phrase(d):
-    global phrase_timestamp
+def reset_utterance_state():
     global utterance_insertions, utterance_text_before, utterance_text_after
     global utterance_has_rich_text
-    phrase_timestamp = time.time()
     utterance_insertions = []
     utterance_text_before = ""
     utterance_text_after = ""
     utterance_has_rich_text = False
 
 
+def on_pre_phrase(d):
+    global phrase_timestamp
+    phrase_timestamp = time.time()
+    reset_utterance_state()
+
+
 def on_post_phrase(d):
-    global phrase_timestamp, utterance_insertions, utterance_text_before
-    global utterance_text_after, utterance_has_rich_text
+    global phrase_timestamp
     insertions = utterance_insertions
     text_before = utterance_text_before
     text_after = utterance_text_after
     has_rich_text = utterance_has_rich_text
     phrase_timestamp = None
-    utterance_insertions = []
-    utterance_text_before = ""
-    utterance_text_after = ""
-    utterance_has_rich_text = False
+    reset_utterance_state()
     if not insertions or has_rich_text or not settings.get("user.dictation_ai_cleanup"):
         return
     utterance_text = "".join(inserted_text for inserted_text, _ in insertions)
@@ -707,18 +707,18 @@ class Actions:
                 after,
                 add_space_after,
             )
-        if add_space_after:
-            actions.user.insert_between("", " ")
-        actions.user.add_phrase_to_history(text, " " if add_space_after else "")
+        space_after = " " if add_space_after else ""
+        if space_after:
+            actions.user.insert_between("", space_after)
+        actions.user.add_phrase_to_history(text, space_after)
         if phrase_timestamp is not None:
             global utterance_text_before, utterance_text_after
             if not utterance_insertions:
                 utterance_text_before = text_before
-                separator = " " if add_space_after else ""
                 utterance_text_after = (
-                    f"{separator}{after}" if after is not None else ""
+                    f"{space_after}{after}" if after is not None else ""
                 )
-            utterance_insertions.append((text, " " if add_space_after else ""))
+            utterance_insertions.append((text, space_after))
 
     def dictation_peek(left: bool, right: bool) -> tuple[Optional[str], Optional[str]]:
         """

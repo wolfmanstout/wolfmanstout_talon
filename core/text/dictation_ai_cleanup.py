@@ -202,17 +202,11 @@ def _strip_ai_cleanup_output_guards(response: str) -> str:
     return response
 
 
-def _make_ai_cleanup_perf(
-    backend: DictationAiCleanupBackend, wall_ms: float
-) -> DictationAiCleanupPerf:
-    return DictationAiCleanupPerf(backend=backend, wall_ms=wall_ms)
-
-
 def _extract_ollama_response_and_perf(
     body: bytes, wall_ms: float = 0.0
 ) -> tuple[str, DictationAiCleanupPerf]:
     data = json.loads(body.decode("utf-8"))
-    perf = _make_ai_cleanup_perf("ollama", wall_ms)
+    perf = DictationAiCleanupPerf(backend="ollama", wall_ms=wall_ms)
     perf.prompt_tokens = data["prompt_eval_count"]
     perf.completion_tokens = data["eval_count"]
     perf.prefill_ms = data["prompt_eval_duration"] / 1_000_000.0
@@ -227,7 +221,7 @@ def _extract_mlx_vlm_response_and_perf(
     body: bytes, wall_ms: float = 0.0
 ) -> tuple[str, DictationAiCleanupPerf]:
     data = json.loads(body.decode("utf-8"))
-    perf = _make_ai_cleanup_perf("mlx", wall_ms)
+    perf = DictationAiCleanupPerf(backend="mlx", wall_ms=wall_ms)
     usage = data["usage"]
     timings = data.get("timings", {})
     perf.prompt_tokens = usage.get("input_tokens", usage.get("prompt_tokens"))
@@ -251,18 +245,14 @@ def _extract_mlx_vlm_response_and_perf(
         perf.decode_ms = timings["predicted_ms"]
     elif perf.completion_tokens is not None and perf.decode_tps:
         perf.decode_ms = (perf.completion_tokens / perf.decode_tps) * 1000.0
-    choices = data["choices"]
-    first_choice = choices[0]
-    message = first_choice["message"]
-    content = message["content"]
+    content = data["choices"][0]["message"]["content"]
     if isinstance(content, str):
         return _normalize_ai_cleanup_response(content), perf
     if isinstance(content, list):
-        text_parts = []
-        for item in content:
-            if item["type"] in {"text", "output_text"}:
-                text_parts.append(item["text"])
-        return _normalize_ai_cleanup_response("".join(text_parts)), perf
+        text = "".join(
+            item["text"] for item in content if item["type"] in {"text", "output_text"}
+        )
+        return _normalize_ai_cleanup_response(text), perf
     return "", perf
 
 
@@ -310,6 +300,14 @@ def _is_dictation_ai_cleanup_backend(
     value: object,
 ) -> TypeGuard[DictationAiCleanupBackend]:
     return value in {"ollama", "mlx"}
+
+
+def _ai_cleanup_url(backend: str, port: int = 0) -> str:
+    if backend == "ollama":
+        return f"http://127.0.0.1:{port if port > 0 else 11434}/api/generate"
+    if backend == "mlx":
+        return f"http://127.0.0.1:{port if port > 0 else 8080}/chat/completions"
+    raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
 
 
 def _current_sentence_text_before(text: str) -> str:
@@ -456,46 +454,35 @@ def _is_safe_ai_cleanup_edit(original: str, corrected: str) -> bool:
     if any(mark not in ",;:!?-'" for mark in added_punctuation):
         return False
 
-    # Every deleted phrase must be accounted for by newly added punctuation.
-    added_marks = {
-        mark: max(0, corrected.count(mark) - original.count(mark)) for mark in ",;:!?-"
-    }
     # Multiple independent lexical edits are too broad to accept automatically.
     if lexical_edit_spans > 1:
         return False
-    if deletion_spans > sum(added_marks.values()):
+    # Every deleted phrase must be accounted for by newly added punctuation.
+    spoken_mark_count = sum(added_punctuation[mark] for mark in ",;:!?")
+    if deletion_spans > spoken_mark_count + added_punctuation["-"]:
         return False
     # A complete question-mark or exclamation-mark name requires two spoken
     # words. This prevents a literal `question` or `exclamation` from becoming
     # punctuation while still allowing phonetic variants of the complete name.
     required_deleted_words = (
-        sum(count for mark, count in added_marks.items() if mark != "-")
-        + added_marks["?"]
-        + added_marks["!"]
+        spoken_mark_count + added_punctuation["?"] + added_punctuation["!"]
     )
     if deleted_word_count < required_deleted_words:
         return False
     # Hyphens may be unspoken. Every other new mark must consume a spoken name.
-    return (
-        sum(count for mark, count in added_marks.items() if mark != "-")
-        <= deletion_spans
-    )
+    return spoken_mark_count <= deletion_spans
 
 
-def _log_ai_cleanup_result(
-    result: DictationAiCleanupResult,
-    text_before: str,
-    utterance_text: str,
-    text_after: str,
+def _record_ai_cleanup_timing(
+    perf: DictationAiCleanupPerf,
+    request_started: float,
+    server_call_started: Optional[float],
+    finished: float,
 ) -> None:
-    logging.debug(
-        "Dictation AI cleanup: outcome=%s text_before=%r utterance=%r text_after=%r output=%r",
-        result.outcome,
-        text_before,
-        utterance_text,
-        text_after,
-        result.model_output,
-    )
+    perf.wall_ms = (finished - request_started) * 1000.0
+    if server_call_started is not None:
+        perf.server_call_ms = (finished - server_call_started) * 1000.0
+        perf.client_prep_ms = (server_call_started - request_started) * 1000.0
 
 
 def _run_ai_cleanup(
@@ -530,13 +517,34 @@ def _run_ai_cleanup_result(
 ) -> DictationAiCleanupResult:
     text_before = _current_sentence_text_before(text_before)
     text_after = _current_sentence_text_after(text_after)
+    result = _request_ai_cleanup(
+        text_before, utterance_text, text_after, model, url, timeout_seconds, backend
+    )
+    logging.debug(
+        "Dictation AI cleanup: outcome=%s text_before=%r utterance=%r text_after=%r output=%r",
+        result.outcome,
+        text_before,
+        utterance_text,
+        text_after,
+        result.model_output,
+    )
+    return result
+
+
+def _request_ai_cleanup(
+    text_before: str,
+    utterance_text: str,
+    text_after: str,
+    model: str,
+    url: str,
+    timeout_seconds: int,
+    backend: DictationAiCleanupBackend,
+) -> DictationAiCleanupResult:
     leading_whitespace, utterance_core, trailing_whitespace = _split_outer_whitespace(
         utterance_text
     )
     if not utterance_core:
-        result = DictationAiCleanupResult(None, None, "empty")
-        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
-        return result
+        return DictationAiCleanupResult(None, None, "empty")
     request_started = time.perf_counter()
     server_call_started: Optional[float] = None
     try:
@@ -549,15 +557,13 @@ def _run_ai_cleanup_result(
                 "think": False,
                 "options": {"temperature": 0.0},
             }
-        elif backend == "mlx":
+        else:
             payload_dict = {
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
                 "stream": False,
                 "temperature": 0.0,
             }
-        else:
-            raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
         payload = json.dumps(payload_dict).encode("utf-8")
         server_call_started = time.perf_counter()
         response = requests.post(
@@ -569,29 +575,13 @@ def _run_ai_cleanup_result(
         response.raise_for_status()
         response_body = response.content
         response_received = time.perf_counter()
-        wall_ms = (response_received - request_started) * 1000.0
-        server_call_ms = (
-            (response_received - server_call_started) * 1000.0
-            if server_call_started is not None
-            else None
-        )
-        client_prep_ms = (
-            (server_call_started - request_started) * 1000.0
-            if server_call_started is not None
-            else None
-        )
         if backend == "ollama":
-            corrected_raw, perf = _extract_ollama_response_and_perf(
-                response_body, wall_ms
-            )
-        elif backend == "mlx":
-            corrected_raw, perf = _extract_mlx_vlm_response_and_perf(
-                response_body, wall_ms
-            )
+            corrected_raw, perf = _extract_ollama_response_and_perf(response_body)
         else:
-            raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
-        perf.server_call_ms = server_call_ms
-        perf.client_prep_ms = client_prep_ms
+            corrected_raw, perf = _extract_mlx_vlm_response_and_perf(response_body)
+        _record_ai_cleanup_timing(
+            perf, request_started, server_call_started, response_received
+        )
     except (
         requests.exceptions.RequestException,
         urllib.error.URLError,
@@ -602,52 +592,29 @@ def _run_ai_cleanup_result(
         IndexError,
         TypeError,
     ) as error:
-        failed_at = time.perf_counter()
-        wall_ms = (failed_at - request_started) * 1000.0
-        server_call_ms = (
-            (failed_at - server_call_started) * 1000.0
-            if server_call_started is not None
-            else None
+        perf = DictationAiCleanupPerf(backend=backend, wall_ms=0.0)
+        _record_ai_cleanup_timing(
+            perf, request_started, server_call_started, time.perf_counter()
         )
-        client_prep_ms = (
-            (server_call_started - request_started) * 1000.0
-            if server_call_started is not None
-            else None
-        )
-        perf = _make_ai_cleanup_perf(backend, wall_ms)
-        perf.server_call_ms = server_call_ms
-        perf.client_prep_ms = client_prep_ms
         _log_ai_cleanup_perf(perf, error)
         error_message = f"{type(error).__name__}: {error}"
         logging.warning("Dictation AI cleanup failed: %s", error_message)
-        result = DictationAiCleanupResult(None, error_message, "error")
-        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
-        return result
+        return DictationAiCleanupResult(None, error_message, "error")
     _log_ai_cleanup_perf(perf)
     corrected_core = _strip_ai_cleanup_output_guards(corrected_raw)
     if corrected_core == "NOCHANGE":
-        result = DictationAiCleanupResult(None, corrected_core, "nochange")
-        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
-        return result
+        return DictationAiCleanupResult(None, corrected_core, "nochange")
     if not corrected_core:
-        result = DictationAiCleanupResult(None, corrected_core, "empty")
-        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
-        return result
+        return DictationAiCleanupResult(None, corrected_core, "empty")
     if corrected_core == utterance_core:
-        result = DictationAiCleanupResult(None, corrected_core, "identical")
-        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
-        return result
+        return DictationAiCleanupResult(None, corrected_core, "identical")
     if not _is_safe_ai_cleanup_edit(utterance_core, corrected_core):
-        result = DictationAiCleanupResult(None, corrected_core, "unsafe")
-        _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
-        return result
+        return DictationAiCleanupResult(None, corrected_core, "unsafe")
     corrected_leading = (
         "" if _starts_with_attached_punctuation(corrected_core) else leading_whitespace
     )
     corrected = f"{corrected_leading}{corrected_core}{trailing_whitespace}"
-    result = DictationAiCleanupResult(corrected, corrected_core, "corrected")
-    _log_ai_cleanup_result(result, text_before, utterance_text, text_after)
-    return result
+    return DictationAiCleanupResult(corrected, corrected_core, "corrected")
 
 
 @mod.action_class
@@ -671,15 +638,7 @@ class Actions:
             )
             return
         model = settings.get("user.dictation_ai_cleanup_model")
-        port = settings.get("user.dictation_ai_cleanup_port")
-        if backend == "ollama":
-            resolved_port = port if port > 0 else 11434
-            url = f"http://127.0.0.1:{resolved_port}/api/generate"
-        elif backend == "mlx":
-            resolved_port = port if port > 0 else 8080
-            url = f"http://127.0.0.1:{resolved_port}/chat/completions"
-        else:
-            raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
+        url = _ai_cleanup_url(backend, settings.get("user.dictation_ai_cleanup_port"))
         timeout = settings.get("user.dictation_ai_cleanup_timeout_s")
         actions.user.dictation_mode_set_processing(True)
         try:
