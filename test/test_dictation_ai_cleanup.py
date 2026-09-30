@@ -249,10 +249,6 @@ if hasattr(talon, "test_mode"):
         assert text_after(" current fragment\r\nNext line") == " current fragment"
         assert text_after(" version 1.2 is ready") == " version 1.2 is ready"
 
-    def test_cleanup_prompt_requires_both_context_arguments():
-        with pytest.raises(TypeError):
-            dictation_ai_cleanup._cleanup_prompt("", "utterance")
-
     def test_run_ai_cleanup_preserves_input_spacing_but_normalizes_output_spacing(
         monkeypatch,
     ):

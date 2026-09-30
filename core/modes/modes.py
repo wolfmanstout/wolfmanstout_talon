@@ -43,17 +43,6 @@ def _create_dictation_mode_region(color: str):
     return region
 
 
-def _publish_dictation_cursor(processing: bool):
-    color = (
-        DICTATION_CURSOR_PROCESSING_COLOR
-        if processing
-        else DICTATION_CURSOR_READY_COLOR
-    )
-    actions.user.hud_publish_screen_regions(
-        "cursor", [_create_dictation_mode_region(color)], True
-    )
-
-
 @ctx_sleep.action_class("speech")
 class ActionsSleepMode:
     def disable():
@@ -92,7 +81,14 @@ class Actions:
 
     def dictation_mode_set_processing(processing: bool):
         """Changes the dictation cursor indicator while an utterance is processed."""
-        _publish_dictation_cursor(processing)
+        color = (
+            DICTATION_CURSOR_PROCESSING_COLOR
+            if processing
+            else DICTATION_CURSOR_READY_COLOR
+        )
+        actions.user.hud_publish_screen_regions(
+            "cursor", [_create_dictation_mode_region(color)], True
+        )
 
     def talon_mode():
         """For windows and Mac with Dragon, enables Talon commands and Dragon's command mode."""

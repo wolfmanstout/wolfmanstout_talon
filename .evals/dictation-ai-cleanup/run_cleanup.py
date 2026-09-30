@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(REPO_ROOT / "test" / "stubs"), str(REPO_ROOT)]
 
 from core.text.dictation_ai_cleanup import (  # noqa: E402
+    _ai_cleanup_url,
     _cleanup_prompt,
     _current_sentence_text_after,
     _current_sentence_text_before,
@@ -18,12 +19,7 @@ from core.text.dictation_ai_cleanup import (  # noqa: E402
 
 def main() -> int:
     backend = os.getenv("DICTATION_AI_CLEANUP_BACKEND", "mlx")
-    if backend == "ollama":
-        default_url = "http://127.0.0.1:11434/api/generate"
-    elif backend == "mlx":
-        default_url = "http://127.0.0.1:8080/chat/completions"
-    else:
-        raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
+    default_url = _ai_cleanup_url(backend)
     text_before = os.environ.get("SMEVALS_TASK_TEXT_BEFORE", "")
     utterance = os.environ["SMEVALS_TASK_UTTERANCE"]
     text_after = os.environ.get("SMEVALS_TASK_TEXT_AFTER", "")

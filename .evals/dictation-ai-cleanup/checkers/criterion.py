@@ -41,6 +41,25 @@ def removes_capitalization(original, candidate):
     )
 
 
+def word_opcodes(original, candidate):
+    """Yield (operation, old_span, new_span, old_start) for a word-level diff."""
+    old_words = words(original)
+    new_words = words(candidate)
+    matcher = SequenceMatcher(
+        None,
+        [word.casefold() for word in old_words],
+        [word.casefold() for word in new_words],
+        autojunk=False,
+    )
+    for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
+        yield (
+            operation,
+            old_words[old_start:old_end],
+            new_words[new_start:new_end],
+            old_start,
+        )
+
+
 def is_allowed_word_replacement(original_words, candidate_words):
     return len(original_words) == len(candidate_words) or (
         bool(original_words)
@@ -51,27 +70,13 @@ def is_allowed_word_replacement(original_words, candidate_words):
 
 
 def preserves_existing_capitalization(original, candidate):
-    old_words = words(original)
-    new_words = words(candidate)
-    matcher = SequenceMatcher(
-        None,
-        [word.casefold() for word in old_words],
-        [word.casefold() for word in new_words],
-        autojunk=False,
-    )
-    for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
+    for operation, old_span, new_span, old_start in word_opcodes(original, candidate):
         if operation == "equal" and any(
             removes_capitalization(old, new)
-            for old, new in zip(
-                old_words[old_start:old_end],
-                new_words[new_start:new_end],
-                strict=True,
-            )
+            for old, new in zip(old_span, new_span, strict=True)
         ):
             return False
         if operation == "replace":
-            old_span = old_words[old_start:old_end]
-            new_span = new_words[new_start:new_end]
             if removes_capitalization("".join(old_span), "".join(new_span)):
                 return False
             if any(
@@ -86,25 +91,12 @@ def preserves_existing_capitalization(original, candidate):
 
 
 def capitalization_edits(original, candidate):
-    old_words = words(original)
-    new_words = words(candidate)
-    matcher = SequenceMatcher(
-        None,
-        [word.casefold() for word in old_words],
-        [word.casefold() for word in new_words],
-        autojunk=False,
-    )
     edits = []
-    for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
+    for operation, old_span, new_span, old_start in word_opcodes(original, candidate):
         if operation != "equal":
             continue
         for index, (old, new) in enumerate(
-            zip(
-                old_words[old_start:old_end],
-                new_words[new_start:new_end],
-                strict=True,
-            ),
-            old_start,
+            zip(old_span, new_span, strict=True), old_start
         ):
             if old != new:
                 edits.append({"index": index, "original": old, "corrected": new})
@@ -126,23 +118,11 @@ def punctuation_removals(original, candidate):
     )
     removed = old - new
 
-    old_words = words(original)
-    new_words = words(candidate)
-    matcher = SequenceMatcher(
-        None,
-        [word.casefold() for word in old_words],
-        [word.casefold() for word in new_words],
-        autojunk=False,
-    )
     allowed = Counter()
-    for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
-        if operation != "replace" or old_end - old_start != new_end - new_start:
+    for operation, old_span, new_span, _ in word_opcodes(original, candidate):
+        if operation != "replace" or len(old_span) != len(new_span):
             continue
-        for old_word, new_word in zip(
-            old_words[old_start:old_end],
-            new_words[new_start:new_end],
-            strict=True,
-        ):
+        for old_word, new_word in zip(old_span, new_span, strict=True):
             if (
                 old_word.replace("'", "").casefold()
                 != new_word.replace("'", "").casefold()
@@ -155,24 +135,14 @@ def punctuation_removals(original, candidate):
 
 
 def word_edit_shape(original, candidate):
-    old_words = words(original)
-    new_words = words(candidate)
-    matcher = SequenceMatcher(
-        None,
-        [word.casefold() for word in old_words],
-        [word.casefold() for word in new_words],
-        autojunk=False,
-    )
     changes = []
     deletion_spans = 0
     deleted_word_count = 0
     lexical_edit_spans = 0
     reason = None
-    for operation, old_start, old_end, new_start, new_end in matcher.get_opcodes():
+    for operation, old, new, _ in word_opcodes(original, candidate):
         if operation == "equal":
             continue
-        old = old_words[old_start:old_end]
-        new = new_words[new_start:new_end]
         changes.append(
             {
                 "operation": operation,

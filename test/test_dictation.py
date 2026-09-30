@@ -298,8 +298,8 @@ if hasattr(talon, "test_mode"):
         text_and_dictation.dictation_formatter.reset()
         text_and_dictation.on_pre_phrase(None)
         try:
-            text_and_dictation.Actions.dictation_insert("plain comment text")
-            text_and_dictation.Actions.dictation_insert_rich_text("bold", ["bold"])
+            talon.actions.user.dictation_insert("plain comment text")
+            talon.actions.user.dictation_insert_rich_text("bold", ["bold"])
             text_and_dictation.on_post_phrase(None)
         finally:
             talon.actions.reset_test_actions()
@@ -332,7 +332,7 @@ if hasattr(talon, "test_mode"):
         text_and_dictation.on_pre_phrase(None)
 
         try:
-            text_and_dictation.Actions.dictation_insert("word")
+            talon.actions.user.dictation_insert("word")
         finally:
             talon.actions.reset_test_actions()
 
@@ -368,7 +368,7 @@ if hasattr(talon, "test_mode"):
         text_and_dictation.on_pre_phrase(None)
 
         try:
-            text_and_dictation.Actions.dictation_insert("word")
+            talon.actions.user.dictation_insert("word")
         finally:
             talon.actions.reset_test_actions()
 
@@ -400,7 +400,7 @@ if hasattr(talon, "test_mode"):
         text_and_dictation.on_pre_phrase(None)
 
         try:
-            text_and_dictation.Actions.dictation_insert(".")
+            talon.actions.user.dictation_insert(".")
         finally:
             talon.actions.reset_test_actions()
 
@@ -433,8 +433,8 @@ if hasattr(talon, "test_mode"):
         text_and_dictation.on_pre_phrase(None)
 
         try:
-            text_and_dictation.Actions.dictation_insert("first")
-            text_and_dictation.Actions.dictation_insert("second")
+            talon.actions.user.dictation_insert("first")
+            talon.actions.user.dictation_insert("second")
         finally:
             talon.actions.reset_test_actions()
 
@@ -471,7 +471,7 @@ if hasattr(talon, "test_mode"):
         text_and_dictation.on_pre_phrase(None)
 
         try:
-            text_and_dictation.Actions.dictation_insert(".")
+            talon.actions.user.dictation_insert(".")
         finally:
             talon.actions.reset_test_actions()
 
