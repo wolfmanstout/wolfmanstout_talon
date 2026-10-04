@@ -125,6 +125,7 @@ settings():
 
     # user.ocr_scroll_debug_mode = true
     user.dictation_debug_mode = true
+    user.dictation_ai_cleanup = true
 
     user.emacs_meta = "alt"
 
