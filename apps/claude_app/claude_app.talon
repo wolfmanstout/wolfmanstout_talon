@@ -3,6 +3,7 @@ app: claude_app
 
 tag(): user.command_search
 tag(): user.splits
+tag(): terminal
 
 # General
 settings open: key(cmd-,)
