@@ -193,6 +193,7 @@ if hasattr(talon, "test_mode"):
     @pytest.mark.parametrize("suffix", ["", ")"])
     def test_ai_cleanup_rewrites_phrase_and_restores_formatter(monkeypatch, suffix):
         events = []
+        monkeypatch.setattr(text_and_dictation, "last_ai_cleanup_correction", None)
         setting_values = {
             "user.dictation_ai_cleanup": True,
             "user.dictation_ai_cleanup_backend": "mlx",
@@ -268,6 +269,97 @@ if hasattr(talon, "test_mode"):
         ]
         assert text_and_dictation.utterance_insertions == []
         assert text_and_dictation.phrase_timestamp is None
+        assert text_and_dictation.last_ai_cleanup_correction == (
+            text_and_dictation.AiCleanupCorrection(
+                "Before", " first comment second", " first, second", suffix, " after"
+            )
+        )
+
+    @pytest.mark.parametrize("suffix", ["", ")"])
+    def test_ai_cleanup_undo_restores_original_and_logs(monkeypatch, caplog, suffix):
+        events = []
+        monkeypatch.setattr(
+            text_and_dictation,
+            "last_ai_cleanup_correction",
+            text_and_dictation.AiCleanupCorrection(
+                "Before", " first comment second", " first, second", suffix, " after"
+            ),
+        )
+        monkeypatch.setattr(
+            text_and_dictation.dictation_formatter,
+            "update_context",
+            lambda text: events.append(("context", text)),
+        )
+        monkeypatch.setattr(
+            text_and_dictation.dictation_formatter,
+            "pass_through",
+            lambda text: events.append(("formatter", text)),
+        )
+        last_phrase = [" first, second"]
+        talon.actions.register_test_action(
+            "user", "get_last_phrase", lambda: last_phrase[0]
+        )
+        for namespace, name in [
+            ("user", "clear_last_phrase"),
+            ("user", "insert_between"),
+            ("user", "add_phrase_to_history"),
+            ("", "insert"),
+        ]:
+            talon.actions.register_test_action(
+                namespace, name, lambda *args, name=name: events.append((name, *args))
+            )
+        try:
+            with caplog.at_level("INFO"):
+                talon.actions.user.dictation_ai_cleanup_undo()
+            # A second undo has nothing left to restore.
+            talon.actions.user.dictation_ai_cleanup_undo()
+        finally:
+            talon.actions.reset_test_actions()
+
+        insertion = (
+            ("insert_between", " first comment second", suffix)
+            if suffix
+            else ("insert", " first comment second")
+        )
+        assert events == [
+            ("clear_last_phrase",),
+            insertion,
+            ("add_phrase_to_history", " first comment second", suffix),
+            ("context", "Before"),
+            ("formatter", " first comment second"),
+        ]
+        assert text_and_dictation.last_ai_cleanup_correction is None
+        assert (
+            "Dictation AI cleanup undone: text_before='Before' "
+            "utterance=' first comment second' text_after=' after' "
+            "output=' first, second'"
+        ) in caplog.text
+
+    def test_ai_cleanup_undo_ignores_stale_correction(monkeypatch):
+        events = []
+        correction = text_and_dictation.AiCleanupCorrection(
+            "Before", " first comment second", " first, second", "", " after"
+        )
+        monkeypatch.setattr(
+            text_and_dictation, "last_ai_cleanup_correction", correction
+        )
+        talon.actions.register_test_action(
+            "user", "get_last_phrase", lambda: " later phrase"
+        )
+        for namespace, name in [
+            ("user", "clear_last_phrase"),
+            ("", "insert"),
+        ]:
+            talon.actions.register_test_action(
+                namespace, name, lambda *args, name=name: events.append((name, *args))
+            )
+        try:
+            talon.actions.user.dictation_ai_cleanup_undo()
+        finally:
+            talon.actions.reset_test_actions()
+
+        assert events == []
+        assert text_and_dictation.last_ai_cleanup_correction is correction
 
     def test_ai_cleanup_skips_utterance_with_rich_text(monkeypatch):
         setting_values = {

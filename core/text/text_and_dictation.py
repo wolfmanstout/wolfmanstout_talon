@@ -3,6 +3,7 @@ import logging
 import re
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Optional
 
 from talon import Context, Module, actions, grammar, settings, speech_system, ui
@@ -508,6 +509,19 @@ utterance_text_after = ""
 utterance_has_rich_text = False
 
 
+@dataclass
+class AiCleanupCorrection:
+    text_before: str
+    original: str
+    corrected: str
+    suffix: str
+    text_after: str
+
+
+# The most recent AI cleanup correction, retained so it can be undone.
+last_ai_cleanup_correction: Optional[AiCleanupCorrection] = None
+
+
 def reset_utterance_state():
     global utterance_insertions, utterance_text_before, utterance_text_after
     global utterance_has_rich_text
@@ -539,10 +553,22 @@ def on_post_phrase(d):
         text_before, utterance_text, text_after, len(insertions), utterance_suffix
     )
     if corrected_utterance_text:
-        # The formatter is a left-to-right state machine; only preceding text
-        # participates in restoring its state after the cleanup action rewrites.
-        dictation_formatter.update_context(text_before)
-        dictation_formatter.pass_through(corrected_utterance_text)
+        global last_ai_cleanup_correction
+        last_ai_cleanup_correction = AiCleanupCorrection(
+            text_before,
+            utterance_text,
+            corrected_utterance_text,
+            utterance_suffix,
+            text_after,
+        )
+        restore_formatter_after_rewrite(text_before, corrected_utterance_text)
+
+
+def restore_formatter_after_rewrite(text_before: str, text: str) -> None:
+    # The formatter is a left-to-right state machine; only preceding text
+    # participates in restoring its state after a rewrite.
+    dictation_formatter.update_context(text_before)
+    dictation_formatter.pass_through(text)
 
 
 speech_system.register("pre:phrase", on_pre_phrase)
@@ -588,6 +614,36 @@ class Actions:
     def dictation_reformat_no_space():
         """Removes space before the last utterance"""
         reformat_last_utterance(lambda s: s[1:] if s.startswith(" ") else s)
+
+    def dictation_ai_cleanup_undo():
+        """Restores the original text of the last AI-cleaned utterance"""
+        global last_ai_cleanup_correction
+        correction = last_ai_cleanup_correction
+        if correction is None:
+            logging.warning("Dictation AI cleanup undo: no correction to undo")
+            return
+        if actions.user.get_last_phrase() != correction.corrected:
+            logging.warning(
+                "Dictation AI cleanup undo: last phrase is not the corrected utterance %r",
+                correction.corrected,
+            )
+            return
+        last_ai_cleanup_correction = None
+        actions.user.clear_last_phrase()
+        if correction.suffix:
+            actions.user.insert_between(correction.original, correction.suffix)
+        else:
+            actions.insert(correction.original)
+        actions.user.add_phrase_to_history(correction.original, correction.suffix)
+        restore_formatter_after_rewrite(correction.text_before, correction.original)
+        # Grep for "Dictation AI cleanup undone" to review rejected corrections.
+        logging.info(
+            "Dictation AI cleanup undone: text_before=%r utterance=%r text_after=%r output=%r",
+            correction.text_before,
+            correction.original,
+            correction.text_after,
+            correction.corrected,
+        )
 
     def omit_space_before(text: str) -> bool:
         """Test if dictated text needs space before"""

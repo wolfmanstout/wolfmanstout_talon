@@ -9,6 +9,7 @@ cap that: user.dictation_reformat_cap()
 
 # Corrections
 scratch that: user.clear_last_phrase()
+cleanup undo: user.dictation_ai_cleanup_undo()
 select that: user.select_last_phrase()
 before that: user.before_last_phrase()
 
