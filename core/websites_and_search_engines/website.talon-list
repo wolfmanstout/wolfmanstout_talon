@@ -17,27 +17,30 @@ github: https://github.com/
 gist: https://gist.github.com/
 wikipedia: https://en.wikipedia.org/
 youtube: https://www.youtube.com/
+
+# My additions
+amazon: https://amazon.com
+buganizer: b/
 calendar: https://calendar.google.com
 critique: cr/
-buganizer: b/
-duckie: duckie/
-drive: https://drive.google.com
-docs: https://docs.google.com
-slides: https://slides.google.com
 deck: https://slides.google.com
-sheets: https://sheets.google.com
+docs: https://docs.google.com
+drive: https://drive.google.com
+duckie: duckie/
 forms: https://forms.google.com
-new docs: https://doc.new
-new doc: https://doc.new
-new slides: https://slides.new
-new slide: https://slides.new
-new deck: https://slides.new
-new sheets: https://sheet.new
-new sheet: https://sheet.new
-new scripts: https://script.new
-new script: https://script.new
-new forms: https://form.new
-new form: https://form.new
-amazon: https://amazon.com
-meet: https://meet.google.com
 gemini: https://gemini.google.com
+meet: https://meet.google.com
+new deck: https://slides.new
+new doc: https://doc.new
+new docs: https://doc.new
+new form: https://form.new
+new forms: https://form.new
+new script: https://script.new
+new scripts: https://script.new
+new sheet: https://sheet.new
+new sheets: https://sheet.new
+new slide: https://slides.new
+new slides: https://slides.new
+sheets: https://sheets.google.com
+slides: https://slides.google.com
+snippets: snippets/
