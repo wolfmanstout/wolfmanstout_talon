@@ -67,6 +67,7 @@ electric-quote-local-mode
 electric-quote-mode
 emacs-lisp-mode
 end-of-buffer, meta->
+end-of-line, ctrl-c c ctrl-e
 enlarge-window, ctrl-x ^
 enlarge-window-horizontally, ctrl-x }
 eval-defun, meta-ctrl-x
