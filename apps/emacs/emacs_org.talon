@@ -17,7 +17,8 @@ new heading below:
     user.emacs("move-end-of-line")
     user.emacs("org-insert-heading-respect-content")
 subheading:
-    user.emacs("move-end-of-line")
+    # Bypass the Ctrl-E remapping to visual line movement.
+    user.emacs("end-of-line")
     user.emacs("org-meta-return")
     user.emacs("org-metaright")
 split heading: user.emacs("org-meta-return")
