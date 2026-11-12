@@ -21,6 +21,11 @@ ctx_awake.matches = r"""
 not mode: sleep
 """
 
+ctx_dictation = Context()
+ctx_dictation.matches = r"""
+mode: dictation
+"""
+
 DICTATION_CURSOR_READY_COLOR = "FF0000"
 DICTATION_CURSOR_PROCESSING_COLOR = "FFBF00"
 
@@ -81,14 +86,9 @@ class Actions:
 
     def dictation_mode_set_processing(processing: bool):
         """Changes the dictation cursor indicator while an utterance is processed."""
-        color = (
-            DICTATION_CURSOR_PROCESSING_COLOR
-            if processing
-            else DICTATION_CURSOR_READY_COLOR
-        )
-        actions.user.hud_publish_screen_regions(
-            "cursor", [_create_dictation_mode_region(color)], True
-        )
+        # Cleanup also runs for text inserted by commands outside of dictation
+        # mode, where there is no dictation indicator to change.
+        actions.skip()
 
     def talon_mode():
         """For windows and Mac with Dragon, enables Talon commands and Dragon's command mode."""
@@ -126,3 +126,16 @@ class Actions:
     def context_insensitive_mode():
         """Disables context sensitivity."""
         actions.mode.enable("user.context_insensitive")
+
+
+@ctx_dictation.action_class("user")
+class DictationActions:
+    def dictation_mode_set_processing(processing: bool):
+        color = (
+            DICTATION_CURSOR_PROCESSING_COLOR
+            if processing
+            else DICTATION_CURSOR_READY_COLOR
+        )
+        actions.user.hud_publish_screen_regions(
+            "cursor", [_create_dictation_mode_region(color)], True
+        )
