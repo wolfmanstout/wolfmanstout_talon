@@ -29,7 +29,8 @@ Each run also stores the exact prompt and a hash of the runtime source. When
 the custom checker changes, increment its `version` in `graders/default.yaml`;
 `smevals` snapshots grader configuration but does not hash checker source.
 
-Run the default MLX configuration:
+Run the default configuration, which expects a LiteRT-LM server
+(`litert-lm serve`) on its default port, 9379:
 
 ```bash
 uv run smevals run .evals/dictation-ai-cleanup -g
@@ -40,6 +41,13 @@ The runner honors `DICTATION_AI_CLEANUP_BACKEND`,
 `DICTATION_AI_CLEANUP_URL`, and `DICTATION_AI_CLEANUP_TIMEOUT_S`. Pass `-m` to
 compare another model. Runs are ignored by Git and can instead be stored
 outside the repository with `--runs-dir`.
+
+For example, to evaluate an mlx-vlm server on its default port, which uses the
+same OpenAI-compatible backend:
+
+```bash
+DICTATION_AI_CLEANUP_URL=http://127.0.0.1:8080/v1/chat/completions uv run smevals run .evals/dictation-ai-cleanup -g -m mlx-community/gemma-4-26b-a4b-it-qat-4bit
+```
 
 Implementation note: backend, URL, and timeout are inherited from the process
 environment because smevals currently exposes only `model` from a Config to

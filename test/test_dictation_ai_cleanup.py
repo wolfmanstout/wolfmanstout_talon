@@ -64,7 +64,7 @@ if hasattr(talon, "test_mode"):
         response, _ = dictation_ai_cleanup._extract_ollama_response_and_perf(payload)
         assert response == "NOCHANGE"
 
-    def test_extract_mlx_vlm_response():
+    def test_extract_openai_chat_response():
         payload = json.dumps(
             {
                 "choices": [
@@ -80,10 +80,12 @@ if hasattr(talon, "test_mode"):
                 },
             }
         ).encode("utf-8")
-        response, _ = dictation_ai_cleanup._extract_mlx_vlm_response_and_perf(payload)
+        response, _ = dictation_ai_cleanup._extract_openai_chat_response_and_perf(
+            payload
+        )
         assert response == " corrected text"
 
-    def test_extract_mlx_vlm_response_perf():
+    def test_extract_openai_chat_response_perf():
         payload = json.dumps(
             {
                 "choices": [
@@ -99,11 +101,11 @@ if hasattr(talon, "test_mode"):
                 },
             }
         ).encode("utf-8")
-        response, perf = dictation_ai_cleanup._extract_mlx_vlm_response_and_perf(
+        response, perf = dictation_ai_cleanup._extract_openai_chat_response_and_perf(
             payload, wall_ms=222.0
         )
         assert response == " corrected text"
-        assert perf.backend == "mlx"
+        assert perf.backend == "openai"
         assert perf.wall_ms == 222.0
         assert perf.prompt_tokens == 120
         assert perf.completion_tokens == 8
@@ -114,7 +116,7 @@ if hasattr(talon, "test_mode"):
         assert perf.decode_tokens_per_second() == 40.0
         assert perf.peak_memory_gb == 5.5
 
-    def test_extract_mlx_vlm_response_content_blocks():
+    def test_extract_openai_chat_response_content_blocks():
         payload = json.dumps(
             {
                 "choices": [
@@ -137,10 +139,12 @@ if hasattr(talon, "test_mode"):
                 },
             }
         ).encode("utf-8")
-        response, _ = dictation_ai_cleanup._extract_mlx_vlm_response_and_perf(payload)
+        response, _ = dictation_ai_cleanup._extract_openai_chat_response_and_perf(
+            payload
+        )
         assert response == "NOCHANGE"
 
-    def test_extract_mlx_vlm_response_openai_usage_shape():
+    def test_extract_openai_chat_response_openai_usage_shape():
         payload = json.dumps(
             {
                 "choices": [
@@ -161,11 +165,11 @@ if hasattr(talon, "test_mode"):
                 },
             }
         ).encode("utf-8")
-        response, perf = dictation_ai_cleanup._extract_mlx_vlm_response_and_perf(
+        response, perf = dictation_ai_cleanup._extract_openai_chat_response_and_perf(
             payload, wall_ms=222.0
         )
         assert response == " corrected text"
-        assert perf.backend == "mlx"
+        assert perf.backend == "openai"
         assert perf.wall_ms == 222.0
         assert perf.prompt_tokens == 120
         assert perf.completion_tokens == 8
@@ -176,7 +180,7 @@ if hasattr(talon, "test_mode"):
         assert perf.decode_tokens_per_second() == 40.0
         assert perf.peak_memory_gb == 5.5
 
-    def test_extract_mlx_vlm_response_openai_usage_shape_with_cached_prefix():
+    def test_extract_openai_chat_response_openai_usage_shape_with_cached_prefix():
         payload = json.dumps(
             {
                 "choices": [
@@ -197,11 +201,11 @@ if hasattr(talon, "test_mode"):
                 },
             }
         ).encode("utf-8")
-        response, perf = dictation_ai_cleanup._extract_mlx_vlm_response_and_perf(
+        response, perf = dictation_ai_cleanup._extract_openai_chat_response_and_perf(
             payload, wall_ms=354.8
         )
         assert response == " corrected text"
-        assert perf.backend == "mlx"
+        assert perf.backend == "openai"
         assert perf.wall_ms == 354.8
         assert perf.prompt_tokens == 370
         assert perf.cached_prompt_tokens == 355
@@ -214,7 +218,7 @@ if hasattr(talon, "test_mode"):
 
     def test_log_ai_cleanup_perf_includes_server_call_and_client_prep(monkeypatch):
         perf = dictation_ai_cleanup.DictationAiCleanupPerf(
-            backend="mlx",
+            backend="openai",
             wall_ms=422.7,
             server_call_ms=401.2,
             client_prep_ms=21.5,
@@ -229,7 +233,7 @@ if hasattr(talon, "test_mode"):
         dictation_ai_cleanup._log_ai_cleanup_perf(perf)
 
         assert calls == [
-            "Dictation AI cleanup perf: backend=mlx wall=422.7ms "
+            "Dictation AI cleanup perf: backend=openai wall=422.7ms "
             "server_call=401.2ms client_prep=21.5ms phase_rates=unavailable"
         ]
 
@@ -276,9 +280,9 @@ if hasattr(talon, "test_mode"):
             " known issue",
             " after deployment",
             "model",
-            "http://127.0.0.1:8080/chat/completions",
+            "http://127.0.0.1:9379/v1/chat/completions",
             1,
-            "mlx",
+            "openai",
         )
 
         prompt = json.loads(request["data"])["messages"][0]["content"]
@@ -291,9 +295,9 @@ if hasattr(talon, "test_mode"):
             " known issue",
             "",
             "model",
-            "http://127.0.0.1:8080/chat/completions",
+            "http://127.0.0.1:9379/v1/chat/completions",
             1,
-            "mlx",
+            "openai",
         )
         prompt = json.loads(request["data"])["messages"][0]["content"]
         assert "<text_before>This is a well</text_before>" in prompt
@@ -331,9 +335,9 @@ if hasattr(talon, "test_mode"):
             " unchanged words",
             " after text",
             "model",
-            "http://127.0.0.1:8080/chat/completions",
+            "http://127.0.0.1:9379/v1/chat/completions",
             1,
-            "mlx",
+            "openai",
         )
 
         assert result is None
@@ -405,9 +409,9 @@ if hasattr(talon, "test_mode"):
                 "apples comment oranges",
                 "",
                 "model",
-                "http://127.0.0.1:8080/chat/completions",
+                "http://127.0.0.1:9379/v1/chat/completions",
                 1,
-                "mlx",
+                "openai",
             )
             is None
         )
@@ -449,9 +453,9 @@ if hasattr(talon, "test_mode"):
             "apples comment oranges",
             "",
             "model",
-            "http://127.0.0.1:8080/chat/completions",
+            "http://127.0.0.1:9379/v1/chat/completions",
             1,
-            "mlx",
+            "openai",
         )
 
         assert result.outcome == "error"
@@ -496,3 +500,84 @@ if hasattr(talon, "test_mode"):
 
         assert result == "apples, oranges"
         assert json.loads(request["data"])["options"] == {"temperature": 0.0}
+
+    def test_extract_openai_chat_response_standard_usage_shape():
+        payload = json.dumps(
+            {
+                "object": "chat.completion",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": "NOCHANGE\n"},
+                        "finish_reason": "stop",
+                    },
+                ],
+                "usage": {
+                    "prompt_tokens": 120,
+                    "completion_tokens": 3,
+                    "total_tokens": 123,
+                    "prompt_tokens_details": {"cached_tokens": 0},
+                    "completion_tokens_details": {"reasoning_tokens": 0},
+                },
+            }
+        ).encode("utf-8")
+        response, perf = dictation_ai_cleanup._extract_openai_chat_response_and_perf(
+            payload, wall_ms=50.0
+        )
+        assert response == "NOCHANGE"
+        assert perf.backend == "openai"
+        assert perf.prompt_tokens == 120
+        assert perf.completion_tokens == 3
+        assert perf.cached_prompt_tokens == 0
+        assert perf.prefill_ms is None
+        assert perf.decode_ms is None
+
+    def test_extract_openai_chat_response_without_usage():
+        payload = json.dumps(
+            {"choices": [{"message": {"content": " corrected text"}}]}
+        ).encode("utf-8")
+        response, perf = dictation_ai_cleanup._extract_openai_chat_response_and_perf(
+            payload
+        )
+        assert response == " corrected text"
+        assert perf.prompt_tokens is None
+
+    def test_ai_cleanup_url_defaults():
+        url = dictation_ai_cleanup._ai_cleanup_url
+        assert url("ollama") == "http://127.0.0.1:11434/api/generate"
+        assert url("openai") == "http://127.0.0.1:9379/v1/chat/completions"
+        assert url("openai", 8080) == "http://127.0.0.1:8080/v1/chat/completions"
+
+    def test_run_ai_cleanup_openai_compatible_payload(monkeypatch):
+        backend = "openai"
+        request = {}
+
+        class Response:
+            def raise_for_status(self):
+                pass
+
+            content = json.dumps(
+                {
+                    "choices": [{"message": {"content": "apples, oranges"}}],
+                    "usage": {"prompt_tokens": 10, "completion_tokens": 2},
+                }
+            ).encode("utf-8")
+
+        def fake_post(url, **kwargs):
+            request["url"] = url
+            request.update(kwargs)
+            return Response()
+
+        monkeypatch.setattr(dictation_ai_cleanup.requests, "post", fake_post)
+
+        url = dictation_ai_cleanup._ai_cleanup_url(backend)
+        result = dictation_ai_cleanup._run_ai_cleanup(
+            "", "apples comment oranges", "", "model", url, 1, backend
+        )
+
+        assert result == "apples, oranges"
+        assert request["url"] == url
+        payload = json.loads(request["data"])
+        assert payload["temperature"] == 0.0
+        assert payload["stream"] is False
+        assert payload["reasoning_effort"] == "none"

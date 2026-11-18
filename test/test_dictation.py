@@ -120,7 +120,7 @@ if hasattr(talon, "test_mode"):
         events = []
         setting_values = {
             "user.dictation_ai_cleanup": True,
-            "user.dictation_ai_cleanup_backend": "mlx",
+            "user.dictation_ai_cleanup_backend": "openai",
             "user.dictation_ai_cleanup_model": "model",
             "user.dictation_ai_cleanup_port": 0,
             "user.dictation_ai_cleanup_timeout_s": 30,
@@ -159,7 +159,7 @@ if hasattr(talon, "test_mode"):
         events = []
         setting_values = {
             "user.dictation_ai_cleanup": True,
-            "user.dictation_ai_cleanup_backend": "mlx",
+            "user.dictation_ai_cleanup_backend": "openai",
             "user.dictation_ai_cleanup_model": "model",
             "user.dictation_ai_cleanup_port": 0,
             "user.dictation_ai_cleanup_timeout_s": 30,
@@ -196,7 +196,7 @@ if hasattr(talon, "test_mode"):
         monkeypatch.setattr(text_and_dictation, "last_ai_cleanup_correction", None)
         setting_values = {
             "user.dictation_ai_cleanup": True,
-            "user.dictation_ai_cleanup_backend": "mlx",
+            "user.dictation_ai_cleanup_backend": "openai",
             "user.dictation_ai_cleanup_model": "model",
             "user.dictation_ai_cleanup_port": 0,
             "user.dictation_ai_cleanup_timeout_s": 30,
@@ -213,9 +213,9 @@ if hasattr(talon, "test_mode"):
             )
             assert (model, url, timeout, backend) == (
                 "model",
-                "http://127.0.0.1:8080/chat/completions",
+                "http://127.0.0.1:9379/v1/chat/completions",
                 30,
-                "mlx",
+                "openai",
             )
             return " first, second"
 

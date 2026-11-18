@@ -18,7 +18,7 @@ from core.text.dictation_ai_cleanup import (  # noqa: E402
 
 
 def main() -> int:
-    backend = os.getenv("DICTATION_AI_CLEANUP_BACKEND", "mlx")
+    backend = os.getenv("DICTATION_AI_CLEANUP_BACKEND", "openai")
     default_url = _ai_cleanup_url(backend)
     text_before = os.environ.get("SMEVALS_TASK_TEXT_BEFORE", "")
     utterance = os.environ["SMEVALS_TASK_UTTERANCE"]

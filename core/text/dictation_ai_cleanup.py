@@ -16,7 +16,8 @@ from talon import Module, actions, settings
 
 mod = Module()
 
-DictationAiCleanupBackend = Literal["ollama", "mlx"]
+DictationAiCleanupBackend = Literal["ollama", "openai"]
+_DICTATION_AI_CLEANUP_BACKENDS = frozenset({"ollama", "openai"})
 DictationAiCleanupOutcome = Literal[
     "corrected", "nochange", "identical", "unsafe", "empty", "error"
 ]
@@ -74,20 +75,28 @@ mod.setting(
 mod.setting(
     "dictation_ai_cleanup_model",
     type=str,
-    default="mlx-community/gemma-4-26b-a4b-it-qat-4bit",
+    default="gemma4-26b",
     desc="Model used for dictation cleanup.",
 )
 mod.setting(
     "dictation_ai_cleanup_backend",
     type=str,
-    default="mlx",
-    desc="LLM backend used for dictation cleanup. Supported values: 'ollama' and 'mlx'.",
+    default="openai",
+    desc=(
+        "LLM backend used for dictation cleanup. Supported values: 'ollama' and "
+        "'openai' (an OpenAI-compatible chat completions server, such as "
+        "`litert-lm serve` or mlx-vlm)."
+    ),
 )
 mod.setting(
     "dictation_ai_cleanup_port",
     type=int,
     default=0,
-    desc="Port for dictation cleanup backends. Set to 0 to use the backend default (11434 for Ollama, 8080 for mlx).",
+    desc=(
+        "Port for dictation cleanup backends. Set to 0 to use the backend default "
+        "(11434 for ollama; 9379, the LiteRT-LM default, for openai). mlx-vlm "
+        "serves on 8080 by default."
+    ),
 )
 mod.setting(
     "dictation_ai_cleanup_timeout_s",
@@ -217,13 +226,20 @@ def _extract_ollama_response_and_perf(
     return _normalize_ai_cleanup_response(response), perf
 
 
-def _extract_mlx_vlm_response_and_perf(
-    body: bytes, wall_ms: float = 0.0
+def _extract_openai_chat_response_and_perf(
+    body: bytes,
+    backend: DictationAiCleanupBackend = "openai",
+    wall_ms: float = 0.0,
 ) -> tuple[str, DictationAiCleanupPerf]:
+    """Parse an OpenAI-style chat completion, including server-specific perf stats.
+
+    mlx-vlm reports throughput in ``usage``; llama.cpp-style servers report it in
+    ``timings``; other servers may report only standard OpenAI token counts.
+    """
     data = json.loads(body.decode("utf-8"))
-    perf = DictationAiCleanupPerf(backend="mlx", wall_ms=wall_ms)
-    usage = data["usage"]
-    timings = data.get("timings", {})
+    perf = DictationAiCleanupPerf(backend=backend, wall_ms=wall_ms)
+    usage = data.get("usage") or {}
+    timings = data.get("timings") or {}
     perf.prompt_tokens = usage.get("input_tokens", usage.get("prompt_tokens"))
     perf.completion_tokens = usage.get("output_tokens", usage.get("completion_tokens"))
     perf.cached_prompt_tokens = usage.get("prompt_tokens_details", {}).get(
@@ -299,14 +315,14 @@ def _log_ai_cleanup_perf(
 def _is_dictation_ai_cleanup_backend(
     value: object,
 ) -> TypeGuard[DictationAiCleanupBackend]:
-    return value in {"ollama", "mlx"}
+    return value in _DICTATION_AI_CLEANUP_BACKENDS
 
 
 def _ai_cleanup_url(backend: str, port: int = 0) -> str:
     if backend == "ollama":
         return f"http://127.0.0.1:{port if port > 0 else 11434}/api/generate"
-    if backend == "mlx":
-        return f"http://127.0.0.1:{port if port > 0 else 8080}/chat/completions"
+    if backend == "openai":
+        return f"http://127.0.0.1:{port if port > 0 else 9379}/v1/chat/completions"
     raise ValueError(f"Unsupported dictation cleanup backend: {backend!r}")
 
 
@@ -563,6 +579,10 @@ def _request_ai_cleanup(
                 "messages": [{"role": "user", "content": prompt}],
                 "stream": False,
                 "temperature": 0.0,
+                # LiteRT-LM otherwise uses the model's configured thinking
+                # mode, and cleanup needs a direct answer. mlx-vlm accepts and
+                # ignores the field; it disables thinking by default.
+                "reasoning_effort": "none",
             }
         payload = json.dumps(payload_dict).encode("utf-8")
         server_call_started = time.perf_counter()
@@ -578,7 +598,9 @@ def _request_ai_cleanup(
         if backend == "ollama":
             corrected_raw, perf = _extract_ollama_response_and_perf(response_body)
         else:
-            corrected_raw, perf = _extract_mlx_vlm_response_and_perf(response_body)
+            corrected_raw, perf = _extract_openai_chat_response_and_perf(
+                response_body, backend
+            )
         _record_ai_cleanup_timing(
             perf, request_started, server_call_started, response_received
         )

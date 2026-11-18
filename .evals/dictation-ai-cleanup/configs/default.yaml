@@ -1,3 +1,3 @@
-name: mlx-vlm
+name: litert-lm
 runner: ../run_cleanup.py
-model: mlx-community/gemma-4-26b-a4b-it-qat-4bit
+model: gemma4-26b
