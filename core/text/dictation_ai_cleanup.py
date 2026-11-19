@@ -645,13 +645,25 @@ class Actions:
         text_before: str,
         utterance_text: str,
         text_after: str,
-        insertion_count: int,
         utterance_suffix: str,
+        insertion_count: int,
     ) -> Optional[str]:
         """Clean up the latest utterance and rewrite its history entries if corrected.
 
+        Args:
+            text_before: Text preceding the utterance, used as prompt context.
+            utterance_text: The text inserted for this utterance, to be cleaned up.
+            text_after: Text following the cursor, used as prompt context. It
+                already begins with utterance_suffix.
+            utterance_suffix: Text inserted after the cursor for this utterance
+                (e.g. auto-spacing). Not sent separately to the model since it is
+                part of text_after; used only to re-insert the correction with
+                the cursor in the right place.
+            insertion_count: Number of history entries recorded for this
+                utterance, all of which are cleared before inserting the
+                correction.
+
         Return the inserted correction so the caller can restore formatter state.
-        The caller must supply the number of insertions recorded for this phrase.
         """
         backend = settings.get("user.dictation_ai_cleanup_backend")
         if not _is_dictation_ai_cleanup_backend(backend):

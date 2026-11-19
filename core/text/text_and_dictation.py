@@ -550,7 +550,7 @@ def on_post_phrase(d):
     utterance_text = "".join(inserted_text for inserted_text, _ in insertions)
     utterance_suffix = "".join(suffix for _, suffix in reversed(insertions))
     corrected_utterance_text = actions.user.dictation_ai_cleanup_rewrite(
-        text_before, utterance_text, text_after, len(insertions), utterance_suffix
+        text_before, utterance_text, text_after, utterance_suffix, len(insertions)
     )
     if corrected_utterance_text:
         global last_ai_cleanup_correction
