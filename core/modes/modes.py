@@ -7,7 +7,7 @@ ctx_awake = Context()
 modes = {
     "private": "a mode that disables recording",
     "context_insensitive": "a mode that disables context sensitivity",
-    "dictation_command": "a mode that enables commands within dictation mode",
+    "dictation_command": "a mode that enables dictation-only commands",
 }
 
 for key, value in modes.items():

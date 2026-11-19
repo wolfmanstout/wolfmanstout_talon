@@ -1,7 +1,3 @@
-mode: command
-mode: user.dictation_command
--
-
 control mouse: tracking.control_toggle()
 control off: user.mouse_sleep()
 zoom mouse: tracking.control_zoom_toggle()

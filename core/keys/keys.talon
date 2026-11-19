@@ -1,7 +1,3 @@
-mode: command
-mode: user.dictation_command
--
-
 <user.letter>: key(letter)
 (ship | uppercase | upper) <user.letters> [(lowercase | sunk)]:
     user.insert_formatted(letters, "ALL_CAPS")

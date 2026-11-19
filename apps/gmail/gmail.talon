@@ -8,16 +8,32 @@ settings():
     user.accessibility_dictation = true
 
 tag(): user.emoji
+
+# Composing
+compose: key(+ c)
+reply: key(+ r)
+reply all: key(+ a)
+forward: key(+ f)
+# go field to: ClickElementAction("//*[@aria-label='To']")
+go field cc: key(ctrl-shift-c)
+this send: key(ctrl-enter)
+[suggest] keep: key(tab)
+
+touch discard:
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2023-08-25_11.31.37.425605.png", 0, 0, 0, user.mouse_helper_calculate_relative_rect("0 -200 -0 -0"))
+    sleep(0.05)
+    mouse_click(0)
+    sleep(0.05)
+    user.mouse_helper_position_restore()
+
+# Messages
 open: key(+ o)
 [this] archive: key(+ {)
 [this] done: key(+ [)
 this unread: key(+ _)
 gmail undo: key(+ z)
 list: key(+ u)
-compose: key(+ c)
-reply: key(+ r)
-reply all: key(+ a)
-forward: key(+ f)
 important: key(+ +)
 this star: key(+ s)
 this important: key(+ +)
@@ -86,12 +102,31 @@ go inbox | going box: key(+ g i)
 go (starred | star): key(+ g s)
 go sent: key(+ g t)
 go drafts: key(+ g d)
-# expand all: ClickElementAction("//*[@aria-label='Expand all']")
-# collapse all: ClickElementAction("//*[@aria-label='Collapse all']")
-# go field to: ClickElementAction("//*[@aria-label='To']")
-go field cc: key(ctrl-shift-c)
+touch expand (all | al):
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2023-09-26_12.58.32.898292.png", 0)
+    sleep(0.05)
+    mouse_click(0)
+    sleep(0.05)
+    user.mouse_helper_position_restore()
+
+touch collapse (all | al):
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2023-08-12_16.01.41.668613.png", 0)
+    sleep(0.05)
+    mouse_click(0)
+    sleep(0.05)
+    user.mouse_helper_position_restore()
+
+touch message options:
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2023-10-09_17.20.54.079391.png", 0, 0, 0, user.mouse_helper_calculate_relative_rect("0 -200 -0 -0"))
+    sleep(0.05)
+    mouse_click(0)
+    sleep(0.05)
+    user.mouse_helper_position_restore()
+
 chat open: key(+ q)
-this send: key(ctrl-enter)
 go search: key(+ /)
 last | preev: key(+ k)
 next: key(+ j)

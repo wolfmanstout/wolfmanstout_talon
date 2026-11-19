@@ -1,5 +1,3 @@
-mode: command
-mode: user.dictation_command
 tag: user.tabs
 -
 

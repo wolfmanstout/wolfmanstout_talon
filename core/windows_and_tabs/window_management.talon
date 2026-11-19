@@ -1,7 +1,3 @@
-mode: command
-mode: user.dictation_command
--
-
 (window | win) (new | open): app.window_open()
 (window | win) next: app.window_next()
 (window | win) last: app.window_previous()

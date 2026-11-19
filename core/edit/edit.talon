@@ -1,7 +1,3 @@
-mode: command
-mode: user.dictation_command
--
-
 # Compound of action(select, clear, copy, cut, paste, etc.) and modifier(word,
 # line, etc.) commands for editing text.
 # eg: "select line", "clear all"

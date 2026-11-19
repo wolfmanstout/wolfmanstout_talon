@@ -124,6 +124,13 @@ language switch: user.vscode("workbench.action.editor.changeLanguageMode")
 mode {user.language_id}:
     user.vscode_with_plugin("commands.setEditorLanguage", language_id)
 
+# Copilot
+[suggest] keep: user.vscode("editor.action.inlineSuggest.commit")
+suggest clear: user.vscode("editor.action.inlineSuggest.hide")
+suggest next: user.vscode("editor.action.inlineSuggest.showNext")
+suggest last: user.vscode("editor.action.inlineSuggest.showPrevious")
+suggest trigger: user.vscode("editor.action.inlineSuggest.trigger")
+
 #code navigation
 go declaration | follow: user.vscode("editor.action.revealDefinition")
 go back: user.vscode("workbench.action.navigateBack")

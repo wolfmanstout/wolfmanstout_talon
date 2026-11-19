@@ -23,6 +23,10 @@ panel (open | close | switch): key(cmd-j)
 (terminal | shell) open | panel (terminal | shell): key(ctrl-`)
 (terminal | shell) clear: key(ctrl-l)
 
+# Composer
+(send | queue) it: key(cmd-enter)
+steer it: key(cmd-shift-enter)
+
 # Thread
 thread new: key(cmd-n)
 thread quick: key(cmd-alt-n)

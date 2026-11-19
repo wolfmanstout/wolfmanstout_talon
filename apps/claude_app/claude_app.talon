@@ -38,6 +38,7 @@ panel (expand | collapse): key(cmd-shift-\)
 side chat open: key(cmd-;)
 
 # Composer
+fork it: key(alt-cmd-enter)
 (mode | permission) menu: key(cmd-shift-m)
 model menu: key(cmd-shift-i)
 effort menu: key(cmd-shift-e)
