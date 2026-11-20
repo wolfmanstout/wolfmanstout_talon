@@ -1,4 +1,3 @@
-not speech.engine: dragon
 mode: all
 -
 

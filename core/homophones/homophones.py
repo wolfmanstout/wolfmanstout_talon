@@ -59,13 +59,6 @@ fs.watch(cwd, update_homophones)
 active_word_list = []
 is_selection = False
 
-# Avoid long lists which slow down context switching.
-dragon_ctx = Context()
-dragon_ctx.matches = r"""
-speech.engine: dragon
-"""
-dragon_ctx.lists["self.homophones_canonicals"] = {}
-
 
 def close_homophones():
     gui.hide()

@@ -476,11 +476,3 @@ def on_abbreviations(values):
     }
 
     ctx.lists["user.abbreviation"] = abbreviations_list_with_values
-
-
-# Avoid long lists which slow down context switching.
-dragon_ctx = Context()
-dragon_ctx.matches = r"""
-speech.engine: dragon
-"""
-dragon_ctx.lists["user.abbreviation"] = {}

@@ -465,14 +465,6 @@ def ui_event(event, arg):
         update_running_list()
 
 
-# Avoid long lists which slow down context switching.
-dragon_ctx = Context()
-dragon_ctx.matches = r"""
-speech.engine: dragon
-"""
-dragon_ctx.lists["user.launch"] = {}
-dragon_ctx.lists["user.running"] = {}
-
 # Talon starts faster if you don't use the `talon.ui` module during launch
 
 

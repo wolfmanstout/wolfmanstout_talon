@@ -39,12 +39,6 @@ ctx_talon_python.matches = r"""
 tag: user.talon_python
 """
 
-# Avoid long lists which slow down context switching.
-dragon_ctx = Context()
-dragon_ctx.matches = r"""
-speech.engine: dragon
-"""
-
 
 def on_update_decls(decls):
     for thing in [
@@ -63,7 +57,6 @@ def on_update_decls(decls):
                 l.keys(), generate_subsequences=False
             )
         )
-        dragon_ctx.lists[f"user.talon_{thing}"] = {}
         # print(
         #     "List: {} \n {}".format(thing, str(ctx_talon_lists.lists[f"user.talon_{thing}"]))
         # )
