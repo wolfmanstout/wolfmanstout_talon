@@ -173,7 +173,11 @@ class Actions:
                 [
                     "/bin/sh",
                     "-c",
-                    f"/usr/bin/open -W {talon_app_path} ; /usr/bin/open {talon_app_path}",
+                    # Wait for this process to fully exit (plus a short
+                    # buffer) before relaunching; otherwise open may just
+                    # activate the dying instance.
+                    f"while /bin/kill -0 {os.getpid()} 2>/dev/null; do /bin/sleep 0.2; done;"
+                    f" /bin/sleep 0.5; /usr/bin/open {talon_app_path}",
                 ],
                 start_new_session=True,
             )
