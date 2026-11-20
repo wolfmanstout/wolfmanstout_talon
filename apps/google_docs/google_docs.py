@@ -10,10 +10,6 @@ TextRange = timestamped_captures.TextRange
 mod = Module()
 mod.apps.google_docs = r"""
 tag: browser
-title: /<docs.google.com>/
-"""
-mod.apps.google_docs = r"""
-tag: browser
 browser.host: docs.google.com
 """
 

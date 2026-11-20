@@ -1,5 +1,5 @@
 tag: browser
-title: /<todoist.com>/
+browser.host: app.todoist.com
 -
 
 tag(): user.command_search

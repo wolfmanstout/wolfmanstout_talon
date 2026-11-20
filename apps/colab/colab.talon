@@ -1,6 +1,6 @@
 tag: browser
-title: /<colab.sandbox.google.com>/
-title: /<colab.research.google.com>/
+browser.host: colab.sandbox.google.com
+browser.host: colab.research.google.com
 -
 
 cell run: key(ctrl-enter)

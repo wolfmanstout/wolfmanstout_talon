@@ -16,10 +16,6 @@ CallbackT = Callable[[dict[str, str]], None]
 DecoratorT = Callable[[CallbackT], CallbackT]
 
 
-def get_settings_path(filename: str):
-    return SETTINGS_DIR / filename
-
-
 def read_csv_list(
     f: IO, headers: tuple[str, str], is_spoken_form_first: bool = False
 ) -> dict[str, str]:

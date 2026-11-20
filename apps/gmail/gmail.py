@@ -5,8 +5,6 @@ mod.apps.gmail = r"""
 tag: browser
 title: /Gmail/
 title: /Google.com Mail/
-title: /<mail.google.com>/
-title: /<inbox.google.com>/
 title: / - Chat/
 """
 mod.apps.gmail = r"""

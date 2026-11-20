@@ -5,12 +5,6 @@ app: vscode
 win.title: /focus:\[Terminal\]/
 -
 
-settings():
-    # Selection does not work properly here, at least in Claude Code.
-    user.context_sensitive_dictation = false
-    # Needed for Claude Code "scratch that" (at least)
-    key_wait = 10.0
-
 tag(): terminal
 screen up: key(shift-pgup)
 screen down: key(shift-pgdown)
